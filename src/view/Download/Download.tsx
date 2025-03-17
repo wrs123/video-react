@@ -1,7 +1,7 @@
 import styles from './Download.module.scss'
 import { Radio, Button, Modal, Input, Space } from "antd";
 import { FileAddOutlined, FolderOpenOutlined, RocketFilled, ClockCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import {useState, forwardRef } from 'react'
+import { useState } from 'react'
 const { TextArea } = Input;
 
 
@@ -51,7 +51,7 @@ function Download(){
                    footer={null}
             >
                 <Space direction="vertical"  style={{ display: 'flex' }}>
-                    <TextArea placeholder="多连接下载请换行" autoSize={{ minRows: 5, maxRows: 5 }}></TextArea>
+                    <TextArea style={{marginBottom: '14px'}} placeholder="多连接下载请换行" autoSize={{ minRows: 5, maxRows: 5 }}></TextArea>
                     <Space.Compact style={{ width: '100%' }}>
                         <Input />
                         <Button type="primary" icon={<FolderOpenOutlined />} >

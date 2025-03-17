@@ -13,14 +13,14 @@ const stepList = [
     {
         label: '下载',
         key: 'download',
-        icon: <RocketFilled style={{fontSize: '24px'}} />,
-        activeIcon: <RocketFilled style={ {color: 'var(--color-primary);', fontSize: '24px'}}/>
+        icon: <RocketFilled style={{fontSize: '16px'}} />,
+        activeIcon: <RocketFilled style={ {color: 'var(--color-primary);', fontSize: '16px'}}/>
     },
     {
         label: '设置',
         key: 'config',
-        icon: <ControlFilled style={{fontSize: '24px'}} />,
-        activeIcon: <ControlFilled style={ {color: 'var(--color-primary)', fontSize: '24px'}}/>
+        icon: <ControlFilled style={{fontSize: '16px'}} />,
+        activeIcon: <ControlFilled style={ {color: 'var(--color-primary)', fontSize: '16px'}}/>
     },
 ]
 
