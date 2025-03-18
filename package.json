@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "antd": "^5.24.3",
+    "antd-style": "^3.7.1",
+    "cheerio": "^1.0.0",
     "classnames": "^2.5.1",
     "rc-queue-anim": "^2.0.0",
     "rc-tween-one": "^3.0.6",

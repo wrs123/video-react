@@ -1,12 +1,11 @@
 import styles from './Index.module.scss'
-import { useState, forwardRef } from 'react'
+import { useState } from 'react'
 import { ControlFilled, RocketFilled  } from '@ant-design/icons';
 import classnames from 'classnames';
 import DownLoad from '../Download/Download'
 import Config from '../Config/Config'
-import QueueAnim from 'rc-queue-anim';
 
-import { If, Then, Else } from 'react-if';
+import { If } from 'react-if';
 
 
 const stepList = [

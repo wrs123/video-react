@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron'
 // import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { InitHandler } from "./handlers";
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -29,6 +30,8 @@ let win: BrowserWindow | null
 function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    width: 1000,
+    height: 650,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
     },
@@ -65,4 +68,9 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(createWindow)
+app.whenReady().then(() => {
+  //创建窗口
+  createWindow()
+  //注册全局事件监听
+  InitHandler()
+})
