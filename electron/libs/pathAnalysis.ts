@@ -1,5 +1,4 @@
-import Network from '../utils/network'
-import * as cheerio from 'cheerio'
+import puppeteer from "puppeteer";
 
 const pathMap: any = {
     'www.91porn.com': _91Pron
@@ -18,22 +17,35 @@ export function PathAnalysis(path: string){
 
 
 async function _91Pron(path: string){
-    console.warn(path)
-
-    let vid,title,src,
-        durl = 'https://la.killcovid2021.com/m3u8/'
+    let _downloadLink: any = ''
 
     try{
-        const net = new Network()
-        let html:any = await net.get(path)
-        html = html.toString()
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: [
+                "--disable-blink-features=AutomationControlled", // 禁用自动化标记
+                "--window-size=1920,1080", // 设置合理视口
+            ],
+        });
+        const page = await browser.newPage();
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        await page.setViewport({width: 1920, height: 1080});
+        // 覆盖 WebDriver 属性（绕过反爬检测）
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, "webdriver", {
+                get: () => false,
+            });
+        });
+        await page.goto(path, { waitUntil: ["domcontentloaded", "networkidle2"] });
 
-        let $ = cheerio.load(html)
-        vid = $("div#VID").html()
-        title = $("title").html().replace(/\s+/g,"").replace("Chinesehomemadevideo","")
-        src = durl+vid+'/'+vid+'.m3u8'
+        const _videoElment:any = await page.$("#videodetails .video-container video source")
 
-        console.log('src:'+src)
+        if(_videoElment){
+            _downloadLink = await _videoElment.getProperty('src');
+            _downloadLink = await _downloadLink.jsonValue();
+        }
+        await browser.close();
+        return _downloadLink
     }catch(e){
         console.log(e)
     }

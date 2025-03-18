@@ -10,5 +10,6 @@ export const getVideoUrl = async () => {
 export const createTask = async (param: any) => {
 
     const filePath =  await PathAnalysis(param.urls)
+    console.log(filePath)
     return 'ok'
 }

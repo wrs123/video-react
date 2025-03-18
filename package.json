@@ -12,13 +12,16 @@
   "dependencies": {
     "antd": "^5.24.3",
     "antd-style": "^3.7.1",
+    "bufferutil": "^4.0.9",
     "cheerio": "^1.0.0",
     "classnames": "^2.5.1",
+    "puppeteer": "^24.4.0",
     "rc-queue-anim": "^2.0.0",
     "rc-tween-one": "^3.0.6",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-if": "^4.1.5"
+    "react-if": "^4.1.5",
+    "utf-8-validate": "^6.0.5"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",
