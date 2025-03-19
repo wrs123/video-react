@@ -4,7 +4,6 @@ import { ControlFilled, RocketFilled  } from '@ant-design/icons';
 import classnames from 'classnames';
 import DownLoad from '../Download/Download'
 import Config from '../Config/Config'
-
 import { If } from 'react-if';
 
 
@@ -25,7 +24,7 @@ const stepList = [
 
 
 function Index(){
-    const [activeStep, setActiveStep] = useState('download')
+    const [activeStep, setActiveStep] = useState<string>('download')
 
     const changeItem = (key: string) => {
         setActiveStep(key)

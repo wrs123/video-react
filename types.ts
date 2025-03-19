@@ -1,12 +1,13 @@
-import {DownloadStatus, ResultStatus} from "./enums.ts";
+import {DownloadFileType, DownloadStatus, ResultStatus} from "./enums.ts";
 
-interface DownloadType {
-    name: string,
-    status: DownloadStatus,
-    percent: number,
-    path: string,
-    size: number,
-    finishSize: number
+interface DownloadTaskType {
+    id: number, //下载任务id
+    originUrl: string, //原视频地址
+    status: DownloadStatus, //下载状态
+    TotalBytes: number, //视频总字节数
+    receivedBytes: number, //已下载的字节数
+    savePath: string, //下载的本地地址
+    fileObj: DownloadAnalysisType
 }
 
 interface BaseResult {
@@ -16,7 +17,15 @@ interface BaseResult {
     data: any
 }
 
+interface DownloadAnalysisType {
+    fileName: string, //文件名
+    analysisUrl: string, //解析后的下载地址
+    suffix: string //文件后缀
+    fileType: DownloadFileType
+}
+
 export type {
-    DownloadType,
-    BaseResult
+    DownloadTaskType,
+    BaseResult,
+    DownloadAnalysisType
 }

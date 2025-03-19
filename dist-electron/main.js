@@ -1,7 +1,7 @@
 import "electron";
 import "node:url";
 import "node:path";
-import { aw, ax, av } from "./main-B-fEhGb7.js";
+import { aw, ax, av } from "./main-C_pyZDaN.js";
 export {
   aw as MAIN_DIST,
   ax as RENDERER_DIST,

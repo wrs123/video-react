@@ -73,4 +73,7 @@ app.whenReady().then(() => {
   createWindow()
   //注册全局事件监听
   InitHandler()
+  //全局注册窗口
+  global.win = win
+  global.downloadStack = []
 })

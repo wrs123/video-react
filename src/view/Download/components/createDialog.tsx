@@ -1,9 +1,11 @@
-import { Space, Input, Button, Divider, Form } from "antd";
+import { Space, Input, Button, Divider, Form, message } from "antd";
+import { useState } from 'react'
 import {
     FolderOpenOutlined,
     RocketFilled,
 } from '@ant-design/icons';
 import API from "../../../request/api.ts";
+import {ResultStatus} from "../../../../enums.ts";
 const { TextArea, Search } = Input;
 
 type FieldType = {
@@ -11,13 +13,27 @@ type FieldType = {
     path?: string;
 };
 
-function CreateDialog (){
+function CreateDialog ({ onSubmit }){
     const [formData] = Form.useForm<FieldType>();
+    const [posting, setPosting ] = useState<boolean>(false)
+    const [messageApi, contextHolder] = message.useMessage();
 
     const onFinish = async (values: any) => {
-        console.warn(values)
+        setPosting(true)
         const res = await API.createTask(values)
-        console.warn(res)
+        if(res.status == ResultStatus.OK){
+            onSubmit(res.data)
+            messageApi.open({
+                type: 'success',
+                content: '创建成功',
+            });
+        }else{
+            messageApi.open({
+                type: 'warning',
+                content: '创建失败',
+            });
+        }
+        setPosting(false)
     }
 
      const getFolderPath = async () => {
@@ -25,6 +41,7 @@ function CreateDialog (){
          console.warn(res.data)
          if(res.status == "OK"){
 
+             // https://www.91porn.com/view_video.php?viewkey=a68aa309566890ce4144&c=piktl&viewtype=&category=
              formData.setFieldsValue({
                  urls: 'https://www.91porn.com/view_video.php?viewkey=8280bf4b5a31fa5329ed&c=piktl&viewtype=&category=',
                  path: res.data,
@@ -61,7 +78,7 @@ function CreateDialog (){
                             </Button>} />
                 </Form.Item>
                 <Divider variant="dashed" style={{margin: "4px"}} />
-                <Button type="primary" block htmlType="submit" size="large" icon={<RocketFilled/>}>
+                <Button type="primary" loading={posting} block htmlType="submit" size="large" icon={<RocketFilled/>}>
                     创建下载
                 </Button>
             </Space>

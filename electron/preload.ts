@@ -23,6 +23,11 @@ if (process.contextIsolated) {
         return ipcRenderer.invoke(channel, ...omit)
       },
     })
+    contextBridge.exposeInMainWorld('onDownloadUpdate', {
+      get:(callback:any ) => {
+        return ipcRenderer.on("download:updateDownload", callback)
+      }
+    })
   } catch (error) {
     console.error(error)
   }

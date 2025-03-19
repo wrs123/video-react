@@ -16,6 +16,13 @@ const API = {
         return API.request('download:createTask', param)
     },
     /**
+     * 修改下载任务
+     * @param param
+     */
+    editTask : (param: any) => {
+        return API.request('download:editTask', param)
+    },
+    /**
      * 获取本地目录
      * @param param
      */

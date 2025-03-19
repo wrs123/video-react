@@ -20,6 +20,11 @@ if (process.contextIsolated) {
         return electron.ipcRenderer.invoke(channel, ...omit);
       }
     });
+    electron.contextBridge.exposeInMainWorld("onDownloadUpdate", {
+      get: (callback) => {
+        return electron.ipcRenderer.on("download:updateDownload", callback);
+      }
+    });
   } catch (error) {
     console.error(error);
   }

@@ -1,4 +1,6 @@
 import puppeteer from "puppeteer";
+import {DownloadAnalysisType} from "../../types.ts";
+import {DownloadFileType} from "../../enums.ts";
 
 const pathMap: any = {
     'www.91porn.com': _91Pron
@@ -17,7 +19,12 @@ export function PathAnalysis(path: string){
 
 
 async function _91Pron(path: string){
-    let _downloadLink: any = ''
+    const res: DownloadAnalysisType = {
+        analysisUrl: '', //下载地址
+        fileName: '', //文件名称
+        suffix: '.mp4', //文件后缀
+        fileType: DownloadFileType.MP4
+    }
 
     try{
         const browser = await puppeteer.launch({
@@ -37,15 +44,17 @@ async function _91Pron(path: string){
             });
         });
         await page.goto(path, { waitUntil: ["domcontentloaded", "networkidle2"] });
-
         const _videoElment:any = await page.$("#videodetails .video-container video source")
+        const _title: string = await page.title();
 
+        if(_title) res.fileName =  _title.replace(" Chinese homemade video", "")
         if(_videoElment){
-            _downloadLink = await _videoElment.getProperty('src');
-            _downloadLink = await _downloadLink.jsonValue();
+            const _link = await _videoElment.getProperty('src');
+            res.analysisUrl = await _link.jsonValue();
         }
+
         await browser.close();
-        return _downloadLink
+        return res
     }catch(e){
         console.log(e)
     }

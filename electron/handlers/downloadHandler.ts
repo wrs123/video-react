@@ -5,7 +5,7 @@ import {createTask, getVideoUrl} from "../models/downloadModel.ts";
 export const DownloadHandler = () => {
     const DOMAIN = "download"
 
-    ipcMain.handle(`${DOMAIN}:downloadFile`, async (event: IpcMainInvokeEvent, param: any) => {
+    ipcMain.handle(`${DOMAIN}:editTask`, async (event: IpcMainInvokeEvent, param: any) => {
         return "ok"
     })
 
