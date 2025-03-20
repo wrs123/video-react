@@ -4,7 +4,7 @@ import { ControlFilled, RocketFilled  } from '@ant-design/icons';
 import classnames from 'classnames';
 import DownLoad from '../Download/Download'
 import Config from '../Config/Config'
-import { If } from 'react-if';
+import { If, Then } from 'react-if';
 
 
 const stepList = [
@@ -47,10 +47,14 @@ function Index(){
             </div>
             <div className={styles.projectContainer}>
                 <If condition={activeStep == 'download'}>
-                    <DownLoad key="1" />
+                    <Then>
+                        <DownLoad key="1" />
+                    </Then>
                 </If>
                 <If condition={activeStep == 'config'}>
-                    <Config key="2" />
+                    <Then>
+                        <Config key="2" />
+                    </Then>
                 </If>
             </div>
         </div>

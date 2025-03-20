@@ -4,7 +4,7 @@ import {
     CheckCircleOutlined,
     ClockCircleOutlined,
     PlusOutlined,
-    SearchOutlined,
+    FolderOpenOutlined,
     DeleteOutlined,
     PlayCircleOutlined,
     PauseCircleOutlined
@@ -12,7 +12,7 @@ import {
 import {useState} from 'react'
 import { DownloadTaskType} from "../../../types.ts";
 import {DownloadStatus, ResultStatus} from "../../../enums.ts";
-import { If, Else } from 'react-if';
+import { If, Else, Then } from 'react-if';
 import CreateDialog from "./components/createDialog"
 import { createStyles } from 'antd-style';
 import API from "../../request/api.ts";
@@ -57,6 +57,16 @@ function Download(){
             case DownloadStatus.FINISH:
                 res = "下载完成"
                 break;
+            case DownloadStatus.ANAL:
+                res = "解析中"
+                break;
+            case DownloadStatus.ANALERROR:
+                res = "解析失败"
+                break;
+            case DownloadStatus.ERROR:
+                res = "下载失败"
+                break;
+
         }
         return res
     }
@@ -72,18 +82,18 @@ function Download(){
 
                 item.status = DownloadStatus.PAUSE;
                 setDownloadList(prevList => prevList.map(preItem =>
-                    item.id == item.id ? {...preItem, ...item} : preItem
+                    item.id == preItem.id ? {...preItem, ...item} : preItem
                 ));
                 break;
             case "PUSH":
                 item.status = DownloadStatus.PENDING;
                 setDownloadList(prevList => prevList.map(preItem =>
-                    item.id == item.id ? {...preItem, ...item} : preItem
+                    item.id == preItem.id ? {...preItem, ...item} : preItem
                 ));
                 break;
             case "UPDATE":
                 setDownloadList(prevList => prevList.map(preItem =>
-                    item.id == item.id ? {...preItem, ...item} : preItem
+                    item.id == preItem.id ? {...preItem, ...item} : preItem
                 ));
                 break;
         }
@@ -109,37 +119,17 @@ function Download(){
         return res
     }
 
-    const useStyle = createStyles(({ prefixCls, css }) => ({
-        linearGradientButton: css`
-    &.${prefixCls}-btn-primary:not([disabled]):not(.${prefixCls}-btn-dangerous) {
-      > span {
-        position: relative;
-      }
-
-      &::before {
-        content: '';
-        background: linear-gradient(135deg, #6253e1, #04befe);
-        position: absolute;
-        inset: -1px;
-        opacity: 1;
-        transition: all 0.3s;
-        border-radius: inherit;
-      }
-
-      &:hover::before {
-        opacity: 0;
-      }
-    }
-  `,
-    }));
-
     onDownloadUpdate.get((event: unknown, str: any) => {
-        console.warn(str)
         commandCommon('UPDATE', str)
     })
 
+    const openFolder = async (path: string) => {
+        const res = await API.openFolderPath({path: path})
+        console.warn(res)
+    }
+
     const fileSizeFormat = (bytes: number) => {
-        return (bytes / (1024 * 1024)).toFixed(2) + 'MB';
+        return (bytes / (1024 * 1024)).toFixed(0) + 'MB';
     }
 
     return (
@@ -162,77 +152,85 @@ function Download(){
                         </Radio.Button>
                     </Radio.Group>
                     <div>
-                        <ConfigProvider
-                            button={{
-                                className: useStyle().styles.linearGradientButton,
-                            }}
-                        >
-                            <Button type="primary"  shape="round" icon={<PlusOutlined />} size="large" onClick={ showModal }>
-
-                            </Button>
-                        </ConfigProvider>
+                        <Button type="primary" shape="circle" icon={<PlusOutlined />} onClick={ showModal }>
+                        </Button>
                     </div>
                 </div>
                 <div className={styles.downloadList}>
                     <If condition={downloadList.length != 0}>
-                        <Table<DownloadTaskType> dataSource={downloadList} size="small" pagination={false}>
-                            <Column title="" dataIndex="name" key="name" width="50px"
-                                    render={(_:any, record: DownloadTaskType) => (
-                                        <If condition={record.status == DownloadStatus.PENDING}>
-                                            <Button type="text" onClick={() => commandCommon('PAUSE', record)} icon={<PauseCircleOutlined />} />
-                                        </If>
-                                    )}
-                            />
-                            <Column title="名称" dataIndex="name" key="name" ellipsis={true}
-                                    render={(_:any, record: DownloadTaskType) => (
-                                        <span>{record.fileObj.fileName}</span>
-                                    )}
-                            />
-                            <Column title="大小" dataIndex="size" key="size" width="170px"
-                                    render={(_:any, record: DownloadTaskType) => (
-                                        <span>
+                        <Then>
+                            <Table<DownloadTaskType> dataSource={downloadList} size="small" pagination={false}>
+                                <Column title="" dataIndex="name" key="name" width="50px"
+                                        render={(_:any, record: DownloadTaskType) => (
+                                            <If condition={record.status == DownloadStatus.PENDING}>
+                                                <Then>
+                                                    <Button type="text" onClick={() => commandCommon('PAUSE', record)} icon={<PauseCircleOutlined />} />
+                                                </Then>
+                                            </If>
+                                        )}
+                                />
+                                <Column title="名称" dataIndex="name" key="name" ellipsis={true}
+                                        render={(_:any, record: DownloadTaskType) => (
+                                            <span>{record.fileObj.fileName}</span>
+                                        )}
+                                />
+                                <Column title="大小" dataIndex="size" key="size" width="190px"
+                                        render={(_:any, record: DownloadTaskType) => (
+                                            <span>
                                             <If condition={record.status == DownloadStatus.FINISH}>
-                                                {fileSizeFormat(record.TotalBytes)}
+                                                <Then>
+                                                    {fileSizeFormat(record.TotalBytes)}
+                                                </Then>
                                             </If>
                                             <If condition={record.status == DownloadStatus.PENDING || record.status == DownloadStatus.PAUSE}>
-                                                {fileSizeFormat(record.receivedBytes)}/{fileSizeFormat(record.TotalBytes)}
-                                                ({percentParse(record.receivedBytes, record.TotalBytes)}%)
+                                                <Then>
+                                                    {fileSizeFormat(record.receivedBytes)}/{fileSizeFormat(record.TotalBytes)}
+                                                    ({percentParse(record.receivedBytes, record.TotalBytes)}%)
+                                                </Then>
                                             </If>
                                         </span>
-                                    )}
-                            />
-                            <Column title="状态" dataIndex="progress" key="progress" width="200px"
-                                    render={(_:any, record: DownloadTaskType) => (
-                                        <div style={{display: "flex", flexDirection: "column", paddingRight:"8px"}} >
-                                            <If condition={record.status != DownloadStatus.FINISH && record.status != DownloadStatus.ERROR}>
-                                                <Progress
-                                                    percent={record.receivedBytes / record.TotalBytes * 100}
-                                                    showInfo={false}
-                                                    size="small"
-                                                    strokeColor={progressColor(record.status)}
-                                                />
-                                            </If>
-                                            <span style={{fontSize: "12px", color: "var(--color-text-second)"}}>{statusParse(record.status)}</span>
-                                        </div>
-                                    )}
-                            />
-                            <Column title="操作" dataIndex="progress" key="progress" width="120px"
-                                    render={(_:any, record: DownloadTaskType) => (
-                                        <>
-                                            <If condition={record.status == DownloadStatus.PAUSE}>
-                                                <Button type="text" onClick={() => commandCommon('PUSH', record)} icon={<PlayCircleOutlined />} />
-                                            </If>
-                                            <Button type="text" icon={<SearchOutlined />} />
-                                            <Button color="danger" variant="text" icon={<DeleteOutlined />} />
-                                        </>
-                                    )}
-                            />
-                        </Table>
+                                        )}
+                                />
+                                <Column title="状态" dataIndex="progress" key="progress" width="200px"
+                                        render={(_:any, record: DownloadTaskType) => (
+                                            <div style={{display: "flex", flexDirection: "column", paddingRight:"8px"}} >
+                                                <If condition={record.status != DownloadStatus.FINISH && record.status != DownloadStatus.ERROR}>
+                                                    <Then>
+                                                        <Progress
+                                                            percent={record.receivedBytes / record.TotalBytes * 100}
+                                                            showInfo={false}
+                                                            size="small"
+                                                            strokeColor={progressColor(record.status)}
+                                                        />
+                                                    </Then>
+                                                </If>
+                                                <span style={{fontSize: "12px", color: "var(--color-text-second)"}}>{statusParse(record.status)}
+                                                    <If condition={record.status == DownloadStatus.PENDING}>
+                                                        <span>{fileSizeFormat(record.speed)}/s</span>
+                                                    </If>
+                                                </span>
+                                            </div>
+                                        )}
+                                />
+                                <Column title="操作" dataIndex="progress" key="progress" width="120px"
+                                        render={(_:any, record: DownloadTaskType) => (
+                                            <>
+                                                <If condition={record.status == DownloadStatus.PAUSE}>
+                                                    <Then>
+                                                        <Button type="text" onClick={() => commandCommon('PUSH', record)} icon={<PlayCircleOutlined />} />
+                                                    </Then>
+                                                </If>
+                                                <Button type="text" icon={<FolderOpenOutlined />} onClick={() =>openFolder(record.savePath)}/>
+                                                <Button color="danger" variant="text" icon={<DeleteOutlined />} />
+                                            </>
+                                        )}
+                                />
+                            </Table>
+                        </Then>
+                        <Else>
+                            <Empty style={{marginTop: '50px'}} />
+                        </Else>
                     </If>
-                    <Else>
-                        <Empty style={{marginTop: '50px'}} />
-                    </Else>
-
                 </div>
             </div>
             <Modal title="新建下载"

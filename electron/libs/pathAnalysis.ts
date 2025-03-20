@@ -6,14 +6,19 @@ const pathMap: any = {
     'www.91porn.com': _91Pron
 }
 
-export function PathAnalysis(path: string){
+export async function PathAnalysis(path: string){
     console.warn(path)
     if(!path){
         return ''
     }
 
     const url = new URL(path)
-    return pathMap[url.hostname](path)
+    const res: DownloadAnalysisType = await pathMap[url.hostname](path)
+
+    if(res.analysisUrl){
+        console.log('####地址解析完成：'+ res.analysisUrl)
+    }
+    return res
 }
 
 

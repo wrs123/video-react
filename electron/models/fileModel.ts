@@ -1,6 +1,7 @@
 import {BaseResult} from "../../types.ts";
 import {ResultStatus} from "../../enums.ts";
-import { dialog } from 'electron'
+import { dialog, shell } from 'electron'
+import path from 'path'
 
 export const chooseFolderPath = async () => {
     const res: BaseResult = {
@@ -27,4 +28,21 @@ export const chooseFolderPath = async () => {
     }
 
 
+}
+
+export const openFolderPath = async (paths: string) => {
+    const res: BaseResult = {
+        code: 200,
+        status: ResultStatus.OK,
+        message: '',
+        data: ''
+    }
+
+    try{
+        await shell.openPath(path.join(paths))
+    }catch(e){
+        res.status = ResultStatus.ERROR
+        res.message = '打开失败'+e
+    }
+    return res
 }
