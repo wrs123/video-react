@@ -1,12 +1,14 @@
+interface ConfigProps {
+    style?: { display: string }
+}
 
-
-function Config(){
+function Config({style}: ConfigProps) {
     return (
         <>
-            11
+            <div style={style}></div>
         </>
     )
 }
 
 
-export default  Config
+export default Config

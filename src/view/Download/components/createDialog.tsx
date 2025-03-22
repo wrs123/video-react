@@ -23,15 +23,15 @@ function CreateDialog ({ onSubmit }){
         const res = await API.createTask(values)
         if(res.status == ResultStatus.OK){
             onSubmit(res.data)
-            messageApi.open({
-                type: 'success',
-                content: '创建成功',
-            });
+            // messageApi.open({
+            //     type: 'success',
+            //     content: '创建成功',
+            // });
         }else{
-            messageApi.open({
-                type: 'warning',
-                content: '创建失败',
-            });
+            // messageApi.open({
+            //     type: 'warning',
+            //     content: '创建失败',
+            // });
         }
         setPosting(false)
     }
@@ -43,7 +43,7 @@ function CreateDialog ({ onSubmit }){
 
              // https://www.91porn.com/view_video.php?viewkey=a68aa309566890ce4144&c=piktl&viewtype=&category=
              formData.setFieldsValue({
-                 urls: 'https://www.91porn.com/view_video.php?viewkey=8280bf4b5a31fa5329ed&c=piktl&viewtype=&category=',
+                 urls: 'https://www.91porn.com/view_video.php?viewkey=a68aa309566890ce4144&c=piktl&viewtype=&category=',
                  path: res.data,
              })
          }

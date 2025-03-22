@@ -1,9 +1,10 @@
 export enum DownloadStatus {
-    PENDING,
-    ERROR,
-    FINISH,
-    PAUSE,
-    ANAL //解析中
+    PENDING = 'PENDING',
+    ERROR = 'ERROR',
+    FINISH = 'FINISH',
+    PAUSE = 'PAUSE',
+    ANAL = 'ANAL', //解析中
+    ANALERROR = 'ANALERROR' //解析失败
 }
 
 export enum ResultStatus {
@@ -12,6 +13,7 @@ export enum ResultStatus {
 }
 
 export enum DownloadFileType{
+    NONE= "NONE",
     MP4 = "MP4",
     M3U8 = "M3U8",
 }

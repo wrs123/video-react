@@ -1,3 +1,5 @@
+import {getSysConfig} from "../../electron/models/sysModel.ts";
+
 const API = {
     request: window.ipcRenderer.invoke,
 
@@ -29,7 +31,27 @@ const API = {
     getFolderPath : (param: any = {}) => {
         return API.request('file:chooseFolderPath', param)
     },
-
+    /**
+     * 打开本地目录
+     * @param param
+     */
+    openFolderPath : (param: any = {}) => {
+        return API.request('file:openFolderPath', param)
+    },
+    /**
+     * 获取软件配置
+     * @param param
+     */
+    getSysConfig : (param: any = {}) => {
+        return API.request('sys:getSysConfig', param)
+    },
+    /**
+     * 窗口操作
+     * @param param
+     */
+    operationWindow : (param: any = {}) => {
+        return API.request('sys:operationWindow', param)
+    }
 }
 
 export default API
