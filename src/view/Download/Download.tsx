@@ -1,5 +1,5 @@
 import styles from './Download.module.scss'
-import {Button, Modal, Radio, Space, Table, Progress, ConfigProvider, Empty } from "antd";
+import {Button, Modal, Radio, Space, Table, Progress, ConfigProvider, Empty} from "antd";
 import {
     CheckCircleOutlined,
     ClockCircleOutlined,
@@ -10,15 +10,20 @@ import {
     PauseCircleOutlined
 } from '@ant-design/icons';
 import {useState} from 'react'
-import { DownloadTaskType} from "../../../types.ts";
+import {DownloadTaskType} from "../../../types.ts";
 import {DownloadStatus, ResultStatus} from "../../../enums.ts";
-import { If, Else, Then } from 'react-if';
+import {If, Else, Then} from 'react-if';
 import CreateDialog from "./components/createDialog"
-import { createStyles } from 'antd-style';
+import {createStyles} from 'antd-style';
 import API from "../../request/api.ts";
-const { Column } = Table;
 
-function Download(){
+const {Column} = Table;
+
+interface DownLoadProps {
+    style?: { display: string }
+}
+
+function Download({style}: DownLoadProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [downloadList, setDownloadList] = useState<DownloadTaskType[]>([]);
 
@@ -37,17 +42,17 @@ function Download(){
     };
 
     const percentParse = (finishSize: number, size: number) => {
-        if(size == 0 || size < finishSize){
+        if (size == 0 || size < finishSize) {
             return 0
         }
 
         return (finishSize / size * 100).toFixed(2).replace(/\.?0+$/, '');
     }
 
-    const statusParse = (status : DownloadStatus ) => {
+    const statusParse = (status: DownloadStatus) => {
         let res: string = ""
 
-        switch(status){
+        switch (status) {
             case DownloadStatus.PENDING:
                 res = "下载中"
                 break;
@@ -136,23 +141,24 @@ function Download(){
         <>
             <div className={styles.downloadContainer}>
                 <div className={styles.containerTop}>
-                    <Radio.Group defaultValue="a" buttonStyle="solid">
-                        <Radio.Button value="a">
-                            <Space>
-                                <ClockCircleOutlined />
-                                下载中
-                            </Space>
-                        </Radio.Button>
-                        <Radio.Button value="b">
+                    <div></div>
+                    {/*<Radio.Group defaultValue="a" buttonStyle="solid">*/}
+                    {/*    <Radio.Button value="a">*/}
+                    {/*        <Space>*/}
+                    {/*            <ClockCircleOutlined/>*/}
+                    {/*            下载中*/}
+                    {/*        </Space>*/}
+                    {/*    </Radio.Button>*/}
+                    {/*    <Radio.Button value="b">*/}
 
-                            <Space>
-                                <CheckCircleOutlined />
-                                已完成
-                            </Space>
-                        </Radio.Button>
-                    </Radio.Group>
+                    {/*        <Space>*/}
+                    {/*            <CheckCircleOutlined/>*/}
+                    {/*            已完成*/}
+                    {/*        </Space>*/}
+                    {/*    </Radio.Button>*/}
+                    {/*</Radio.Group>*/}
                     <div>
-                        <Button type="primary" shape="circle" icon={<PlusOutlined />} onClick={ showModal }>
+                        <Button type="primary" shape="circle" icon={<PlusOutlined/>} onClick={showModal}>
                         </Button>
                     </div>
                 </div>
@@ -161,21 +167,22 @@ function Download(){
                         <Then>
                             <Table<DownloadTaskType> dataSource={downloadList} size="small" pagination={false}>
                                 <Column title="" dataIndex="name" key="name" width="50px"
-                                        render={(_:any, record: DownloadTaskType) => (
+                                        render={(_: any, record: DownloadTaskType) => (
                                             <If condition={record.status == DownloadStatus.PENDING}>
                                                 <Then>
-                                                    <Button type="text" onClick={() => commandCommon('PAUSE', record)} icon={<PauseCircleOutlined />} />
+                                                    <Button type="text" onClick={() => commandCommon('PAUSE', record)}
+                                                            icon={<PauseCircleOutlined/>}/>
                                                 </Then>
                                             </If>
                                         )}
                                 />
                                 <Column title="名称" dataIndex="name" key="name" ellipsis={true}
-                                        render={(_:any, record: DownloadTaskType) => (
+                                        render={(_: any, record: DownloadTaskType) => (
                                             <span>{record.fileObj.fileName}</span>
                                         )}
                                 />
                                 <Column title="大小" dataIndex="size" key="size" width="190px"
-                                        render={(_:any, record: DownloadTaskType) => (
+                                        render={(_: any, record: DownloadTaskType) => (
                                             <span>
                                             <If condition={record.status == DownloadStatus.FINISH}>
                                                 <Then>
@@ -192,8 +199,9 @@ function Download(){
                                         )}
                                 />
                                 <Column title="状态" dataIndex="progress" key="progress" width="200px"
-                                        render={(_:any, record: DownloadTaskType) => (
-                                            <div style={{display: "flex", flexDirection: "column", paddingRight:"8px"}} >
+                                        render={(_: any, record: DownloadTaskType) => (
+                                            <div
+                                                style={{display: "flex", flexDirection: "column", paddingRight: "8px"}}>
                                                 <If condition={record.status != DownloadStatus.FINISH && record.status != DownloadStatus.ERROR}>
                                                     <Then>
                                                         <Progress
@@ -204,7 +212,10 @@ function Download(){
                                                         />
                                                     </Then>
                                                 </If>
-                                                <span style={{fontSize: "12px", color: "var(--color-text-second)"}}>{statusParse(record.status)}
+                                                <span style={{
+                                                    fontSize: "12px",
+                                                    color: "var(--color-text-second)"
+                                                }}>{statusParse(record.status)}
                                                     <If condition={record.status == DownloadStatus.PENDING}>
                                                         <span>{fileSizeFormat(record.speed)}/s</span>
                                                     </If>
@@ -213,22 +224,25 @@ function Download(){
                                         )}
                                 />
                                 <Column title="操作" dataIndex="progress" key="progress" width="120px"
-                                        render={(_:any, record: DownloadTaskType) => (
+                                        render={(_: any, record: DownloadTaskType) => (
                                             <>
                                                 <If condition={record.status == DownloadStatus.PAUSE}>
                                                     <Then>
-                                                        <Button type="text" onClick={() => commandCommon('PUSH', record)} icon={<PlayCircleOutlined />} />
+                                                        <Button type="text"
+                                                                onClick={() => commandCommon('PUSH', record)}
+                                                                icon={<PlayCircleOutlined/>}/>
                                                     </Then>
                                                 </If>
-                                                <Button type="text" icon={<FolderOpenOutlined />} onClick={() =>openFolder(record.savePath)}/>
-                                                <Button color="danger" variant="text" icon={<DeleteOutlined />} />
+                                                <Button type="text" icon={<FolderOpenOutlined/>}
+                                                        onClick={() => openFolder(record.savePath)}/>
+                                                <Button color="danger" variant="text" icon={<DeleteOutlined/>}/>
                                             </>
                                         )}
                                 />
                             </Table>
                         </Then>
                         <Else>
-                            <Empty style={{marginTop: '50px'}} />
+                            <Empty style={{marginTop: '50px'}}/>
                         </Else>
                     </If>
                 </div>
@@ -241,10 +255,10 @@ function Download(){
                    destroyOnClose
                    maskClosable={false}
             >
-                <CreateDialog onSubmit={createSuccess} />
+                <CreateDialog onSubmit={createSuccess}/>
             </Modal>
         </>
     )
 }
 
-export default  Download
+export default Download

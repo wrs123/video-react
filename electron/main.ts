@@ -32,10 +32,16 @@ function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     width: 1000,
     height: 650,
+    frame: false,
+    titleBarStyle: 'hiddenInset',
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
     },
   })
+
+  if (process.platform === 'darwin') {
+    win.setWindowButtonVisibility(true) // 显示原生按钮
+  }
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {

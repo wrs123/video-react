@@ -44,6 +44,13 @@ const API = {
      */
     getSysConfig : (param: any = {}) => {
         return API.request('sys:getSysConfig', param)
+    },
+    /**
+     * 窗口操作
+     * @param param
+     */
+    operationWindow : (param: any = {}) => {
+        return API.request('sys:operationWindow', param)
     }
 }
 
