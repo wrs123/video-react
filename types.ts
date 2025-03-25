@@ -22,7 +22,8 @@ interface DownloadAnalysisType {
     fileName: string, //文件名
     analysisUrl: string, //解析后的下载地址
     suffix: string //文件后缀
-    fileType: DownloadFileType
+    fileType: DownloadFileType,
+    cover?: string //文件预览图
 }
 
 export type {

@@ -1,5 +1,5 @@
 import { Space, Input, Button, Divider, Form, message } from "antd";
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
     FolderOpenOutlined,
     RocketFilled,
@@ -13,10 +13,18 @@ type FieldType = {
     path?: string;
 };
 
+
 function CreateDialog ({ onSubmit }){
-    const [formData] = Form.useForm<FieldType>();
+    const [formData] = Form.useForm<FieldType>()
     const [posting, setPosting ] = useState<boolean>(false)
     const [messageApi, contextHolder] = message.useMessage();
+
+
+    useEffect(() => {
+        formData.setFieldsValue({
+            path: "C:\\Users\\ofg\\Downloads",
+        })
+    })
 
     const onFinish = async (values: any) => {
         setPosting(true)
@@ -43,7 +51,6 @@ function CreateDialog ({ onSubmit }){
 
              // https://www.91porn.com/view_video.php?viewkey=a68aa309566890ce4144&c=piktl&viewtype=&category=
              formData.setFieldsValue({
-                 urls: 'https://www.91porn.com/view_video.php?viewkey=a68aa309566890ce4144&c=piktl&viewtype=&category=',
                  path: res.data,
              })
          }

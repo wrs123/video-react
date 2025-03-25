@@ -2,12 +2,12 @@ $stepBarWidth: 170px;
 
 .indexContainer{
   display: flex;
-  height: -webkit-fill-available;
+  height: 100vh;
   flex-direction: column;
 
   .contentContainer{
     display: flex;
-    flex: 1;
+    height: 100%;
   }
 }
 
@@ -66,7 +66,7 @@ $stepBarWidth: 170px;
     color: var(--color-primary);
   }
 
-  &.active {5
+  &.active {
     background: var(--color-primary-second);
     color: var(--color-primary);
     font-weight: bold;

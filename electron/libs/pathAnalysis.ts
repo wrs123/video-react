@@ -1,7 +1,13 @@
-import puppeteer from "puppeteer";
+// import puppeteer from "puppeteer";
 import {DownloadAnalysisType} from "../../types.ts";
 import {DownloadFileType} from "../../enums.ts";
 import ytdl from "@distube/ytdl-core"
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { connect } = require("puppeteer-real-browser");
+
+
 
 const pathMap: any = {
     "www.91porn.com": _91Pron,
@@ -62,61 +68,46 @@ async function _91Pron(path:string){
         analysisUrl: '', //下载地址
         fileName: '', //文件名称
         suffix: '.mp4', //文件后缀
-        fileType: DownloadFileType.MP4
+        fileType: DownloadFileType.MP4,
+        cover: ''
     }
 
     try{
-        const browser = await puppeteer.launch({
+        const { browser, page } = await connect({
             headless: false,
+            turnstile: true,
+            disableXvfb: true,
+            ignoreAllFlags: false,
+            plugins: [require("puppeteer-extra-plugin-click-and-wait")()],
             args: [
-                "--disable-blink-features=AutomationControlled", // 禁用自动化标记
-                '--no-sandbox', // 在某些环境中可能需要此参数，但请注意安全风险
-                '--disable-setuid-sandbox', // 同上
-                '--disable-dev-shm-usage', // 禁用 dev shm usage
-                '--disable-accelerated-2d-canvas', // 禁用硬件加速的 canvas
-                '--disable-gpu', // 禁用 GPU 加速，有时可以绕过某些验证
-                "--window-size=1920,1080", // 设置合理视口
+                // "--disable-blink-features=AutomationControlled", // 禁用自动化标记
+                // '--no-sandbox', // 在某些环境中可能需要此参数，但请注意安全风险
+                // '--disable-setuid-sandbox', // 同上
+                // '--disable-dev-shm-usage', // 禁用 dev shm usage
+                // '--disable-accelerated-2d-canvas', // 禁用硬件加速的 canvas
+                // '--disable-gpu', // 禁用 GPU 加速，有时可以绕过某些验证
+                // "--window-size=1920,1080", // 设置合理视口
             ],
         });
-        const page = await browser.newPage();
-        await page.setExtraHTTPHeaders({
-            'Accept-Language': 'en-US,en;q=0.5',
-        });
-        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-        await page.setViewport({width: 1920, height: 1080});
-        // 覆盖 WebDriver 属性（绕过反爬检测）
-        await page.evaluateOnNewDocument(() => {
-            Object.defineProperty(navigator, "webdriver", {
-                get: () => false,
-            });
-        });
-        await page.goto(path, { waitUntil: ["domcontentloaded", "networkidle2"] });
 
-        // 检查是否触发 Cloudflare
-        const isBlocked = await page.evaluate(() => {
-            return document.title.includes('Just a moment') || document.querySelector('#challenge-form');
-        });
-
-        if (isBlocked) {
-            console.log('Cloudflare challenge detected!');
-            // 处理验证逻辑（见下文）
-            await page.mouse.move(100, 100);
-            await page.mouse.move(200, 200, { steps: 10 });
-            await page.evaluate(() => window.scrollBy(0, window.innerHeight));
-        }
-
-
-
-        const _videoElment:any = await page.$("#videodetails .video-container video source")
+        await page.goto(path, { waitUntil: ["domcontentloaded"] });
+        const selector: string = "#player_one_html5_api"
+        await page.waitForSelector(selector);
+        const _videoElment:any = await page.$(selector+" source")
+        const _coverElment:any = await page.$("#player_one_html5_api")
         const _title: string = await page.title();
-
         if(_title) res.fileName =  _title.replace(" Chinese homemade video", "")
         if(_videoElment){
+
             const _link = await _videoElment.getProperty('src');
+            const _cover = await _coverElment.getProperty('poster')
+            res.cover = await _cover.jsonValue()
             res.analysisUrl = await _link.jsonValue();
+
+            console.warn(res.cover, res.analysisUrl)
         }
 
-        // await browser.close();
+        await browser.close();
         return res
     }catch(e){
         console.log(e)
