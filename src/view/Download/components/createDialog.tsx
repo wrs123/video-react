@@ -24,7 +24,7 @@ function CreateDialog ({ onSubmit }){
         formData.setFieldsValue({
             path: "C:\\Users\\ofg\\Downloads",
         })
-    })
+    }, [])
 
     const onFinish = async (values: any) => {
         setPosting(true)
@@ -48,7 +48,6 @@ function CreateDialog ({ onSubmit }){
         const res= await API.getFolderPath()
          console.warn(res.data)
          if(res.status == "OK"){
-
              // https://www.91porn.com/view_video.php?viewkey=a68aa309566890ce4144&c=piktl&viewtype=&category=
              formData.setFieldsValue({
                  path: res.data,
@@ -75,7 +74,6 @@ function CreateDialog ({ onSubmit }){
                     name="path"
                     rules={[{ required: true, message: '请选择下载地址' }]}
                     style={{marginBottom: '0px'}}
-
                 >
                     <Search placeholder="请选择下载路径"
                             disabled={true}

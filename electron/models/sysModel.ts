@@ -11,7 +11,8 @@ export const getSysConfig = () => {
     }
 
     const _config = {
-        downloadPath: app.getPath('downloads')
+        downloadPath: app.getPath('downloads'),
+        platform: process.platform
     }
 
     res.data = _config

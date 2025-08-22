@@ -4,7 +4,7 @@ import { CheckCircleFilled, ThunderboltFilled, SettingFilled  } from '@ant-desig
 import classnames from 'classnames';
 import DownLoad from '../Download/Download'
 import Config from '../Config/Config'
-import { Button } from "antd";
+import { Button, Modal } from "antd";
 import WindowTitleBar from "../../components/windowTitleBar.tsx";
 import logoIcon from '../../assets/images/logo.png'
 
@@ -26,10 +26,16 @@ const stepList = [
 
 function Index(){
     const [activeStep, setActiveStep] = useState<string>('download')
+    const [sysConfigVisible, setSysConfigVisible] = useState(false);
 
     const changeItem = (key: string) => {
         setActiveStep(key)
     }
+
+    const openSysConfig = () => {
+        setSysConfigVisible(true)
+    }
+
 
     return (
         <div className={styles.indexContainer} >
@@ -51,7 +57,7 @@ function Index(){
                         )
                     }
                     <div className={styles.bottomButton}>
-                        <Button color="primary" variant="outlined" block icon={<SettingFilled />}>
+                        <Button color="primary" variant="outlined" block icon={<SettingFilled />} onClick={openSysConfig}>
                             软件设置
                         </Button>
                     </div>
@@ -61,7 +67,27 @@ function Index(){
                     <Config style={{ display: activeStep == 'config' ? 'block' : 'none' }} key="2" />
                 </div>
             </div>
-
+            <Modal
+                height="100%"
+                open={sysConfigVisible}
+                onCancel={() => setSysConfigVisible(false)}
+                destroyOnClose
+                styles={{
+                    mask: {
+                        backdropFilter: 'blur(12px) brightness(1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.6)'
+                    },
+                }}
+                style={{ top: 0, margin: 0, maxWidth: 'unset', padding: 0 }}
+                maskClosable={false}
+                className={styles.sysConfigDrawer}
+                width='100vw'
+                closable={false}
+                footer={null}
+                title={null}
+            >
+                <Config onClose={() => setSysConfigVisible(false)} />
+            </Modal>
         </div>
     )
 }

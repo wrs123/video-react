@@ -13,7 +13,7 @@ $stepBarWidth: 170px;
 
 .stepBar{
   height: -webkit-fill-available;
-  padding: 30px 4px 12px 4px;
+  padding: var(--window-titlebar-height) 4px 12px 4px;
   background: var(--color-white);
   position: relative;
   width: $stepBarWidth;
@@ -28,7 +28,7 @@ $stepBarWidth: 170px;
     justify-content: center;
     font-size: 22px;
     font-weight: bolder;
-    padding: 12px 0 8px 0;
+    padding: 4px 0 8px 0;
     align-items: center;
 
     img{
@@ -100,5 +100,30 @@ $stepBarWidth: 170px;
   flex: 1;
   height: -webkit-fill-available;
   overflow: hidden;
-  padding-top: 20px;
+  padding-top: var(--window-titlebar-height);
+}
+
+.sysConfigDrawer {
+    border-radius: 0;
+
+   :global{
+     .ant-drawer-header{
+       padding: 36px 24px 16px 24px!important;
+       font-size: 21px;
+
+     }
+
+     .ant-modal-content{
+       height: 100vh!important;
+       background-color: transparent;
+       padding: 0;
+       //backdrop-filter: blur(5px);
+     }
+
+     .ant-modal-body{
+       height: 100%!important;
+     }
+   }
+
+
 }
