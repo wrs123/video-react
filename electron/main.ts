@@ -3,6 +3,7 @@ import { app, BrowserWindow } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { InitHandler } from "./handlers";
+import {initDB} from "./db/init.ts";
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -77,12 +78,20 @@ app.on('activate', () => {
   }
 })
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  console.log(1111)
+
+  //初始化db实例并注册到全局
+  global.db = initDB()
+
   //创建窗口
   createWindow()
   //注册全局事件监听
   InitHandler()
+
   //全局注册窗口
   global.win = win
   global.downloadStack = []
+
+
 })

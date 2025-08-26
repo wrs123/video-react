@@ -86,7 +86,7 @@ function DownloadItem({item, commandCommon}: DownloadItemProps) {
             <If condition={item?.fileObj.cover}>
                 <Then>
                     <div className={styles.downloadCover}>
-                        <div className={styles.mask} style={{left: `${percentParse(item?.receivedBytes, item?.TotalBytes)}%`}}></div>
+                        <div className={styles.mask} style={{width: `${100 - percentParse(item?.receivedBytes, item?.TotalBytes)}%`}}></div>
                         <img  src={item?.fileObj.cover} alt=""/>
                     </div>
                 </Then>

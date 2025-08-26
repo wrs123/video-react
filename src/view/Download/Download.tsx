@@ -74,6 +74,11 @@ function Download() {
         }
     }
 
+    onDownloadUpdate.get((event: unknown, str: any) => {
+        console.warn(str)
+        commandCommon('UPDATE', str)
+    })
+
     useEffect(() => {
         console.warn(`页面渲染`)
     }, [])
