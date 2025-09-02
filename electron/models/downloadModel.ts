@@ -5,7 +5,34 @@ import DownloadFile from "../libs/downloadManage.ts";
 import crypto from 'crypto'
 
 export function updateDownloadStatus(downloadTask:DownloadTaskType){
+    updateTask(downloadTask)
     global.win.webContents.send('download:updateDownload', downloadTask)
+}
+
+export const updateTask = async (param) => {
+    const db = global.db
+
+    try{
+
+        let query: any = []
+
+        Object.keys(param).forEach((key, val) => {
+            console.warn(val, key)
+            if(key !== 'speed' && key != 'id'){
+                query.push(`${key}=@${key}`)
+            }
+
+        })
+
+        const update = db.prepare(`UPDATE tasks SET ${query.join(',')} WHERE id=@id`);
+        const updateFunc = db.transaction((signs: any) => {
+            for (const sign of signs) update.run(sign);
+        });
+
+        updateFunc([param])
+    }catch(error: any){
+        console.warn(error?.message)
+    }
 }
 
 
@@ -31,7 +58,8 @@ export const createTask = async (param: any) => {
             name: (new URL(param.urls)).origin, //文件名
             analysisUrl: "", //解析后的下载地址
             suffix: "", //文件后缀
-            fileType: DownloadFileType.NONE
+            fileType: DownloadFileType.NONE,
+            cover: ""
         }
 
         let query = []
@@ -52,7 +80,12 @@ export const createTask = async (param: any) => {
         PathAnalysis(param.urls).then((analysisObj: DownloadAnalysisType) => {
             console.warn(analysisObj.analysisUrl)
             if(analysisObj.analysisUrl){
-                _data.fileObj = analysisObj
+                _data.name = analysisObj.fileName
+                _data.analysisUrl = analysisObj.analysisUrl
+                _data.suffix = analysisObj.suffix
+                _data.fileType = analysisObj.fileType
+                _data.cover = analysisObj.cover
+
                 DownloadFile(analysisObj, param.path, _data)
             }else{
                 _data.status =  DownloadStatus.ANALERROR

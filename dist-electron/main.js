@@ -46921,7 +46921,7 @@ function DownloadFile(downloadObj, savePath, downloadTask) {
         updateDownloadStatus(downloadTask);
       } else if (state === "progressing") {
         const _progress = (Number(item.getReceivedBytes()) / Number(item.getTotalBytes())).toFixed(2);
-        console.log(`下载进度: ${_progress}%`);
+        console.log(`download progress: ${_progress}%`);
         downloadTask.status = DownloadStatus.PENDING;
         downloadTask.TotalBytes = item.getTotalBytes();
         downloadTask.receivedBytes = item.getReceivedBytes();
@@ -46932,7 +46932,7 @@ function DownloadFile(downloadObj, savePath, downloadTask) {
     item.on("done", (_2, state) => {
       win2.destroy();
       if (state === "completed") {
-        console.log("下载完成:", filePath);
+        console.log("下载完成:", filePath, downloadTask);
         downloadTask.status = DownloadStatus.FINISH;
         downloadTask.TotalBytes = item.getTotalBytes();
         downloadTask.receivedBytes = item.getReceivedBytes();
@@ -46947,8 +46947,28 @@ function DownloadFile(downloadObj, savePath, downloadTask) {
   win2.webContents.downloadURL(downloadObj.analysisUrl);
 }
 function updateDownloadStatus(downloadTask) {
+  updateTask(downloadTask);
   global.win.webContents.send("download:updateDownload", downloadTask);
 }
+const updateTask = async (param) => {
+  const db = global.db;
+  try {
+    let query = [];
+    Object.keys(param).forEach((key, val) => {
+      console.warn(val, key);
+      if (key !== "speed" && key != "id") {
+        query.push(`${key}=@${key}`);
+      }
+    });
+    const update = db.prepare(`UPDATE tasks SET ${query.join(",")} WHERE id=@id`);
+    const updateFunc = db.transaction((signs) => {
+      for (const sign of signs) update.run(sign);
+    });
+    updateFunc([param]);
+  } catch (error) {
+    console.warn(error == null ? void 0 : error.message);
+  }
+};
 const createTask = async (param) => {
   const db = global.db;
   const res = {
@@ -46978,7 +46998,8 @@ const createTask = async (param) => {
       //解析后的下载地址
       suffix: "",
       //文件后缀
-      fileType: DownloadFileType.NONE
+      fileType: DownloadFileType.NONE,
+      cover: ""
     };
     let query = [];
     Object.keys(_data).forEach((key, val) => {
@@ -46993,7 +47014,11 @@ const createTask = async (param) => {
     PathAnalysis(param.urls).then((analysisObj) => {
       console.warn(analysisObj.analysisUrl);
       if (analysisObj.analysisUrl) {
-        _data.fileObj = analysisObj;
+        _data.name = analysisObj.fileName;
+        _data.analysisUrl = analysisObj.analysisUrl;
+        _data.suffix = analysisObj.suffix;
+        _data.fileType = analysisObj.fileType;
+        _data.cover = analysisObj.cover;
         DownloadFile(analysisObj, param.path, _data);
       } else {
         _data.status = DownloadStatus.ANALERROR;
@@ -47171,6 +47196,7 @@ const createTables = async (db) => {
     savePath varchar(500) NOT NULL,
     name varchar(500), 
     analysisUrl varchar(500), 
+    cover varchar(500),
     suffix varchar(10), 
     fileType varchar(10)
   )`);

@@ -54,7 +54,7 @@ function DownloadFile(downloadObj : DownloadAnalysisType, savePath: string, down
                 updateDownloadStatus(downloadTask)
             } else if (state === 'progressing') {
                 const _progress = (Number(item.getReceivedBytes())/Number(item.getTotalBytes())).toFixed(2)
-                console.log(`下载进度: ${_progress}%`)
+                console.log(`download progress: ${_progress}%`)
                 downloadTask.status = DownloadStatus.PENDING
                 downloadTask.TotalBytes = item.getTotalBytes()
                 downloadTask.receivedBytes = item.getReceivedBytes()
@@ -67,7 +67,7 @@ function DownloadFile(downloadObj : DownloadAnalysisType, savePath: string, down
             win.destroy()
 
             if (state === 'completed') {
-                console.log('下载完成:', filePath)
+                console.log('下载完成:', filePath, downloadTask)
 
                 downloadTask.status = DownloadStatus.FINISH
                 downloadTask.TotalBytes = item.getTotalBytes()

@@ -17,6 +17,7 @@ const createTables = async (db : any) => {
     savePath varchar(500) NOT NULL,
     name varchar(500), 
     analysisUrl varchar(500), 
+    cover varchar(500),
     suffix varchar(10), 
     fileType varchar(10)
   )`)
