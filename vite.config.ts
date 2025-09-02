@@ -10,6 +10,9 @@ export default defineConfig({
     rollupOptions: {
       external: ['better-sqlite3'],
     },
+    commonjsOptions: {
+      transformMixedEsModules: true, // 处理混合 ES 模块和 CommonJS 的情况
+    },
   },
   plugins: [
     react(),

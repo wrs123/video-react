@@ -17,7 +17,7 @@ const stepList = [
     },
     {
         label: '已完成',
-        key: 'config',
+        key: 'finish',
         icon: <CheckCircleFilled style={{fontSize: '16px'}} />,
         activeIcon: <CheckCircleFilled style={ {color: 'var(--color-primary)', fontSize: '16px'}}/>
     },
@@ -63,8 +63,18 @@ function Index(){
                     </div>
                 </div>
                 <div className={styles.projectContainer}>
-                    <DownLoad style={{ display: activeStep == 'download' ? 'block' : 'none' }} key="1" />
-                    <Config style={{ display: activeStep == 'config' ? 'block' : 'none' }} key="2" />
+                    <DownLoad style={{ display: activeStep == 'download' ? 'block' : 'none' }} key="1" status={0} />
+                    <DownLoad style={{ display: activeStep == 'finish' ? 'block' : 'none' }} key="2" status={1} />
+                    {/*<If condition={activeStep === 'download'}>*/}
+                    {/*    <Then>*/}
+                    {/*        */}
+                    {/*    </Then>*/}
+                    {/*</If>*/}
+                    {/*<If condition={activeStep === 'download'}>*/}
+                    {/*    <Then>*/}
+                    {/*        */}
+                    {/*    </Then>*/}
+                    {/*</If>*/}
                 </div>
             </div>
             <Modal

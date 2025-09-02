@@ -1,23 +1,24 @@
 import { resolve } from 'path'
-import Database from 'better-sqlite3'
+import { createRequire } from 'node:module'
 import fs from 'fs'
 import { publicDir } from '../utils'
 import createTables from './createTable'
 
+const require = createRequire(import.meta.url)
 // 连接数据库
 const conDb = () => {
   const DB_NAME = 'sql.db'
   const DB_PATH = resolve(publicDir(), DB_NAME)
 
   try {
+
     if (!fs.existsSync(DB_PATH)) {
       // 数据库文件不存在，复制它
       fs.writeFileSync(DB_PATH, '')
     }
 
-    const db = new Database(DB_PATH, {})
+    const db = require('better-sqlite3')(DB_PATH, {})
     db.pragma('journal_mode = WAL')
-    console.warn(JSON.stringify(db))
     return db
   } catch (e) {
     console.warn('==error==', e.message)

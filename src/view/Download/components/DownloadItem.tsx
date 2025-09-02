@@ -75,7 +75,7 @@ function DownloadItem({item, commandCommon}: DownloadItemProps) {
     }
 
     useEffect(() => {
-        console.warn(`组件${item?.fileObj.fileName}渲染`)
+        console.warn(`组件${item?.name}渲染`)
     }, [])
 
 
@@ -83,16 +83,16 @@ function DownloadItem({item, commandCommon}: DownloadItemProps) {
     return (
         // style={{backgroundImage: `url("${item?.fileObj.cover ?? ''}")`}}
         <div  className={`${styles.downloadItem} ${item?.status == DownloadStatus.ANAL ? styles.loader : ''}`} >
-            <If condition={item?.fileObj.cover}>
+            <If condition={item?.cover}>
                 <Then>
                     <div className={styles.downloadCover}>
                         <div className={styles.mask} style={{width: `${100 - percentParse(item?.receivedBytes, item?.TotalBytes)}%`}}></div>
-                        <img  src={item?.fileObj.cover} alt=""/>
+                        <img  src={item?.cover} alt=""/>
                     </div>
                 </Then>
             </If>
             <div className={styles.leftContainer}>
-                <div className={styles.title}>{item?.fileObj.fileName}</div>
+                <div className={styles.title}>{item?.name}</div>
                 <div className={styles.content}>
                     <div className={styles.contentLeft}>
                         <If condition={item?.status == DownloadStatus.FINISH}>

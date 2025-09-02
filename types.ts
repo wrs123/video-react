@@ -9,6 +9,11 @@ interface DownloadTaskType {
     savePath: string, //下载的本地地址
     fileObj: DownloadAnalysisType,
     speed: number,
+    name: string, //文件名
+    analysisUrl: string, //解析后的下载地址
+    suffix: string //文件后缀
+    fileType: DownloadFileType,
+    cover?: string //文件预览图
 }
 
 interface BaseResult {

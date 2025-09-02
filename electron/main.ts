@@ -18,6 +18,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // │ │ └── preload.mjs
 // │
 process.env.APP_ROOT = path.join(__dirname, '..')
+console.log('Node.js environment:', typeof __filename );
+
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -79,7 +81,6 @@ app.on('activate', () => {
 })
 
 app.whenReady().then(async () => {
-  console.log(1111)
 
   //初始化db实例并注册到全局
   global.db = initDB()

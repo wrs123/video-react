@@ -1,5 +1,5 @@
 import { ipcMain  } from 'electron'
-import { createTask } from "../models/downloadModel.ts";
+import { createTask, queryTask } from "../models/downloadModel.ts";
 
 export const DownloadHandler = () => {
     const DOMAIN = "download"
@@ -10,6 +10,10 @@ export const DownloadHandler = () => {
 
     ipcMain.handle(`${DOMAIN}:createTask`, async (_, param: any) => {
         return await createTask(param)
+    })
+
+    ipcMain.handle(`${DOMAIN}:getTaskList`, async (_, param: any) => {
+        return await queryTask(param)
     })
 
     ipcMain.handle(`${DOMAIN}:getVideoUrl`, async (_) => {

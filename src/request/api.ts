@@ -7,6 +7,13 @@ const API = {
      * 下载文件
      * @param param
      */
+    getTaskList : (param: any) => {
+        return API.request('download:getTaskList', param)
+    },
+    /**
+     * 下载文件
+     * @param param
+     */
     downloadFile : (param: any) => {
         return API.request('download:downloadFile', param)
     },

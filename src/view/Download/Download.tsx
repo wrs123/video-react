@@ -11,12 +11,13 @@ import {If, Else, Then} from 'react-if';
 import CreateDialog from "./components/createDialog"
 
 import DownloadItem from "./components/DownloadItem.tsx";
+import API from "../../request/api.ts";
 
 const MemoDownloadItem = React.memo(DownloadItem, (prevProps, nextProps) => {
     return JSON.stringify(prevProps) == JSON.stringify(nextProps)
 })
 
-function Download() {
+function Download(props: any) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [downloadList, setDownloadList] = useState<DownloadTaskType[]>([
         // {
@@ -79,8 +80,14 @@ function Download() {
         commandCommon('UPDATE', str)
     })
 
+    const getTaskList = async () => {
+        const res= await API.getTaskList({status: props.status})
+        console.warn('下载列表', props.status , res.data)
+    }
+
     useEffect(() => {
-        console.warn(`页面渲染`)
+        console.warn(`页面渲染`, props.status)
+        getTaskList()
     }, [])
 
 
