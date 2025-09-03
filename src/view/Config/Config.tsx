@@ -1,6 +1,6 @@
 import styles from './Config.module.scss'
 import { CloseOutlined, RocketOutlined, RocketFilled, CloudServerOutlined } from '@ant-design/icons';
-import { Button, Space, Form, Input, Radio } from "antd";
+import { Button, Space, Form, Input, Switch } from "antd";
 import { useState } from 'react'
 import {If, Then} from 'react-if';
 
@@ -93,15 +93,7 @@ function Config({onClose}: ConfigProps) {
                                             name="useProxy"
                                             layout={'horizontal'}
                                         >
-                                            <Radio.Group
-
-                                                optionType="button"
-                                                // buttonStyle="solid"
-                                                options={[
-                                                    { value: '1', label: '关闭' },
-                                                    { value: '2', label: '开启' },
-                                                ]}
-                                            />
+                                            <Switch checkedChildren="开启" unCheckedChildren="关闭" defaultChecked />
                                         </Form.Item>
                                         <Form.Item<FieldType>
                                             name="useProxy"
