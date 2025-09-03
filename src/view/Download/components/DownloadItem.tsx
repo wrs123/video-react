@@ -1,7 +1,7 @@
 import styles from './DownloadItem.module.scss'
 import {DownloadTaskType} from "../../../../types.ts";
-import {DownloadStatus} from "../../../../enums.ts";
-import {Button} from "antd";
+import {DownloadStatus, ResultStatus} from "../../../../enums.ts";
+import {Button, Tooltip, Modal, message } from "antd";
 import {
     CaretRightOutlined,
     LoadingOutlined,
@@ -17,10 +17,12 @@ import { useEffect } from 'react';
 
 interface DownloadItemProps {
     item?: DownloadTaskType,
+    index?: number,
+    onDeleteTask: Function,
     commandCommon?: (type: string, item: DownloadTaskType) => Promise<void>
 }
 
-function DownloadItem({item, commandCommon}: DownloadItemProps) {
+function DownloadItem({item, index, commandCommon}: DownloadItemProps) {
 
     const statusParse = (status: DownloadStatus | undefined) => {
         let res: string = ""
@@ -48,34 +50,55 @@ function DownloadItem({item, commandCommon}: DownloadItemProps) {
         }
         return res
     }
+    const [modal, confrimContextHolder] = Modal.useModal();
+    const [messageApi, messageContextHolder] = message.useMessage();
 
-    // const progressColor = (status: DownloadStatus | undefined) => {
-    //     let res: string = ""
-    //
-    //     switch (status) {
-    //         case DownloadStatus.PAUSE:
-    //             res = "#d7d7d7"
-    //             break;
-    //         case DownloadStatus.PENDING:
-    //             res = "var(--color-primary)"
-    //             break;
-    //         case DownloadStatus.ERROR:
-    //             res = "#f2f2f2"
-    //             break;
-    //         case DownloadStatus.FINISH:
-    //             res = "#f2f2f2"
-    //             break;
-    //     }
-    //     return res
-    // }
 
     const openFolder = async (path: string) => {
         const res = await API.openFolderPath({path: path})
         console.warn(res)
+        if(res.status === ResultStatus.ERROR){
+            messageApi.open({
+                type: 'warning',
+                content: res.message,
+            });
+        }
     }
 
+    const deleteTask = async (item: DownloadTaskType, index: number) => {
+        try{
+            const confirmed = await modal.confirm({
+                title: `提示`,
+                okText: '确认',
+                cancelText: '取消',
+                centered: true,
+                content: (
+                    <>
+                        确认删除
+                        <span style={{color: "var(--color-primary)", fontWeight: 'bold'}}>
+                            【{item.name.slice(0,15)}{item.name.length > 15 ? '...' : ''}】
+                        </span>
+                        吗?
+                    </>
+                ),
+            });
+
+            if(confirmed){
+                const res = await API.deleteTask({id: item?.id})
+                console.warn(res)
+                if(res.status === ResultStatus.OK){
+                    commandCommon && commandCommon('DELETE', item)
+                }
+            }
+        }catch(e){
+            console.error(e)
+        }
+
+    }
+
+
+
     useEffect(() => {
-        console.warn(`组件${item?.name}渲染`)
     }, [])
 
 
@@ -83,6 +106,8 @@ function DownloadItem({item, commandCommon}: DownloadItemProps) {
     return (
         // style={{backgroundImage: `url("${item?.fileObj.cover ?? ''}")`}}
         <div  className={`${styles.downloadItem} ${item?.status == DownloadStatus.ANAL ? styles.loader : ''}`} >
+            {confrimContextHolder}
+            {messageContextHolder}
             <If condition={item?.cover}>
                 <Then>
                     <div className={styles.downloadCover}>
@@ -91,10 +116,13 @@ function DownloadItem({item, commandCommon}: DownloadItemProps) {
                     </div>
                 </Then>
             </If>
-            <div className={styles.leftContainer}>
+            <div className={`${styles.leftContainer} ${item?.status == DownloadStatus.FINISH ? styles.full : ''}` }>
                 <div className={styles.title}>{item?.name}</div>
                 <div className={styles.content}>
                     <div className={styles.contentLeft}>
+                        <span style={{
+                            marginRight: '10px'
+                        }}>{statusParse(item?.status)}</span>
                         <If condition={item?.status == DownloadStatus.FINISH}>
                             <Then>
                                 {fileSizeFormat(item?.TotalBytes)}
@@ -108,24 +136,34 @@ function DownloadItem({item, commandCommon}: DownloadItemProps) {
                         </If>
                         <If condition={item?.status != DownloadStatus.ANAL}>
                             <Then>
-                                <div style={{paddingLeft: '10px'}}>
-                                    <Button color="primary" icon={<FolderOpenOutlined />} variant="text" onClick={() => openFolder(item?.savePath)}></Button>
-                                    <Button color="primary" icon={<DeleteOutlined/>} variant="text" ></Button>
-                                </div>
+
                             </Then>
                         </If>
                     </div>
                     <div className={styles.contentRight}>
+
                         <If condition={item?.status == DownloadStatus.PENDING}>
                             <Then>
                                 <span>{fileSizeFormat(item?.speed)}/s</span>
                             </Then>
                             <Else>
-                                <span style={{
-                                    fontSize: "12px",
-                                    color: "var(--color-text-second)"
-                                }}>{statusParse(item?.status)}
-                                </span>
+                                <If condition={() => item?.status != DownloadStatus.ANAL}>
+                                    <div className={styles.actionGroup}>
+                                        <Tooltip title="打开目录">
+                                            <div className={styles.actionButton} onClick={() => openFolder(item?.savePath)}>
+                                                <FolderOpenOutlined />
+                                            </div>
+                                        </Tooltip>
+                                        <Tooltip title="删除">
+                                            <div className={`${styles.actionButton} ${styles.danger}`} onClick={() => deleteTask(item, index)}>
+                                                <DeleteOutlined />
+                                            </div>
+                                        </Tooltip>
+                                    </div>
+                                </If>
+                                <Else>
+
+                                </Else>
                             </Else>
                         </If>
                     </div>
@@ -136,26 +174,30 @@ function DownloadItem({item, commandCommon}: DownloadItemProps) {
                    <div className={styles.rightContainer}>
                        <If condition={item?.status == DownloadStatus.PENDING}>
                            <Then>
-                               <Button shape="circle" size="large" onClick={() => commandCommon && commandCommon('PAUSE', item)}
-                                       color="primary"
-                                       icon={<PauseOutlined/>} ghost variant="text"></Button>
+                               <div className={styles.actionButton} onClick={() => commandCommon && commandCommon('PAUSE', item)}>
+                                   <PauseOutlined/>
+                               </div>
                            </Then>
                        </If>
                        <If condition={item?.status == DownloadStatus.PAUSE}>
                            <Then>
-                               <Button shape="circle" size="large" onClick={() => commandCommon && commandCommon('PAUSE', item)}
-                                       color="primary"
-                                       icon={<CaretRightOutlined/>} ghost variant="text"></Button>
+                               <div className={styles.actionButton} onClick={() => commandCommon && commandCommon('PAUSE', item)}>
+                                   <CaretRightOutlined/>
+                               </div>
                            </Then>
                        </If>
-                       <If condition={item?.status == DownloadStatus.ANAL}>
-                           <Then>
-                               <LoadingOutlined style={{ fontSize: '20px'}} />
-                           </Then>
-                       </If>
+                       {/*<If condition={item?.status == DownloadStatus.ANAL}>*/}
+                       {/*    <Then>*/}
+                       {/*        <div className={styles.actionLoading}>*/}
+                       {/*            <LoadingOutlined />*/}
+                       {/*        </div>*/}
+
+                       {/*    </Then>*/}
+                       {/*</If>*/}
                    </div>
                </Then>
             </If>
+
         </div>
     )
 }

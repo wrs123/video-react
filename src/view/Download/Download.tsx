@@ -1,12 +1,13 @@
 import styles from './Download.module.scss'
-import {Button, Modal, Space, Empty} from "antd";
+import {Button, Modal, Space, Empty, List} from "antd";
+import VirtualList from 'rc-virtual-list';
 import {
     PlusOutlined,
     PauseOutlined
 } from '@ant-design/icons';
-import React, {useState, useEffect} from 'react'
-import {DownloadTaskType} from "../../../types.ts";
-import {DownloadFileType, DownloadStatus} from "../../../enums.ts";
+import React, {useState, useEffect, useRef} from 'react'
+import {DownloadTaskType } from "../../../types.ts";
+import { DownloadStatus } from "../../../enums.ts";
 import {If, Else, Then} from 'react-if';
 import CreateDialog from "./components/createDialog"
 
@@ -18,24 +19,10 @@ const MemoDownloadItem = React.memo(DownloadItem, (prevProps, nextProps) => {
 })
 
 function Download(props: any) {
+    const [listHeight, setListHeight] = useState(200);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [downloadList, setDownloadList] = useState<DownloadTaskType[]>([
-        // {
-        //     id: "string", //下载任务id
-        //     originUrl: "string", //原视频地址
-        //     status: DownloadStatus.ANAL, //下载状态
-        //     TotalBytes: 11111, //视频总字节数
-        //     receivedBytes: 2222222, //已下载的字节数
-        //     savePath: "string", //下载的本地地址
-        //     fileObj: {
-        //         fileName: "string", //文件名
-        //         analysisUrl: 'string', //解析后的下载地址
-        //         suffix: ".mp4", //文件后缀
-        //         fileType: DownloadFileType.M3U8
-        //     },
-        //     speed: 11
-        // }
-    ]);
+    const listRef = useRef(null);
+    const [downloadList, setDownloadList] = useState<DownloadTaskType[]>([]);
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -44,7 +31,7 @@ function Download(props: any) {
     const createSuccess = (_param: DownloadTaskType) => {
         console.log(_param);
         setIsModalOpen(false);
-        setDownloadList(prevList => [...prevList, _param]);
+        setDownloadList(prevList => [_param, ...prevList]);
     };
 
     const handleCancel = () => {
@@ -68,9 +55,12 @@ function Download(props: any) {
                 ));
                 break;
             case "UPDATE":
-                setDownloadList&& setDownloadList(prevList => prevList.map(preItem =>
+                setDownloadList && setDownloadList(prevList => prevList.map(preItem =>
                     item.id == preItem.id ? {...preItem, ...item} : preItem
                 ));
+                break;
+            case "DELETE":
+                setDownloadList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
                 break;
         }
     }
@@ -84,15 +74,23 @@ function Download(props: any) {
 
     const getTaskList = async () => {
         const res= await API.getTaskList({status: props.status})
-
         setDownloadList(res.data || [])
-        console.warn('下载列表', props.status , res.data)
     }
+    const handleResize = () => {
+        if (listRef.current) {
+            setListHeight(listRef.current.offsetHeight)
+        }
+    };
 
     useEffect(() => {
         console.warn(`页面渲染`, props.status)
+        handleResize()
+        // 添加事件监听器
+        window.addEventListener('resize', handleResize);
         getTaskList()
     }, [])
+
+
 
 
 
@@ -100,7 +98,10 @@ function Download(props: any) {
         <>
             <div className={styles.downloadContainer}>
                 <div className={styles.containerTop}>
-                    <div></div>
+                    <div className={styles.leftTitle}>
+                        <h1 >{props.status == 1 ? '已完成' : '下载中'}</h1>
+                        <div className={styles.downloadCount}>{downloadList.length}</div>
+                    </div>
                     <div>
                         <Space>
                             <Button icon={<PauseOutlined />}></Button>
@@ -108,19 +109,23 @@ function Download(props: any) {
                                 新建
                             </Button>
                         </Space>
-
                     </div>
                 </div>
-                <div className={styles.downloadList}>
+                <div className={styles.downloadList} ref={listRef}>
                     <If condition={downloadList.length != 0}>
                         <Then>
-                            {
-                                downloadList.map((item: DownloadTaskType) => {
-                                    return (
-                                        <MemoDownloadItem key={item.id} item={item} commandCommon={commandCommon}/>
-                                    )
-                                })
-                            }
+                            <List>
+                                <VirtualList
+                                    data={ downloadList }
+                                    height={ listHeight }
+                                    itemKey="email"
+                                >
+
+                                    {
+                                        (item, index) => (<MemoDownloadItem key={item.id} item={item} index={index} commandCommon={commandCommon}/>)
+                                    }
+                                </VirtualList>
+                            </List>
                         </Then>
                         <Else>
                             <Empty style={{marginTop: '50px'}}/>

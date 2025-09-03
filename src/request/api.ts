@@ -4,11 +4,17 @@ const API = {
     request: window.ipcRenderer.invoke,
 
     /**
-     * 下载文件
+     * 获取任务列表
      * @param param
      */
     getTaskList : (param: any) => {
         return API.request('download:getTaskList', param)
+    },
+    /**
+     * 删除任务
+     */
+    deleteTask : (param: any) => {
+        return API.request('download:deleteTask', param)
     },
     /**
      * 下载文件

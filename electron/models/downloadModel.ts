@@ -1,8 +1,8 @@
 import {BaseResult, DownloadAnalysisType, DownloadTaskType} from "../../types.ts";
 import {DownloadFileType, DownloadStatus, ResultStatus} from "../../enums.ts";
-import { PathAnalysis } from "../libs/pathAnalysis.ts";
+import {PathAnalysis} from "../libs/pathAnalysis.ts";
 import DownloadFile from "../libs/downloadManage.ts";
-import crypto from 'crypto'
+import crypto from "crypto"
 
 export function updateDownloadStatus(downloadTask:DownloadTaskType){
     updateTask(downloadTask)
@@ -35,7 +35,7 @@ export const updateTask = async (param) => {
     }
 }
 
-
+//创建任务
 export const createTask = async (param: any) => {
     const db = global.db
     const res: BaseResult = {
@@ -144,6 +144,33 @@ export const queryTask = async (param: any) => {
         console.warn(error.message)
         res.status= ResultStatus.ERROR
         res.message = "查询失败"+error.message
+    }
+
+
+    return res
+}
+
+//删除任务
+export const deleteTask = async (param: any) => {
+    const db = global.db
+
+    const res: BaseResult = {
+        code: 200,
+        status: ResultStatus.OK,
+        message: '删除成功',
+        data: ''
+    }
+
+    try{
+        await db
+            .prepare('DELETE FROM tasks WHERE id == ?')
+            .run(
+                param.id
+            )
+    }catch(error){
+        console.warn(error.message)
+        res.status= ResultStatus.ERROR
+        res.message = "删除失败"+error.message
     }
 
 

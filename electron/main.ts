@@ -35,6 +35,8 @@ function createWindow() {
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     width: 1200,
     height: 650,
+    minWidth: 1200,
+    minHeight: 650,
     frame: false,
     titleBarStyle: 'hiddenInset',
     webPreferences: {

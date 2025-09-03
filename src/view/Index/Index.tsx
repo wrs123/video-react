@@ -7,6 +7,7 @@ import Config from '../Config/Config'
 import { Button, Modal } from "antd";
 import WindowTitleBar from "../../components/windowTitleBar.tsx";
 import logoIcon from '../../assets/images/logo.png'
+import {If, Else, Then} from 'react-if';
 
 const stepList = [
     {
@@ -63,18 +64,17 @@ function Index(){
                     </div>
                 </div>
                 <div className={styles.projectContainer}>
-                    <DownLoad style={{ display: activeStep == 'download' ? 'block' : 'none' }} key="1" status={0} />
-                    <DownLoad style={{ display: activeStep == 'finish' ? 'block' : 'none' }} key="2" status={1} />
-                    {/*<If condition={activeStep === 'download'}>*/}
-                    {/*    <Then>*/}
-                    {/*        */}
-                    {/*    </Then>*/}
-                    {/*</If>*/}
-                    {/*<If condition={activeStep === 'download'}>*/}
-                    {/*    <Then>*/}
-                    {/*        */}
-                    {/*    </Then>*/}
-                    {/*</If>*/}
+
+                    <If condition={activeStep === 'download'}>
+                        <Then>
+                            <DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={0} />
+                        </Then>
+                    </If>
+                    <If condition={activeStep === 'finish'}>
+                        <Then>
+                            <DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={1} />
+                        </Then>
+                    </If>
                 </div>
             </div>
             <Modal
@@ -84,8 +84,8 @@ function Index(){
                 destroyOnClose
                 styles={{
                     mask: {
-                        backdropFilter: 'blur(12px) brightness(1)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.6)'
+                        backdropFilter: 'blur(20px) brightness(1)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)'
                     },
                 }}
                 style={{ top: 0, margin: 0, maxWidth: 'unset', padding: 0 }}

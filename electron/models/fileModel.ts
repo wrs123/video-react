@@ -2,6 +2,7 @@ import {BaseResult} from "../../types.ts";
 import {ResultStatus} from "../../enums.ts";
 import { dialog, shell } from 'electron'
 import path from 'path'
+import fs from 'fs'
 
 export const chooseFolderPath = async () => {
     const res: BaseResult = {
@@ -39,10 +40,15 @@ export const openFolderPath = async (paths: string) => {
     }
 
     try{
-        await shell.openPath(path.join(paths))
+        if(!fs.existsSync(path.join(paths))){
+            res.status = ResultStatus.ERROR
+            res.message = '打开失败，目录不存在'
+        }else{
+            await shell.openPath(path.join(paths))
+        }
     }catch(e){
         res.status = ResultStatus.ERROR
-        res.message = '打开失败'+e
+        res.message = '打开失败'+e.message
     }
     return res
 }

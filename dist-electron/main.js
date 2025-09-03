@@ -47060,6 +47060,25 @@ const queryTask = async (param) => {
   }
   return res;
 };
+const deleteTask = async (param) => {
+  const db = global.db;
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "删除成功",
+    data: ""
+  };
+  try {
+    await db.prepare("DELETE FROM tasks WHERE id == ?").run(
+      param.id
+    );
+  } catch (error) {
+    console.warn(error.message);
+    res.status = ResultStatus.ERROR;
+    res.message = "删除失败" + error.message;
+  }
+  return res;
+};
 const DownloadHandler = () => {
   const DOMAIN = "download";
   ipcMain.handle(`${DOMAIN}:editTask`, async (_) => {
@@ -47070,6 +47089,9 @@ const DownloadHandler = () => {
   });
   ipcMain.handle(`${DOMAIN}:getTaskList`, async (_, param) => {
     return await queryTask(param);
+  });
+  ipcMain.handle(`${DOMAIN}:deleteTask`, async (_, param) => {
+    return await deleteTask(param);
   });
   ipcMain.handle(`${DOMAIN}:getVideoUrl`, async (_) => {
     return "ok";
@@ -47104,10 +47126,15 @@ const openFolderPath = async (paths) => {
     data: ""
   };
   try {
-    await shell.openPath(path.join(paths));
+    if (!fs.existsSync(path.join(paths))) {
+      res.status = ResultStatus.ERROR;
+      res.message = "打开失败，目录不存在";
+    } else {
+      await shell.openPath(path.join(paths));
+    }
   } catch (e) {
     res.status = ResultStatus.ERROR;
-    res.message = "打开失败" + e;
+    res.message = "打开失败" + e.message;
   }
   return res;
 };
@@ -47117,6 +47144,9 @@ const FileHandler = () => {
     return chooseFolderPath();
   });
   ipcMain.handle(`${DOMAIN}:openFolderPath`, async (_, param) => {
+    return await openFolderPath(param.path);
+  });
+  ipcMain.handle(`${DOMAIN}:deleteFile`, async (_, param) => {
     return await openFolderPath(param.path);
   });
 };
@@ -47246,6 +47276,8 @@ function createWindow() {
     icon: path$1.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     width: 1200,
     height: 650,
+    minWidth: 1200,
+    minHeight: 650,
     frame: false,
     titleBarStyle: "hiddenInset",
     webPreferences: {

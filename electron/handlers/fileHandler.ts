@@ -11,4 +11,8 @@ export const FileHandler = () => {
     ipcMain.handle(`${DOMAIN}:openFolderPath`, async (_, param: any) => {
         return await openFolderPath(param.path)
     })
+
+    ipcMain.handle(`${DOMAIN}:deleteFile`, async (_, param: any) => {
+        return await openFolderPath(param.path)
+    })
 }
