@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "rebuildSql": "electron-rebuild -f -w better-sqlite3"
   },
   "build": {
-    "icon": "src/assets/images/icon.png"
+    "mac": {
+      "icon": "public/icon.png"
+    },
+    "win": {
+      "icon": "public/icon.png"
+    }
   },
   "dependencies": {
     "@distube/ytdl-core": "^4.16.5",
@@ -22,6 +26,7 @@
     "bufferutil": "^4.0.9",
     "cheerio": "^1.0.0",
     "classnames": "^2.5.1",
+    "moment": "^2.30.1",
     "puppeteer": "^24.4.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-click-and-wait": "^2.3.3",

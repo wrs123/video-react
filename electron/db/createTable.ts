@@ -1,5 +1,3 @@
-import {DownloadStatus} from "../../enums.ts";
-
 const createTables = async (db : any) => {
   console.log('=======start create table')
 
@@ -19,7 +17,9 @@ const createTables = async (db : any) => {
     analysisUrl varchar(500), 
     cover varchar(500),
     suffix varchar(10), 
-    fileType varchar(10)
+    fileType varchar(10),
+    createTime datetime NOT NULL,
+    finishTime datetime
   )`)
 
   /**

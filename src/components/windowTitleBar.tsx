@@ -28,7 +28,7 @@ function WindowTitleBar() {
     return (
         <div className={styles.windowTitleContainer}>
             <div></div>
-            <If condition={window.sysConfig.platform != 'darwin'}>
+            <If condition={window['sysConfig'].platform != 'darwin'}>
                 <Then>
                     <div className={styles.windowBottonGroup}>
                         <div className={styles.windowBotton} onClick={()=> onElectronOperationWindow('min')}>

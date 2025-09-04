@@ -75,12 +75,12 @@ function Download(props: any) {
         }
     }
 
-    if(props.status === 0){
-        onDownloadUpdate.get((event: unknown, str: any) => {
-            console.warn(str)
-            commandCommon('UPDATE', str)
-        })
-    }
+    // if(props.status === 0){
+    //     onDownloadUpdate.get((event: unknown, str: any) => {
+    //         console.warn(str)
+    //         commandCommon('UPDATE', str)
+    //     })
+    // }
 
     const getTaskList = async () => {
         const res= await API.getTaskList({status: props.status})

@@ -16,14 +16,14 @@ export const SysHandler = () => {
     ipcMain.handle(`${DOMAIN}:operationWindow`, function (_, param) {
 
         const { type } =param
-        const currOperationWindow: any = global.win //当前操作的窗口实例
+        const currOperationWindow: any = global?.win //当前操作的窗口实例
         // if (!currOperationWindow) return
         switch (type) {
             case 'max': //窗口 最大化
-                currOperationWindow.maximize()
+                currOperationWindow?.maximize()
                 break
             case 'restore': //窗口 向下还原
-                currOperationWindow.unmaximize()
+                currOperationWindow?.unmaximize()
                 break
             case 'min': //窗口 最小化
                 currOperationWindow.minimize()

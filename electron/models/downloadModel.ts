@@ -1,14 +1,68 @@
 import {BaseResult, DownloadAnalysisType, DownloadTaskType} from "../../types.ts";
 import {DownloadFileType, DownloadStatus, ResultStatus} from "../../enums.ts";
-import {PathAnalysis} from "../libs/pathAnalysis.ts";
 import DownloadFile from "../libs/downloadManage.ts";
 import crypto from "crypto"
+import moment from 'moment'
+import { Worker } from "node:worker_threads";
+import { resolve, dirname } from 'path';
+import {publicDir} from "../utils";
+
 
 export function updateDownloadStatus(downloadTask:DownloadTaskType){
     updateTask(downloadTask)
     global.win.webContents.send('download:updateDownload', downloadTask)
 }
 
+/**
+ * 地址解析worker
+ * @param path
+ */
+const _analysisWorker = (path: string, id: string) => {
+    return new Promise((rev, reject) => {
+        //解析下载地址
+
+        const analysisWorker = new Worker(resolve(publicDir(), 'pathAnalysisWorker.js'), {
+            workerData: { path },
+            type: "module"
+        });
+        //线程入栈
+        global.taskStack[id] = analysisWorker;
+
+        analysisWorker.on("message", (msg) => {
+            console.warn('接收消息', msg)
+            if(msg.type === 'done'){
+                rev(msg.data)
+            }
+            else if(msg.type === 'error'){
+                reject(msg.message);
+            }
+            else{
+                rev("")
+            }
+            //线程出栈
+            delete global.taskStack[id]
+            //销毁线程
+            analysisWorker.terminate();
+        });
+
+        analysisWorker.on("error", (err) => {
+            console.warn(`Worker error: ${err}`)
+            reject(err);
+        });
+
+        analysisWorker.on("exit", (code) => {
+            if (code !== 0) {
+                console.warn(`Worker 停止，退出码: ${code}`)
+                reject(new Error(`Worker 停止，退出码: ${code}`));
+            }
+        });
+    })
+}
+
+/**
+ * 更新任务
+ * @param param
+ */
 export const updateTask = async (param) => {
     const db = global.db
 
@@ -35,8 +89,12 @@ export const updateTask = async (param) => {
     }
 }
 
-//创建任务
+/**
+ * 创建任务
+ * @param param
+ */
 export const createTask = async (param: any) => {
+
     const db = global.db
     const res: BaseResult = {
         code: 200,
@@ -46,14 +104,15 @@ export const createTask = async (param: any) => {
     }
 
     try{
-
         const _data: DownloadTaskType = {
-            id: crypto.randomUUID({ disableEntropyCache: true }), //下载任务id
+            id: crypto.randomUUID(), //下载任务id
             originUrl: param.urls, //原视频地址
             status: DownloadStatus.ANAL, //下载状态
             TotalBytes: 0, //视频总字节数
             receivedBytes: 0, //已下载的字节数
             speed: 0,
+            createTime: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+            finishTime: null,
             savePath: param.path, //下载的本地地址
             name: (new URL(param.urls)).origin, //文件名
             analysisUrl: "", //解析后的下载地址
@@ -62,23 +121,16 @@ export const createTask = async (param: any) => {
             cover: ""
         }
 
+        //插入任务记录
         let query = []
-
         Object.keys(_data).forEach((key, val) => {
-            console.warn(val, key)
             if(key !== 'speed'){
                 query.push(key)
             }
-
         })
-        await db
-            .prepare(
-                `INSERT INTO tasks (${query.join(',')}) VALUES (@${query.join(',@')})`
-            )
-            .run(_data)
+        await db.prepare(`INSERT INTO tasks (${query.join(',')}) VALUES (@${query.join(',@')})`).run(_data)
 
-        PathAnalysis(param.urls).then((analysisObj: DownloadAnalysisType) => {
-            console.warn(analysisObj.analysisUrl)
+        _analysisWorker(param.urls, param.id).then((analysisObj: any) => {
             if(analysisObj.analysisUrl){
                 _data.name = analysisObj.fileName
                 _data.analysisUrl = analysisObj.analysisUrl
@@ -88,7 +140,7 @@ export const createTask = async (param: any) => {
 
                 DownloadFile(analysisObj, param.path, _data)
             }else{
-                _data.status =  DownloadStatus.ANALERROR
+                _data.status = DownloadStatus.ANALERROR
                 updateDownloadStatus(_data)
             }
         })
@@ -126,9 +178,9 @@ export const queryTask = async (param: any) => {
     try{
         let query = ''
         if(param.status === 1){
-            query = 'SELECT * FROM tasks WHERE status == ?'
+            query = 'SELECT * FROM tasks WHERE status == ? ORDER BY createTime DESC'
         }else{
-            query = 'SELECT * FROM tasks WHERE status != ?'
+            query = 'SELECT * FROM tasks WHERE status != ? ORDER BY createTime DESC'
         }
 
         const _res = await db
@@ -162,6 +214,13 @@ export const deleteTask = async (param: any) => {
     }
 
     try{
+        if(global.taskStack[param.id]){
+            //销毁线程
+            global.taskStack[param.id].terminate();
+            //线程出栈
+            delete global.taskStack[param.id]
+        }
+
         await db
             .prepare('DELETE FROM tasks WHERE id == ?')
             .run(

@@ -36,7 +36,7 @@
       height: 100%;
       width: 100%;
       z-index: 1;
-      backdrop-filter: blur(10px) brightness(.5);
+      backdrop-filter: blur(4px) brightness(.6);
       will-change: transform;
       transform: translateZ(0);
       transition: width 0.3s;
@@ -57,7 +57,7 @@
   }
 
 
-  &.loader {
+  &.loader, &.loaderErr {
     //width: 100%;
     //height: 100%;
     background: linear-gradient(90deg, #0001 33%, rgb(98 106 239 / 20%) 50%, #0001 66%) #fff;
@@ -65,9 +65,20 @@
     animation: ci_1 1.6s infinite linear;
     color: var(--color-text-primary)!important;
 
-    .contentLeft{
-      color: var(--color-text-primary)!important;
+
+    .title{
+      text-shadow: none!important;
     }
+
+    .contentLeft{
+      color: var(--color-text-second)!important;
+      text-shadow: none!important;
+    }
+  }
+
+  &.loaderErr{
+    animation: unset!important;
+    background: #c6c6c6;
   }
 
   @keyframes ci_1 {
@@ -79,7 +90,7 @@
   .leftContainer{
     flex: 1;
     text-shadow: 0 0 1px rgba(0, 0, 0, .3);
-    padding-right: 62px;
+    padding-right: 66px;
 
     &.full{
       padding-right: 0!important;
@@ -89,6 +100,8 @@
       font-size: 16px;
       font-weight: 500;
       line-height: 1;
+      display: flex;
+      align-items: flex-end;
     }
 
     .content{
@@ -102,8 +115,14 @@
         display: flex;
         align-items: center;
         height: 30px;
+        color: #c7c7c7;
 
-        color: #c1bfbf;
+        .speed{
+          padding-left: 12px;
+          font-size: 14px;
+          border-left: 1px solid #666;
+          margin-left: 12px
+        }
 
         *{
           line-height: 1;
@@ -117,7 +136,7 @@
         .actionGroup{
           display: flex;
           align-items: center;
-          padding-left: 10px;
+          //padding-left: 10px;
           gap: 8px;
 
 
@@ -160,14 +179,17 @@
   }
 
   .rightContainer{
-    width: 68px;
+    width: 78px;
     height: 100%;
     position: absolute;
     right: 0;
     top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     svg{
-      font-size: 28px;
+      font-size: 20px;
     }
 
     .actionLoading{
@@ -183,12 +205,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 100%;
-      height: 100%;
+      width: 50px;
+      height: 50px;
       cursor: pointer;
-      transition: background-color .2s;
+      border-radius: 6px;
+      transition: background-color 0.2s;
       will-change: background-color;
-      box-shadow: inset 1px 0 0 rgba(255,255,255,.1);
 
 
       &:hover{

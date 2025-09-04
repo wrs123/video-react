@@ -1,6 +1,6 @@
 import styles from './Index.module.scss'
 import { useState } from 'react'
-import { CheckCircleFilled, ThunderboltFilled, SettingFilled  } from '@ant-design/icons';
+import { CheckCircleOutlined, SettingFilled, DownloadOutlined  } from '@ant-design/icons';
 import classnames from 'classnames';
 import DownLoad from '../Download/Download'
 import Config from '../Config/Config'
@@ -13,14 +13,14 @@ const stepList = [
     {
         label: '下载中',
         key: 'download',
-        icon: <ThunderboltFilled style={{fontSize: '16px'}} />,
-        activeIcon: <ThunderboltFilled style={ {color: 'var(--color-primary);', fontSize: '16px'}}/>
+        icon: <DownloadOutlined style={{fontSize: '18px'}} />,
+        activeIcon: <DownloadOutlined style={ {color: 'var(--color-primary);', fontSize: '18px'}}/>
     },
     {
         label: '已完成',
         key: 'finish',
-        icon: <CheckCircleFilled style={{fontSize: '16px'}} />,
-        activeIcon: <CheckCircleFilled style={ {color: 'var(--color-primary)', fontSize: '16px'}}/>
+        icon: <CheckCircleOutlined style={{fontSize: '18px'}} />,
+        activeIcon: <CheckCircleOutlined style={ {color: 'var(--color-primary)', fontSize: '18px'}}/>
     },
 ]
 

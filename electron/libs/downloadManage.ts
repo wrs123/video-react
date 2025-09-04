@@ -3,6 +3,7 @@ import path from 'path'
 import {DownloadAnalysisType, DownloadTaskType} from "../../types.ts";
 import {DownloadStatus} from "../../enums.ts";
 import {updateDownloadStatus} from "../models/downloadModel.ts";
+import moment from 'moment'
 
 
 function DownloadFile(downloadObj : DownloadAnalysisType, savePath: string, downloadTask:DownloadTaskType){
@@ -34,7 +35,6 @@ function DownloadFile(downloadObj : DownloadAnalysisType, savePath: string, down
         const filePath = path.join(savePath, downloadObj.fileName+downloadObj.suffix)
         item.setSavePath(filePath)
 
-        console.warn(JSON.stringify(item))
         item.on('updated', (_, state) => {
             const currentBytes = item.getReceivedBytes(); // 当前已下载字节数
             const currentTime = Date.now();              // 当前时间
@@ -67,14 +67,15 @@ function DownloadFile(downloadObj : DownloadAnalysisType, savePath: string, down
             win.destroy()
 
             if (state === 'completed') {
-                console.log('下载完成:', filePath, downloadTask)
+                console.log('download finish:', filePath, downloadTask)
 
                 downloadTask.status = DownloadStatus.FINISH
                 downloadTask.TotalBytes = item.getTotalBytes()
                 downloadTask.receivedBytes = item.getReceivedBytes()
+                downloadTask.finishTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
                 updateDownloadStatus(downloadTask)
             } else {
-                console.log('下载失败:', state)
+                console.log('download fail:', state)
 
                 downloadTask.status = DownloadStatus.ERROR
                 updateDownloadStatus(downloadTask)

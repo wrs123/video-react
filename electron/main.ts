@@ -95,6 +95,7 @@ app.whenReady().then(async () => {
   //全局注册窗口
   global.win = win
   global.downloadStack = []
+  global.taskStack = {}
 
 
 })

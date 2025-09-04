@@ -20,7 +20,7 @@ const conDb = () => {
     const db = require('better-sqlite3')(DB_PATH, {})
     db.pragma('journal_mode = WAL')
     return db
-  } catch (e) {
+  } catch (e : any) {
     console.warn('==error==', e.message)
     return e
   }

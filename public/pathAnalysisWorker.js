@@ -1,42 +1,42 @@
 // import puppeteer from "puppeteer";
-import {DownloadAnalysisType} from "../../types.ts";
-import {DownloadFileType} from "../../enums.ts";
-import ytdl from "@distube/ytdl-core"
+
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
+const { parentPort, workerData } = require("node:worker_threads");
 const { connect } = require("puppeteer-real-browser");
+import ytdl from "@distube/ytdl-core"
 
-
-
-const pathMap: any = {
+const _pathMap = {
     "www.91porn.com": _91Pron,
     "www.youtube.com": _youtube
 }
 
-export async function PathAnalysis(path: string){
+async function PathAnalysisWorker(path){
     console.warn(path)
     if(!path){
         return ''
     }
 
     const url = new URL(path)
-    const res: DownloadAnalysisType = await pathMap[url.hostname](path)
+    const res = await _pathMap[url.hostname](path)
 
     if(res.analysisUrl){
-        console.log('####地址解析完成：'+ res.analysisUrl)
+        parentPort.postMessage({ type: "done", data: res });
+    }else{
+        parentPort.postMessage({ type: "error", message: e.message });
     }
     return res
 }
 
 
 
-async function _youtube(path: string){
-    const res: DownloadAnalysisType = {
+async function _youtube(path){
+    const res = {
         analysisUrl: '', //下载地址
         fileName: '', //文件名称
         suffix: '.mp4', //文件后缀
-        fileType: DownloadFileType.MP4
+        fileType: 'MP4'
     }
 
     try{
@@ -63,12 +63,12 @@ async function _youtube(path: string){
 }
 
 
-async function _91Pron(path:string){
-    const res: DownloadAnalysisType = {
+async function _91Pron(path){
+    const res = {
         analysisUrl: '', //下载地址
         fileName: '', //文件名称
         suffix: '.mp4', //文件后缀
-        fileType: DownloadFileType.MP4,
+        fileType: "MP4",
         cover: ''
     }
 
@@ -91,11 +91,11 @@ async function _91Pron(path:string){
         });
 
         await page.goto(path, { waitUntil: ["domcontentloaded"] });
-        const selector: string = "#player_one_html5_api"
+        const selector = "#player_one_html5_api"
         await page.waitForSelector(selector);
-        const _videoElment:any = await page.$(selector+" source")
-        const _coverElment:any = await page.$("#player_one_html5_api")
-        const _title: string = await page.title();
+        const _videoElment = await page.$(selector+" source")
+        const _coverElment = await page.$("#player_one_html5_api")
+        const _title = await page.title();
         if(_title) res.fileName =  _title.replace(" Chinese homemade video", "")
         if(_videoElment){
 
@@ -104,12 +104,22 @@ async function _91Pron(path:string){
             res.cover = await _cover.jsonValue()
             res.analysisUrl = await _link.jsonValue();
 
-            console.warn(res.cover, res.analysisUrl)
+            console.warn('下载地址解析完成', res.analysisUrl)
         }
 
         await browser.close();
+
         return res
     }catch(e){
-        console.log(e)
+        return {}
+
     }
 }
+
+try{
+    const { path } = workerData;
+    await PathAnalysisWorker(path)
+}catch(err){
+    parentPort.postMessage({ type: "error", message: err.message });
+}
+
