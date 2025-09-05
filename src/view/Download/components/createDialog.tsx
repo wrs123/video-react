@@ -22,7 +22,7 @@ function CreateDialog ({ onSubmit }){
 
     useEffect(() => {
         formData.setFieldsValue({
-            path: "C:\\Users\\ofg\\Downloads",
+            path: window['sysConfig'].downloadUrl,
         })
     }, [])
 

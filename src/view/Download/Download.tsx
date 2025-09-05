@@ -11,6 +11,8 @@ import {DownloadTaskType } from "../../../types.ts";
 import { DownloadStatus } from "../../../enums.ts";
 import {If, Else, Then} from 'react-if';
 import CreateDialog from "./components/createDialog"
+import QueueAnim from 'rc-queue-anim';
+
 
 import DownloadItem from "./components/DownloadItem.tsx";
 import API from "../../request/api.ts";
@@ -108,18 +110,17 @@ function Download(props: any) {
                 <div className={styles.downloadList} ref={listRef}>
                     <If condition={downloadList.length != 0}>
                         <Then>
-                            <List>
-                                <VirtualList
-                                    data={ downloadList }
-                                    height={ listHeight }
-                                    itemKey="email"
-                                >
+                            <VirtualList
+                                data={ downloadList }
+                                height={ listHeight }
+                                itemKey="id"
+                            >
 
-                                    {
-                                        (item, index) => (<MemoDownloadItem key={item.id} item={item} status={props.status} commandCommon={commandCommon}/>)
-                                    }
-                                </VirtualList>
-                            </List>
+                                {
+                                    (item) => <MemoDownloadItem key={item.id} item={item} status={props.status} commandCommon={commandCommon}/>
+                                }
+                            </VirtualList>
+
                         </Then>
                         <Else>
                             <Empty style={{marginTop: '50px'}}/>
