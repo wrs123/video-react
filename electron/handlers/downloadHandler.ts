@@ -21,7 +21,6 @@ export const DownloadHandler = () => {
     })
 
     ipcMain.handle(`${DOMAIN}:getVideoUrl`, async (_) => {
-
         return "ok"
     })
 

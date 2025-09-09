@@ -1,12 +1,13 @@
 import styles from './DownloadItem.module.scss'
-import {DownloadTaskType} from "../../../../types.ts";
-import {DownloadStatus, ResultStatus} from "../../../../enums.ts";
-import {message, Modal, Tooltip} from "antd";
-import {CaretRightOutlined, CloseOutlined, ReloadOutlined, LinkOutlined, DeleteOutlined, FolderOpenOutlined, PauseOutlined} from '@ant-design/icons';
-import {Else, If, Then} from 'react-if';
-import {fileSizeFormat, percentParse} from '../../../utils/tools.ts'
+import { DownloadTaskType} from "../../../../types.ts";
+import { DownloadStatus, ResultStatus} from "../../../../enums.ts";
+import { message, Modal, Tooltip, Dropdown, Space } from "antd";
+import { CaretRightOutlined, CloseOutlined, FileTextFilled, HddFilled, ReloadOutlined, LinkOutlined, DeleteOutlined, FolderOpenOutlined, PauseOutlined} from '@ant-design/icons';
+import { Else, If, Then} from 'react-if';
+import { fileSizeFormat, percentParse} from '../../../utils/tools.ts'
 import API from "../../../request/api.ts";
-import {useEffect, useState} from 'react';
+import { useEffect, useState} from 'react';
+import type { MenuProps } from 'antd';
 
 
 interface DownloadItemProps {
@@ -47,7 +48,19 @@ function DownloadItem(props: DownloadItemProps) {
     const [modal, confrimContextHolder] = Modal.useModal();
     const [messageApi, messageContextHolder] = message.useMessage();
     const [taskItem , setTaskItem] = useState<DownloadTaskType>()
+    const copyLinkItems: MenuProps['items'] = [
+        {
+            label: '复制原地址',
+            key: 'originUrl',
+            icon: <HddFilled />,
+        },
+        {
+            label: '复制解析地址',
+            key: 'analysisUrl',
+            icon: <FileTextFilled />
 
+        }
+    ]
 
     const openFolder = async (path: string) => {
         const res = await API.openFolderPath({path: path})
@@ -58,6 +71,11 @@ function DownloadItem(props: DownloadItemProps) {
                 content: res.message,
             });
         }
+    }
+
+    const copyLink: MenuProps['onClick'] = async (key: string, item: DownloadTaskType) => {
+        console.warn(key, item)
+        copyToClipBoard(item[key])
     }
 
     const copyToClipBoard = (url: string) => {
@@ -166,6 +184,18 @@ function DownloadItem(props: DownloadItemProps) {
                                     <div className={styles.actionButton} onClick={() => openFolder(taskItem?.savePath)}>
                                         <FolderOpenOutlined />
                                     </div>
+                                </Tooltip>
+                                <Tooltip title="复制链接">
+                                    <Dropdown menu={{ items: copyLinkItems, onClick: (e) => copyLink(e.key, taskItem) }} trigger={['click']}>
+                                        <Space>
+                                            <div className={styles.actionButton} >
+                                                <LinkOutlined />
+                                            </div>
+                                        </Space>
+                                    </Dropdown>
+                                    {/*<div className={styles.actionButton} onClick={() => copyLink(taskItem)}>*/}
+                                    {/*    <LinkOutlined />*/}
+                                    {/*</div>*/}
                                 </Tooltip>
                                 <Tooltip title="删除">
                                     <div className={`${styles.actionButton} ${styles.danger}`} onClick={() => deleteTask(taskItem, true)}>

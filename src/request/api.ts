@@ -31,7 +31,7 @@ const API = {
         return API.request('download:createTask', param)
     },
     /**
-     * 修改下载任务
+     * 下载任务通用操作
      * @param param
      */
     editTask : (param: any) => {
