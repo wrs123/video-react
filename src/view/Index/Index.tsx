@@ -78,20 +78,11 @@ function Index(){
                 </div>
             </div>
             <Modal
-                height="100%"
                 open={sysConfigVisible}
                 onCancel={() => setSysConfigVisible(false)}
                 destroyOnClose
-                styles={{
-                    mask: {
-                        backdropFilter: 'blur(20px) brightness(1)',
-                        backgroundColor: 'rgba(255, 255, 255, 0.8)'
-                    },
-                }}
-                style={{ top: 0, margin: 0, maxWidth: 'unset', padding: 0 }}
                 maskClosable={false}
                 className={styles.sysConfigDrawer}
-                width='100vw'
                 closable={false}
                 footer={null}
                 title={null}

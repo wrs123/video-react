@@ -24,7 +24,7 @@ async function PathAnalysisWorker(path){
     if(res.analysisUrl){
         parentPort.postMessage({ type: "done", data: res });
     }else{
-        parentPort.postMessage({ type: "error", message: e.message });
+        parentPort.postMessage({ type: "error", message: '解析失败' });
     }
     return res
 }

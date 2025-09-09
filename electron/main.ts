@@ -5,6 +5,7 @@ import path from 'node:path'
 import { InitHandler } from "./handlers";
 import {initDB} from "./db/init.ts";
 
+
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -87,6 +88,7 @@ app.whenReady().then(async () => {
   //初始化db实例并注册到全局
   global.db = initDB()
 
+
   //创建窗口
   createWindow()
   //注册全局事件监听
@@ -96,6 +98,7 @@ app.whenReady().then(async () => {
   global.win = win
   global.downloadStack = []
   global.taskStack = {}
+
 
 
 })

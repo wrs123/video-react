@@ -23,7 +23,7 @@ const _analysisWorker = (path: string, id: string) => {
 
         const analysisWorker = new Worker(resolve(publicDir(), 'pathAnalysisWorker.js'), {
             workerData: { path },
-            type: "module"
+
         });
         //线程入栈
         global.taskStack[id] = analysisWorker;
@@ -121,6 +121,19 @@ export const createTask = async (param: any) => {
             cover: ""
         }
 
+        //查询重复任务
+        const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
+
+        console.warn('相同任务', filterTask);
+        if((filterTask.length || []) > 0){
+            res.status= ResultStatus.ERROR
+            res.code = 202
+            res.message = "存在相同下载"
+            res.data = filterTask
+            return res
+        }
+
+
         //插入任务记录
         let query = []
         Object.keys(_data).forEach((key, val) => {
@@ -188,8 +201,6 @@ export const queryTask = async (param: any) => {
             .all(
                 'FINISH'
             )
-
-        console.warn(_res)
 
         res.data = _res
     }catch(error){

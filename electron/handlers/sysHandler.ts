@@ -1,11 +1,21 @@
 import { ipcMain  } from 'electron'
-import {getSysConfig} from "../models/sysModel.ts";
+import {getSysConfig, setSysConfig} from "../models/sysModel.ts";
 
 export const SysHandler = () => {
     const DOMAIN = "sys"
 
+    /**
+     * 获取系统设置
+     */
     ipcMain.handle(`${DOMAIN}:getSysConfig`, async () => {
         return getSysConfig()
+    })
+
+    /**
+     * 更新系统设置
+     */
+    ipcMain.handle(`${DOMAIN}:setSysConfig`, async (_, param) => {
+        return setSysConfig(param)
     })
 
     /** 接收渲染进程 操作窗口 的通知

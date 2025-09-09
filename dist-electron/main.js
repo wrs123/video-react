@@ -4127,8 +4127,7 @@ function updateDownloadStatus(downloadTask) {
 const _analysisWorker = (path2, id2) => {
   return new Promise((rev, reject) => {
     const analysisWorker = new Worker(resolve$5(publicDir(), "pathAnalysisWorker.js"), {
-      workerData: { path: path2 },
-      type: "module"
+      workerData: { path: path2 }
     });
     global.taskStack[id2] = analysisWorker;
     analysisWorker.on("message", (msg) => {
@@ -4208,6 +4207,15 @@ const createTask = async (param) => {
       fileType: DownloadFileType.NONE,
       cover: ""
     };
+    const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
+    console.warn("相同任务", filterTask);
+    if ((filterTask.length || []) > 0) {
+      res.status = ResultStatus.ERROR;
+      res.code = 202;
+      res.message = "存在相同下载";
+      res.data = filterTask;
+      return res;
+    }
     let query = [];
     Object.keys(_data).forEach((key, val) => {
       if (key !== "speed") {
@@ -4254,7 +4262,6 @@ const queryTask = async (param) => {
     const _res = await db.prepare(query).all(
       "FINISH"
     );
-    console.warn(_res);
     res.data = _res;
   } catch (error2) {
     console.warn(error2.message);
@@ -19290,18 +19297,18 @@ class Conf {
     const fileExtension = options.fileExtension ? `.${options.fileExtension}` : "";
     this.path = path$1.resolve(options.cwd, `${options.configName ?? "config"}${fileExtension}`);
     const fileStore = this.store;
-    const store = Object.assign(createPlainObject(), options.defaults, fileStore);
+    const store2 = Object.assign(createPlainObject(), options.defaults, fileStore);
     if (options.migrations) {
       if (!options.projectVersion) {
         throw new Error("Please specify the `projectVersion` option.");
       }
       this._migrate(options.migrations, options.projectVersion, options.beforeEachMigration);
     }
-    this._validate(store);
+    this._validate(store2);
     try {
-      assert.deepEqual(fileStore, store);
+      assert.deepEqual(fileStore, store2);
     } catch {
-      this.store = store;
+      this.store = store2;
     }
     if (options.watch) {
       this._watch();
@@ -19311,8 +19318,8 @@ class Conf {
     if (__privateGet(this, _options).accessPropertiesByDotNotation) {
       return this._get(key, defaultValue);
     }
-    const { store } = this;
-    return key in store ? store[key] : defaultValue;
+    const { store: store2 } = this;
+    return key in store2 ? store2[key] : defaultValue;
   }
   set(key, value) {
     if (typeof key !== "string" && typeof key !== "object") {
@@ -19324,13 +19331,13 @@ class Conf {
     if (this._containsReservedKey(key)) {
       throw new TypeError(`Please don't use the ${INTERNAL_KEY} key, as it's used to manage this module internal operations.`);
     }
-    const { store } = this;
+    const { store: store2 } = this;
     const set2 = (key2, value2) => {
       checkValueType(key2, value2);
       if (__privateGet(this, _options).accessPropertiesByDotNotation) {
-        setProperty(store, key2, value2);
+        setProperty(store2, key2, value2);
       } else {
-        store[key2] = value2;
+        store2[key2] = value2;
       }
     };
     if (typeof key === "object") {
@@ -19341,7 +19348,7 @@ class Conf {
     } else {
       set2(key, value);
     }
-    this.store = store;
+    this.store = store2;
   }
   has(key) {
     if (__privateGet(this, _options).accessPropertiesByDotNotation) {
@@ -19364,13 +19371,13 @@ class Conf {
     }
   }
   delete(key) {
-    const { store } = this;
+    const { store: store2 } = this;
     if (__privateGet(this, _options).accessPropertiesByDotNotation) {
-      deleteProperty(store, key);
+      deleteProperty(store2, key);
     } else {
-      delete store[key];
+      delete store2[key];
     }
-    this.store = store;
+    this.store = store2;
   }
   /**
       Delete all items.
@@ -19602,9 +19609,9 @@ class Conf {
     return getProperty(this.store, key, defaultValue);
   }
   _set(key, value) {
-    const { store } = this;
-    setProperty(store, key, value);
-    this.store = store;
+    const { store: store2 } = this;
+    setProperty(store2, key, value);
+    this.store = store2;
   }
 }
 _validator = new WeakMap();
@@ -19667,6 +19674,7 @@ class ElectronStore extends Conf {
     }
   }
 }
+const store = new ElectronStore();
 const getSysConfig = () => {
   const res = {
     code: 200,
@@ -19675,20 +19683,22 @@ const getSysConfig = () => {
     data: ""
   };
   try {
-    const store = new ElectronStore({
-      defaults: {
-        sysConfig: {
-          maxDownloadCount: 3,
-          downloadUrl: app$1.getPath("downloads"),
-          isLimitSpeed: false,
-          limitSpeed: 500,
-          useProxy: false,
-          proxyPortal: "http",
-          proxyHost: "",
-          proxyPort: ""
-        }
-      }
-    });
+    console.warn(store.has("sysConfig"));
+    if (!store.has("sysConfig")) {
+      store.set("sysConfig", {
+        maxDownloadCount: 3,
+        downloadUrl: app$1.getPath("downloads"),
+        isLimitSpeed: false,
+        limitSpeed: 500,
+        useProxy: false,
+        proxyPortal: "http",
+        proxyHost: "",
+        proxyPort: "",
+        themeMode: "auto",
+        language: "simpleChinese"
+      });
+    }
+    console.warn("getSys", store.get("sysConfig"));
     res.data = {
       ...store.get("sysConfig"),
       platform: process.platform
@@ -19697,7 +19707,25 @@ const getSysConfig = () => {
   } catch (error2) {
     res.status = ResultStatus.ERROR;
     res.message = "获取系统失败" + error2.message;
-    console.warn(error2.message);
+    console.warn("err", error2.message);
+  }
+  return res;
+};
+const setSysConfig = (param) => {
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "",
+    data: ""
+  };
+  try {
+    console.warn("获取", param);
+    store.set("sysConfig", param);
+    global.sysConfig = param;
+  } catch (error2) {
+    res.status = ResultStatus.ERROR;
+    res.message = "更新失败" + error2.message;
+    console.warn("err", error2.message);
   }
   return res;
 };
@@ -19705,6 +19733,9 @@ const SysHandler = () => {
   const DOMAIN = "sys";
   ipcMain$1.handle(`${DOMAIN}:getSysConfig`, async () => {
     return getSysConfig();
+  });
+  ipcMain$1.handle(`${DOMAIN}:setSysConfig`, async (_, param) => {
+    return setSysConfig(param);
   });
   ipcMain$1.handle(`${DOMAIN}:operationWindow`, function(_, param) {
     const { type: type2 } = param;

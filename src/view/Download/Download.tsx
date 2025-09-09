@@ -26,6 +26,7 @@ function Download(props: any) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const listRef = useRef(null);
     const [downloadList, setDownloadList] = useState<DownloadTaskType[]>([]);
+    const [modal, confrimContextHolder] = Modal.useModal();
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -36,6 +37,24 @@ function Download(props: any) {
         setIsModalOpen(false);
         setDownloadList(prevList => [_param, ...prevList]);
     };
+
+    const createError = async (param) => {
+        setIsModalOpen(false)
+
+        const confirmed = await modal.confirm({
+            title: `提示`,
+            okText: '重新下载',
+            cancelText: '查看任务',
+            centered: true,
+            content: "存在重复任务，是否继续？",
+        });
+
+        if(confirmed){
+            alert(1)
+        }else{
+
+        }
+    }
 
     const handleCancel = () => {
         setIsModalOpen(false);
@@ -92,6 +111,7 @@ function Download(props: any) {
 
     return (
         <>
+            {confrimContextHolder}
             <div className={styles.downloadContainer}>
                 <div className={styles.containerTop}>
                     <div className={styles.leftTitle}>
@@ -136,7 +156,7 @@ function Download(props: any) {
                    destroyOnClose
                    maskClosable={false}
             >
-                <CreateDialog onSubmit={createSuccess}/>
+                <CreateDialog onSubmit={createSuccess} onError={(param) => {createError(param)}}/>
             </Modal>
         </>
     )

@@ -1,4 +1,4 @@
-import { Space, Input, Button, Divider, Form, message } from "antd";
+import { Space, Input, Button, Divider, Form, message, Modal } from "antd";
 import { useState, useEffect } from 'react'
 import {
     FolderOpenOutlined,
@@ -14,10 +14,11 @@ type FieldType = {
 };
 
 
-function CreateDialog ({ onSubmit }){
+function CreateDialog ({ onSubmit, onError }){
     const [formData] = Form.useForm<FieldType>()
     const [posting, setPosting ] = useState<boolean>(false)
     const [messageApi, contextHolder] = message.useMessage();
+
 
 
     useEffect(() => {
@@ -29,17 +30,24 @@ function CreateDialog ({ onSubmit }){
     const onFinish = async (values: any) => {
         setPosting(true)
         const res = await API.createTask(values)
+        console.warn(res)
         if(res.status == ResultStatus.OK){
             onSubmit(res.data)
-            // messageApi.open({
-            //     type: 'success',
-            //     content: '创建成功',
-            // });
+            messageApi.open({
+                type: 'success',
+                content: '创建成功',
+            });
         }else{
-            // messageApi.open({
-            //     type: 'warning',
-            //     content: '创建失败',
-            // });
+
+            if(res.code === 202){
+                setPosting(false)
+                onError()
+            }else{
+                messageApi.open({
+                    type: 'warning',
+                    content: `创建失败：${res.message}`,
+                });
+            }
         }
         setPosting(false)
     }
@@ -62,6 +70,7 @@ function CreateDialog ({ onSubmit }){
             autoComplete="off"
             initialValues={{}}
         >
+            {contextHolder}
             <Space direction="vertical"  style={{ display: 'flex' }}>
                 <Form.Item<FieldType>
                     name="urls"

@@ -59,6 +59,13 @@ const API = {
         return API.request('sys:getSysConfig', param)
     },
     /**
+     * 更新软件配置
+     * @param param
+     */
+    setSysConfig : (param: any = {}) => {
+        return API.request('sys:setSysConfig', param)
+    },
+    /**
      * 窗口操作
      * @param param
      */

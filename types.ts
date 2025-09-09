@@ -7,8 +7,8 @@ interface DownloadTaskType {
     TotalBytes: number, //视频总字节数
     receivedBytes: number, //已下载的字节数
     savePath: string, //下载的本地地址
-    createTime: number,
-    finishTime: number,
+    createTime: string,
+    finishTime: string,
     speed: number,
     name: string, //文件名
     analysisUrl: string, //解析后的下载地址

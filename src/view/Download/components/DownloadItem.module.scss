@@ -97,7 +97,7 @@
     }
 
     .title{
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 500;
       line-height: 1;
       display: flex;
@@ -121,7 +121,8 @@
           padding-left: 12px;
           font-size: 14px;
           border-left: 1px solid #666;
-          margin-left: 12px
+          margin-left: 12px;
+          width: 60px;
         }
 
         *{
