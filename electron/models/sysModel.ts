@@ -21,7 +21,7 @@ export const getSysConfig = () => {
         if(!store.has('sysConfig')){
             store.set('sysConfig', {
                 maxDownloadCount: 3,
-                downloadUrl: app.getPath('downloads'),
+                savePath: app.getPath('downloads'),
                 isLimitSpeed: false,
                 limitSpeed: 500,
                 useProxy: false,

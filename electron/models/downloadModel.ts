@@ -6,6 +6,7 @@ import moment from 'moment'
 import { Worker } from "node:worker_threads";
 import { resolve, dirname } from 'path';
 import {publicDir} from "../utils";
+import { spawn } from "child_process"
 
 
 export function updateDownloadStatus(downloadTask:DownloadTaskType){
@@ -124,7 +125,6 @@ export const createTask = async (param: any) => {
         //查询重复任务
         const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
 
-        console.warn('相同任务', filterTask);
         if((filterTask.length || []) > 0){
             res.status= ResultStatus.ERROR
             res.code = 202
@@ -143,6 +143,25 @@ export const createTask = async (param: any) => {
         })
         await db.prepare(`INSERT INTO tasks (${query.join(',')}) VALUES (@${query.join(',@')})`).run(_data)
 
+        //通用解析
+        const ytdlp = spawn(resolve(publicDir(), 'yt-dlp/yt-dlp_macos'), ["--cookies", `${resolve(publicDir(), 'yt-dlp/cookies.txt')}`, "chrome", "-o", `${resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s') }`, param.urls]);
+
+        ytdlp.stdout.on("data", (data) => {
+            console.log(`stdout: ${data}`);
+        });
+
+        ytdlp.stderr.on("data", (data) => {
+            console.error(`stderr: ${data}`);
+        });
+
+        ytdlp.on("close", (code) => {
+            console.log(`下载进程退出: ${code}`);
+        });
+
+
+        return res
+
+        // 通用解析外下载方法
         _analysisWorker(param.urls, param.id).then((analysisObj: any) => {
             if(analysisObj.analysisUrl){
                 _data.name = analysisObj.fileName
@@ -180,6 +199,7 @@ export const createTask = async (param: any) => {
 
 export const queryTask = async (param: any) => {
     const db = global.db
+    const { page, pageSize } = param
 
     const res: BaseResult = {
         code: 200,
@@ -189,20 +209,41 @@ export const queryTask = async (param: any) => {
     }
 
     try{
-        let query = ''
+        console.warn(param)
+        let query = '',
+            totalQuery = ''
+        const querys = (val) => {
+            return `SELECT * FROM tasks WHERE status ${val} ? ORDER BY createTime DESC `
+        }
+        const totalQuerys = (val) => {
+            return `SELECT COUNT(*) as total FROM tasks WHERE status ${val} ?`
+        }
+
         if(param.status === 1){
-            query = 'SELECT * FROM tasks WHERE status == ? ORDER BY createTime DESC'
+            query = querys('==')
+            totalQuery = totalQuerys('==')
         }else{
-            query = 'SELECT * FROM tasks WHERE status != ? ORDER BY createTime DESC'
+            query = querys('!=')
+            totalQuery = totalQuerys('!=')
         }
 
         const _res = await db
             .prepare(query)
             .all(
-                'FINISH'
+                'FINISH',
             )
 
-        res.data = _res
+        const stmt = db.prepare(totalQuery).all(
+            'FINISH'
+        );
+        res.data = {
+            list: _res,
+            page: {
+                page,
+                pageSize,
+                total: stmt[0].total
+            }
+        }
     }catch(error){
         console.warn(error.message)
         res.status= ResultStatus.ERROR

@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons';
 import React, {useState, useEffect, useRef} from 'react'
 import {DownloadTaskType } from "../../../types.ts";
-import { DownloadStatus } from "../../../enums.ts";
+import {DownloadStatus, ResultStatus} from "../../../enums.ts";
 import {If, Else, Then} from 'react-if';
 import CreateDialog from "./components/createDialog"
 import QueueAnim from 'rc-queue-anim';
@@ -27,6 +27,11 @@ function Download(props: any) {
     const listRef = useRef(null);
     const [downloadList, setDownloadList] = useState<DownloadTaskType[]>([]);
     const [modal, confrimContextHolder] = Modal.useModal();
+    const [total, setTotal] = useState(0);
+    let page = {
+        page: 1,
+        pageSize: 15,
+    }
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -82,14 +87,43 @@ function Download(props: any) {
                 ));
                 break;
             case "DELETE":
-                setDownloadList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
+                const res = await API.deleteTask({id: item?.id})
+                console.warn(res)
+                if(res.status === ResultStatus.OK){
+                    setDownloadList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
+                }
                 break;
         }
     }
 
+    // const onScroll  = async (e: React.UIEvent<HTMLElement>) => {
+    //     if (
+    //         e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
+    //         listHeight
+    //     ) {
+    //         if( page.page * page.pageSize < total ){
+    //            page.page += 1
+    //             alert(JSON.stringify(page))
+    //             console.warn(page)
+    //             getTaskList()
+    //         }
+    //
+    //     }
+    // }
+
     const getTaskList = async () => {
-        const res= await API.getTaskList({status: props.status})
-        setDownloadList(res.data || [])
+        const _param = {
+            status: props.status
+        }
+
+        const res = await API.getTaskList(_param)
+
+        setDownloadList([
+            ...downloadList,
+            ...res.data.list || []
+        ])
+        // setDownloadList(res.data.list || [])
+        setTotal(res.data.page.total)
     }
     const handleResize = () => {
         if (listRef.current) {
@@ -116,7 +150,7 @@ function Download(props: any) {
                 <div className={styles.containerTop}>
                     <div className={styles.leftTitle}>
                         <h1 >{props.status == 1 ? '已完成' : '下载中'}</h1>
-                        <div className={styles.downloadCount}>{downloadList.length}</div>
+                        <div className={styles.downloadCount}>{total}</div>
                     </div>
                     <div>
                         <Space>

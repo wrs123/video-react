@@ -9,6 +9,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         theme={{
             token: {
                 colorPrimary: '#4d53e8',
+                borderRadius: 6,
+                borderRadiusSM: 6,
+                controlHeightSM: 28,
+                contentFontSizeSM: 13
             },
         }}
     >

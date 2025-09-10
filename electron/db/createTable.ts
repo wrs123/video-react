@@ -22,15 +22,15 @@ const createTables = async (db : any) => {
     finishTime datetime
   )`)
 
+
   /**
-   * 系统设置表
+   * 网站cookie表
    */
-  db.exec(`create table if not exists config (
+  db.exec(`create table if not exists cookies (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    proxyHost varchar(64),
-    proxyPort varchar(32),
-    useProxy INTEGER,
-    savePath varchar(500) NOT NULL
+    domain varchar(64) NOT NULL,
+    cookies TEXT NOT NULL,
+    updateTime datetime
   )`)
 
 }

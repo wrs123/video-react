@@ -1,10 +1,13 @@
 import styles from './Config.module.scss'
-import { CloseOutlined, RocketOutlined, RocketFilled, AppstoreOutlined, AppstoreFilled, CloudServerOutlined, FolderOpenOutlined } from '@ant-design/icons';
-import { Button, Space, Form, Input, Switch, Select, Flex } from "antd";
+import { CloseOutlined, RocketOutlined, RocketFilled, AppstoreOutlined, CloudDownloadOutlined,
+    FolderOutlined, AppstoreFilled, CloudServerOutlined, FolderOpenOutlined,
+    SettingFilled} from '@ant-design/icons';
+import { Button, Space, Form, Input, Switch, Select, Flex, Modal } from "antd";
 import { useState } from 'react'
 import {If, Then} from 'react-if'
 import API from "../../request/api.ts";
 import {ResultStatus} from "../../../enums.ts";
+import CookieList from "./components/CookieList.tsx";
 
 
 interface ConfigProps {
@@ -16,7 +19,7 @@ function Config({onClose}: ConfigProps) {
 
     type FieldType = {
         maxDownloadCount: number,
-        downloadUrl?: string;
+        savePath?: string;
         isLimitSpeed?: boolean;
         limitSpeed?: number;
         useProxy?: string;
@@ -30,6 +33,7 @@ function Config({onClose}: ConfigProps) {
     const [formData] = Form.useForm<FieldType>()
     const defaultValue = window['sysConfig']
     const isLimitSpeed = Form.useWatch('isLimitSpeed', formData);
+    const [cookieDialogVisible, setCookieDialogVisible] = useState<boolean>(false);
     const useProxy = Form.useWatch('useProxy', formData);
     const [activeGroup, setActiveGroup] = useState('common');
     const configGroup : any[] = [
@@ -107,6 +111,7 @@ function Config({onClose}: ConfigProps) {
                                                 </div>
                                             </div>
                                         </div>
+                                        <div className={styles.configTitle}>个性化</div>
                                         <div className={styles.configBlock}>
                                             <div className={styles.configItem}>
                                                 <div className={styles.labelPart}>
@@ -154,6 +159,47 @@ function Config({onClose}: ConfigProps) {
                                 </If>
                                 <If condition={activeGroup === 'download'}>
                                     <Then>
+                                        <div className={styles.configTitle}>解析</div>
+                                        <div className={styles.configBlock}>
+                                            <div className={styles.configItem}>
+                                                <div className={styles.labelPart}>
+                                                    yt-dlp
+                                                </div>
+                                                <div className={styles.contentPart}>
+                                                    <Space.Compact>
+                                                        <Form.Item<FieldType>
+                                                            name="maxDownloadCount"
+
+                                                        >
+                                                            <Button type="link" block icon={<CloudDownloadOutlined />} />
+                                                        </Form.Item>
+                                                        <Form.Item<FieldType>
+                                                            name="maxDownloadCount"
+                                                            noStyle
+                                                        >
+                                                            <Button type="link" block icon={<FolderOutlined />} />
+                                                        </Form.Item>
+                                                    </Space.Compact>
+
+                                                </div>
+                                            </div>
+                                            <div className={styles.configItem}>
+                                                <div className={styles.labelPart}>
+                                                    cookie管理
+                                                </div>
+                                                <div className={styles.contentPart}>
+                                                    <Form.Item<FieldType>
+                                                        name="maxDownloadCount"
+
+                                                    >
+                                                        <Button type="primary" size={'small'} icon={<SettingFilled />} onClick={() => {
+                                                            setCookieDialogVisible(true)
+                                                        }}>管理</Button>
+                                                    </Form.Item>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={styles.configTitle}>下载</div>
                                         <div className={styles.configBlock}>
                                                 <div className={styles.configItem}>
                                                     <div className={styles.labelPart}>
@@ -215,15 +261,23 @@ function Config({onClose}: ConfigProps) {
                                                     <div className={styles.contentPart}>
                                                         <Space.Compact >
                                                             <Form.Item<FieldType>
-                                                                name="downloadUrl"
+                                                                name="savePath"
+                                                                noStyle
                                                             >
                                                                 <Input disabled />
                                                             </Form.Item>
-                                                            <Button icon={<FolderOpenOutlined />}></Button>
+                                                            <Form.Item<FieldType>
+                                                                name="savePath"
+                                                                noStyle
+                                                            >
+                                                                <Button icon={<FolderOpenOutlined />}></Button>
+                                                            </Form.Item>
+
                                                         </Space.Compact>
                                                     </div>
                                                 </div>
                                             </div>
+
                                     </Then>
                                 </If>
                                 <If condition={activeGroup === 'proxy'}>
@@ -272,7 +326,7 @@ function Config({onClose}: ConfigProps) {
                                                                 <Form.Item<FieldType>
                                                                     name="proxyHost"
                                                                 >
-                                                                    <Input placeholder="代理域名" disabled={!useProxy} style={{ width: '200px' }} />
+                                                                    <Input placeholder="代理域名" disabled={!useProxy} style={{ width: '100px' }} />
                                                                 </Form.Item>
                                                             </div>
                                                         </div>
@@ -301,6 +355,17 @@ function Config({onClose}: ConfigProps) {
                     </Button>
                 </div>
             </div>
+            <Modal
+                title="Cookie 管理"
+                footer={ null }
+                open={cookieDialogVisible}
+                classNames={{
+                    content: styles.cookieDialog
+                }}
+                onCancel={ () => setCookieDialogVisible(false) }
+            >
+                <CookieList onChange={setSysConfig} />
+            </Modal>
         </div>
     )
 }

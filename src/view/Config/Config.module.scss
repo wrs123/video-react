@@ -7,6 +7,9 @@
 
   $formGap: 14px;
 
+
+
+
   .configContent{
     display: flex;
     height: 100%;
@@ -25,7 +28,8 @@
         font-size: 18px;
         font-weight: bold;
         color: #333333;
-        padding: 35px 12px 28px 12px;
+        padding: 35px 12px 14px 12px;
+        border-right: 1px solid rgba(16, 24, 40, 0.0392156863);
       }
 
       .configGroupList{
@@ -82,11 +86,17 @@
       .rightMainContent{
         flex: 1;
         height: 100%;
+        overflow-y: hidden;
+        display: flex;
+        flex-direction: column;
         //margin-right: 28px;
 
         .bottomContent{
           padding: 0 18px;
           //width: 100%;
+          flex: 1;
+          overflow-y: auto;
+          padding-top: 14px;
 
           :global{
             .ant-form-item{
@@ -94,6 +104,11 @@
             }
           }
 
+          .configTitle{
+            color: var(--color-text-second);
+            padding: 0 12px 8px 6px;
+
+          }
 
           .configBlock{
             background-color: #f9fafb;
@@ -152,11 +167,25 @@
       //}
 
       .title{
-        padding: 28px 12px 28px 18px;
+        padding: 28px 12px 14px 18px;
         font-size: 20px;
         font-weight: bold;
         color: #333333;
+        border-bottom: 1px solid rgba(16, 24, 40, 0.0392156863);
       }
     }
   }
 }
+
+.cookieDialog{
+  //padding: 0!important;
+  overflow: hidden;
+
+  //:global{
+  //  .ant-modal-header{
+  //    padding: 20px 24px;
+  //  }
+  //}
+}
+
+

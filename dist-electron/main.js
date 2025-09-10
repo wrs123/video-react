@@ -15,6 +15,7 @@ import path$1 from "node:path";
 import path, { join, resolve as resolve$5 } from "path";
 import crypto from "crypto";
 import { Worker } from "node:worker_threads";
+import { spawn } from "child_process";
 import fs from "fs";
 import process$1 from "node:process";
 import { promisify, isDeepStrictEqual } from "node:util";
@@ -4208,7 +4209,6 @@ const createTask = async (param) => {
       cover: ""
     };
     const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
-    console.warn("相同任务", filterTask);
     if ((filterTask.length || []) > 0) {
       res.status = ResultStatus.ERROR;
       res.code = 202;
@@ -4223,6 +4223,17 @@ const createTask = async (param) => {
       }
     });
     await db.prepare(`INSERT INTO tasks (${query.join(",")}) VALUES (@${query.join(",@")})`).run(_data);
+    const ytdlp = spawn(resolve$5(publicDir(), "yt-dlp/yt-dlp_macos"), ["--cookies", `${resolve$5(publicDir(), "yt-dlp/cookies.txt")}`, "chrome", "-o", `${resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s")}`, param.urls]);
+    ytdlp.stdout.on("data", (data) => {
+      console.log(`stdout: ${data}`);
+    });
+    ytdlp.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+    });
+    ytdlp.on("close", (code2) => {
+      console.log(`下载进程退出: ${code2}`);
+    });
+    return res;
     _analysisWorker(param.urls, param.id).then((analysisObj) => {
       if (analysisObj.analysisUrl) {
         _data.name = analysisObj.fileName;
@@ -4246,6 +4257,7 @@ const createTask = async (param) => {
 };
 const queryTask = async (param) => {
   const db = global.db;
+  const { page, pageSize } = param;
   const res = {
     code: 200,
     status: ResultStatus.OK,
@@ -4253,16 +4265,35 @@ const queryTask = async (param) => {
     data: ""
   };
   try {
-    let query = "";
+    console.warn(param);
+    let query = "", totalQuery = "";
+    const querys = (val) => {
+      return `SELECT * FROM tasks WHERE status ${val} ? ORDER BY createTime DESC `;
+    };
+    const totalQuerys = (val) => {
+      return `SELECT COUNT(*) as total FROM tasks WHERE status ${val} ?`;
+    };
     if (param.status === 1) {
-      query = "SELECT * FROM tasks WHERE status == ? ORDER BY createTime DESC";
+      query = querys("==");
+      totalQuery = totalQuerys("==");
     } else {
-      query = "SELECT * FROM tasks WHERE status != ? ORDER BY createTime DESC";
+      query = querys("!=");
+      totalQuery = totalQuerys("!=");
     }
     const _res = await db.prepare(query).all(
       "FINISH"
     );
-    res.data = _res;
+    const stmt = db.prepare(totalQuery).all(
+      "FINISH"
+    );
+    res.data = {
+      list: _res,
+      page: {
+        page,
+        pageSize,
+        total: stmt[0].total
+      }
+    };
   } catch (error2) {
     console.warn(error2.message);
     res.status = ResultStatus.ERROR;
@@ -7356,9 +7387,9 @@ function commentKeyword$1({ gen, schemaEnv, schema, errSchemaPath, opts }) {
   }
 }
 function returnResults$1(it) {
-  const { gen, schemaEnv, validateName, ValidationError: ValidationError3, opts } = it;
+  const { gen, schemaEnv, validateName, ValidationError: ValidationError2, opts } = it;
   if (schemaEnv.$async) {
-    gen.if((0, codegen_1$X._)`${names_1$d.default.errors} === 0`, () => gen.return(names_1$d.default.data), () => gen.throw((0, codegen_1$X._)`new ${ValidationError3}(${names_1$d.default.vErrors})`));
+    gen.if((0, codegen_1$X._)`${names_1$d.default.errors} === 0`, () => gen.return(names_1$d.default.data), () => gen.throw((0, codegen_1$X._)`new ${ValidationError2}(${names_1$d.default.vErrors})`));
   } else {
     gen.assign((0, codegen_1$X._)`${validateName}.errors`, names_1$d.default.vErrors);
     if (opts.unevaluated)
@@ -7702,15 +7733,21 @@ function getData$1($data, { dataLevel, dataNames, dataPathArr }) {
 }
 validate$1.getData = getData$1;
 var validation_error$1 = {};
-Object.defineProperty(validation_error$1, "__esModule", { value: true });
-let ValidationError$1 = class ValidationError extends Error {
-  constructor(errors2) {
-    super("validation failed");
-    this.errors = errors2;
-    this.ajv = this.validation = true;
+var hasRequiredValidation_error;
+function requireValidation_error() {
+  if (hasRequiredValidation_error) return validation_error$1;
+  hasRequiredValidation_error = 1;
+  Object.defineProperty(validation_error$1, "__esModule", { value: true });
+  class ValidationError2 extends Error {
+    constructor(errors2) {
+      super("validation failed");
+      this.errors = errors2;
+      this.ajv = this.validation = true;
+    }
   }
-};
-validation_error$1.default = ValidationError$1;
+  validation_error$1.default = ValidationError2;
+  return validation_error$1;
+}
 var ref_error$1 = {};
 Object.defineProperty(ref_error$1, "__esModule", { value: true });
 const resolve_1$4 = resolve$4;
@@ -7726,7 +7763,7 @@ var compile$1 = {};
 Object.defineProperty(compile$1, "__esModule", { value: true });
 compile$1.resolveSchema = compile$1.getCompilingSchema = compile$1.resolveRef = compile$1.compileSchema = compile$1.SchemaEnv = void 0;
 const codegen_1$W = codegen$1;
-const validation_error_1$1 = validation_error$1;
+const validation_error_1$1 = requireValidation_error();
 const names_1$c = names$3;
 const resolve_1$3 = resolve$4;
 const util_1$P = util$1;
@@ -8682,7 +8719,7 @@ uri$3.default = uri$2;
   Object.defineProperty(exports, "CodeGen", { enumerable: true, get: function() {
     return codegen_12.CodeGen;
   } });
-  const validation_error_12 = validation_error$1;
+  const validation_error_12 = requireValidation_error();
   const ref_error_12 = ref_error$1;
   const rules_12 = rules$1;
   const compile_12 = compile$1;
@@ -11691,7 +11728,7 @@ jsonSchema202012.default = addMetaSchema2020;
   Object.defineProperty(exports, "CodeGen", { enumerable: true, get: function() {
     return codegen_12.CodeGen;
   } });
-  var validation_error_12 = validation_error$1;
+  var validation_error_12 = requireValidation_error();
   Object.defineProperty(exports, "ValidationError", { enumerable: true, get: function() {
     return validation_error_12.default;
   } });
@@ -14224,9 +14261,9 @@ function commentKeyword({ gen, schemaEnv, schema, errSchemaPath, opts }) {
   }
 }
 function returnResults(it) {
-  const { gen, schemaEnv, validateName, ValidationError: ValidationError3, opts } = it;
+  const { gen, schemaEnv, validateName, ValidationError: ValidationError2, opts } = it;
   if (schemaEnv.$async) {
-    gen.if((0, codegen_1$n._)`${names_1$3.default.errors} === 0`, () => gen.return(names_1$3.default.data), () => gen.throw((0, codegen_1$n._)`new ${ValidationError3}(${names_1$3.default.vErrors})`));
+    gen.if((0, codegen_1$n._)`${names_1$3.default.errors} === 0`, () => gen.return(names_1$3.default.data), () => gen.throw((0, codegen_1$n._)`new ${ValidationError2}(${names_1$3.default.vErrors})`));
   } else {
     gen.assign((0, codegen_1$n._)`${validateName}.errors`, names_1$3.default.vErrors);
     if (opts.unevaluated)
@@ -14571,14 +14608,14 @@ function getData($data, { dataLevel, dataNames, dataPathArr }) {
 validate.getData = getData;
 var validation_error = {};
 Object.defineProperty(validation_error, "__esModule", { value: true });
-class ValidationError2 extends Error {
+class ValidationError extends Error {
   constructor(errors2) {
     super("validation failed");
     this.errors = errors2;
     this.ajv = this.validation = true;
   }
 }
-validation_error.default = ValidationError2;
+validation_error.default = ValidationError;
 var ref_error = {};
 Object.defineProperty(ref_error, "__esModule", { value: true });
 const resolve_1$1 = resolve$1;
@@ -19687,7 +19724,7 @@ const getSysConfig = () => {
     if (!store.has("sysConfig")) {
       store.set("sysConfig", {
         maxDownloadCount: 3,
-        downloadUrl: app$1.getPath("downloads"),
+        savePath: app$1.getPath("downloads"),
         isLimitSpeed: false,
         limitSpeed: 500,
         useProxy: false,
@@ -19778,12 +19815,11 @@ const createTables = async (db) => {
     createTime datetime NOT NULL,
     finishTime datetime
   )`);
-  db.exec(`create table if not exists config (
+  db.exec(`create table if not exists cookies (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    proxyHost varchar(64),
-    proxyPort varchar(32),
-    useProxy INTEGER,
-    savePath varchar(500) NOT NULL
+    domain varchar(64) NOT NULL,
+    cookies TEXT NOT NULL,
+    updateTime datetime
   )`);
 };
 const require$1 = createRequire(import.meta.url);

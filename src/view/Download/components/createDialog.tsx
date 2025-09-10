@@ -23,7 +23,7 @@ function CreateDialog ({ onSubmit, onError }){
 
     useEffect(() => {
         formData.setFieldsValue({
-            path: window['sysConfig'].downloadUrl,
+            path: window['sysConfig'].savePath,
         })
     }, [])
 

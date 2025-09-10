@@ -1,7 +1,7 @@
 import styles from './DownloadItem.module.scss'
 import { DownloadTaskType} from "../../../../types.ts";
 import { DownloadStatus, ResultStatus} from "../../../../enums.ts";
-import { message, Modal, Tooltip, Dropdown, Space } from "antd";
+import { message, Modal, Tooltip, Dropdown, Space, Checkbox } from "antd";
 import { CaretRightOutlined, CloseOutlined, FileTextFilled, HddFilled, ReloadOutlined, LinkOutlined, DeleteOutlined, FolderOpenOutlined, PauseOutlined} from '@ant-design/icons';
 import { Else, If, Then} from 'react-if';
 import { fileSizeFormat, percentParse} from '../../../utils/tools.ts'
@@ -97,6 +97,7 @@ function DownloadItem(props: DownloadItemProps) {
     const deleteTask = async (item: DownloadTaskType, showConfrim: boolean = false) => {
         try{
             let confirmed = true
+            let isDelFile = false
             if(showConfrim){
                 confirmed = await modal.confirm({
                     title: `提示`,
@@ -108,8 +109,11 @@ function DownloadItem(props: DownloadItemProps) {
                             确认删除
                             <span style={{color: "var(--color-primary)", fontWeight: 'bold'}}>
                             【{item.name.slice(0,15)}{item.name.length > 15 ? '...' : ''}】
-                        </span>
+                            </span>
                             吗?
+                            <Checkbox style={{marginTop: '6px'}} onChange={(e) => {
+                                isDelFile = e.target.checked
+                            }}>同时删除文件</Checkbox>
                         </>
                     ),
                 });
@@ -118,12 +122,7 @@ function DownloadItem(props: DownloadItemProps) {
                 return
             }
 
-            const res = await API.deleteTask({id: item?.id})
-            console.warn(res)
-            if(res.status === ResultStatus.OK){
-                props.commandCommon && props.commandCommon('DELETE', item)
-            }
-
+            props.commandCommon && props.commandCommon('DELETE', item)
         }catch(e){
             console.error(e)
         }

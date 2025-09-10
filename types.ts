@@ -32,8 +32,16 @@ interface DownloadAnalysisType {
     cover?: string //文件预览图
 }
 
+interface CookieType {
+    id: number;
+    domain: string;
+    cookies: string;
+    updateTime?: string;
+}
+
 export type {
     DownloadTaskType,
     BaseResult,
-    DownloadAnalysisType
+    DownloadAnalysisType,
+    CookieType
 }
