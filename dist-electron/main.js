@@ -14,9 +14,13 @@ import { fileURLToPath } from "node:url";
 import path$1 from "node:path";
 import path, { join, resolve as resolve$5 } from "path";
 import crypto from "crypto";
-import { Worker } from "node:worker_threads";
-import { spawn } from "child_process";
+import require$$0$1 from "events";
+import require$$1$1 from "child_process";
 import fs from "fs";
+import require$$3$2 from "https";
+import require$$4$1 from "os";
+import require$$5$1 from "stream";
+import { Worker } from "node:worker_threads";
 import process$1 from "node:process";
 import { promisify, isDeepStrictEqual } from "node:util";
 import fs$1 from "node:fs";
@@ -4099,6 +4103,491 @@ function DownloadFile(downloadObj, savePath, downloadTask) {
   });
   win2.webContents.downloadURL(downloadObj.analysisUrl);
 }
+var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
+function getDefaultExportFromCjs(x) {
+  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
+}
+var dist$1 = {};
+var __awaiter = commonjsGlobal && commonjsGlobal.__awaiter || function(thisArg, _arguments, P, generator) {
+  function adopt(value) {
+    return value instanceof P ? value : new P(function(resolve2) {
+      resolve2(value);
+    });
+  }
+  return new (P || (P = Promise))(function(resolve2, reject) {
+    function fulfilled(value) {
+      try {
+        step(generator.next(value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function rejected(value) {
+      try {
+        step(generator["throw"](value));
+      } catch (e) {
+        reject(e);
+      }
+    }
+    function step(result) {
+      result.done ? resolve2(result.value) : adopt(result.value).then(fulfilled, rejected);
+    }
+    step((generator = generator.apply(thisArg, _arguments || [])).next());
+  });
+};
+var __generator = commonjsGlobal && commonjsGlobal.__generator || function(thisArg, body) {
+  var _ = { label: 0, sent: function() {
+    if (t2[0] & 1) throw t2[1];
+    return t2[1];
+  }, trys: [], ops: [] }, f, y, t2, g;
+  return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() {
+    return this;
+  }), g;
+  function verb(n) {
+    return function(v) {
+      return step([n, v]);
+    };
+  }
+  function step(op) {
+    if (f) throw new TypeError("Generator is already executing.");
+    while (_) try {
+      if (f = 1, y && (t2 = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t2 = y["return"]) && t2.call(y), 0) : y.next) && !(t2 = t2.call(y, op[1])).done) return t2;
+      if (y = 0, t2) op = [op[0] & 2, t2.value];
+      switch (op[0]) {
+        case 0:
+        case 1:
+          t2 = op;
+          break;
+        case 4:
+          _.label++;
+          return { value: op[1], done: false };
+        case 5:
+          _.label++;
+          y = op[1];
+          op = [0];
+          continue;
+        case 7:
+          op = _.ops.pop();
+          _.trys.pop();
+          continue;
+        default:
+          if (!(t2 = _.trys, t2 = t2.length > 0 && t2[t2.length - 1]) && (op[0] === 6 || op[0] === 2)) {
+            _ = 0;
+            continue;
+          }
+          if (op[0] === 3 && (!t2 || op[1] > t2[0] && op[1] < t2[3])) {
+            _.label = op[1];
+            break;
+          }
+          if (op[0] === 6 && _.label < t2[1]) {
+            _.label = t2[1];
+            t2 = op;
+            break;
+          }
+          if (t2 && _.label < t2[2]) {
+            _.label = t2[2];
+            _.ops.push(op);
+            break;
+          }
+          if (t2[2]) _.ops.pop();
+          _.trys.pop();
+          continue;
+      }
+      op = body.call(thisArg, _);
+    } catch (e) {
+      op = [6, e];
+      y = 0;
+    } finally {
+      f = t2 = 0;
+    }
+    if (op[0] & 5) throw op[1];
+    return { value: op[0] ? op[1] : void 0, done: true };
+  }
+};
+var __importDefault = commonjsGlobal && commonjsGlobal.__importDefault || function(mod2) {
+  return mod2 && mod2.__esModule ? mod2 : { "default": mod2 };
+};
+Object.defineProperty(dist$1, "__esModule", { value: true });
+var events_1 = require$$0$1;
+var child_process_1 = require$$1$1;
+var fs_1 = __importDefault(fs);
+var https_1 = __importDefault(require$$3$2);
+var os_1 = __importDefault(require$$4$1);
+var stream_1 = require$$5$1;
+var executableName = "yt-dlp";
+var progressRegex = /\[download\] *(.*) of ([^ ]*)(:? *at *([^ ]*))?(:? *ETA *([^ ]*))?/;
+var YTDlpWrap = (
+  /** @class */
+  function() {
+    function YTDlpWrap2(binaryPath) {
+      if (binaryPath === void 0) {
+        binaryPath = executableName;
+      }
+      this.binaryPath = binaryPath;
+    }
+    YTDlpWrap2.prototype.getBinaryPath = function() {
+      return this.binaryPath;
+    };
+    YTDlpWrap2.prototype.setBinaryPath = function(binaryPath) {
+      this.binaryPath = binaryPath;
+    };
+    YTDlpWrap2.createGetMessage = function(url) {
+      return new Promise(function(resolve2, reject) {
+        https_1.default.get(url, function(httpResponse) {
+          httpResponse.on("error", function(e) {
+            return reject(e);
+          });
+          resolve2(httpResponse);
+        });
+      });
+    };
+    YTDlpWrap2.processMessageToFile = function(message, filePath) {
+      var file = fs_1.default.createWriteStream(filePath);
+      return new Promise(function(resolve2, reject) {
+        message.pipe(file);
+        message.on("error", function(e) {
+          return reject(e);
+        });
+        file.on("finish", function() {
+          return message.statusCode == 200 ? resolve2(message) : reject(message);
+        });
+      });
+    };
+    YTDlpWrap2.downloadFile = function(fileURL, filePath) {
+      return __awaiter(this, void 0, void 0, function() {
+        var currentUrl, message;
+        return __generator(this, function(_a) {
+          switch (_a.label) {
+            case 0:
+              currentUrl = fileURL;
+              _a.label = 1;
+            case 1:
+              if (!currentUrl) return [3, 6];
+              return [4, YTDlpWrap2.createGetMessage(currentUrl)];
+            case 2:
+              message = _a.sent();
+              if (!message.headers.location) return [3, 3];
+              currentUrl = message.headers.location;
+              return [3, 5];
+            case 3:
+              return [4, YTDlpWrap2.processMessageToFile(message, filePath)];
+            case 4:
+              return [2, _a.sent()];
+            case 5:
+              return [3, 1];
+            case 6:
+              return [
+                2
+                /*return*/
+              ];
+          }
+        });
+      });
+    };
+    YTDlpWrap2.getGithubReleases = function(page, perPage) {
+      if (page === void 0) {
+        page = 1;
+      }
+      if (perPage === void 0) {
+        perPage = 1;
+      }
+      return new Promise(function(resolve2, reject) {
+        var apiURL = "https://api.github.com/repos/yt-dlp/yt-dlp/releases?page=" + page + "&per_page=" + perPage;
+        https_1.default.get(apiURL, { headers: { "User-Agent": "node" } }, function(response) {
+          var resonseString = "";
+          response.setEncoding("utf8");
+          response.on("data", function(body) {
+            return resonseString += body;
+          });
+          response.on("error", function(e) {
+            return reject(e);
+          });
+          response.on("end", function() {
+            return response.statusCode == 200 ? resolve2(JSON.parse(resonseString)) : reject(response);
+          });
+        });
+      });
+    };
+    YTDlpWrap2.downloadFromGithub = function(filePath, version, platform) {
+      if (platform === void 0) {
+        platform = os_1.default.platform();
+      }
+      return __awaiter(this, void 0, void 0, function() {
+        var isWin32, fileName, fileURL;
+        return __generator(this, function(_a) {
+          switch (_a.label) {
+            case 0:
+              isWin32 = platform == "win32";
+              fileName = "".concat(executableName).concat(isWin32 ? ".exe" : "");
+              if (!!version) return [3, 2];
+              return [4, YTDlpWrap2.getGithubReleases(1, 1)];
+            case 1:
+              version = _a.sent()[0].tag_name;
+              _a.label = 2;
+            case 2:
+              if (!filePath)
+                filePath = "./" + fileName;
+              fileURL = "https://github.com/yt-dlp/yt-dlp/releases/download/" + version + "/" + fileName;
+              return [4, YTDlpWrap2.downloadFile(fileURL, filePath)];
+            case 3:
+              _a.sent();
+              !isWin32 && fs_1.default.chmodSync(filePath, "777");
+              return [
+                2
+                /*return*/
+              ];
+          }
+        });
+      });
+    };
+    YTDlpWrap2.prototype.exec = function(ytDlpArguments, options, abortSignal) {
+      if (ytDlpArguments === void 0) {
+        ytDlpArguments = [];
+      }
+      if (options === void 0) {
+        options = {};
+      }
+      if (abortSignal === void 0) {
+        abortSignal = null;
+      }
+      options = YTDlpWrap2.setDefaultOptions(options);
+      var execEventEmitter = new events_1.EventEmitter();
+      var ytDlpProcess = (0, child_process_1.spawn)(this.binaryPath, ytDlpArguments, options);
+      execEventEmitter.ytDlpProcess = ytDlpProcess;
+      YTDlpWrap2.bindAbortSignal(abortSignal, ytDlpProcess);
+      var stderrData = "";
+      var processError;
+      ytDlpProcess.stdout.on("data", function(data) {
+        return YTDlpWrap2.emitYoutubeDlEvents(data.toString(), execEventEmitter);
+      });
+      ytDlpProcess.stderr.on("data", function(data) {
+        return stderrData += data.toString();
+      });
+      ytDlpProcess.on("error", function(error2) {
+        return processError = error2;
+      });
+      ytDlpProcess.on("close", function(code2) {
+        if (code2 === 0 || ytDlpProcess.killed)
+          execEventEmitter.emit("close", code2);
+        else
+          execEventEmitter.emit("error", YTDlpWrap2.createError(code2, processError, stderrData));
+      });
+      return execEventEmitter;
+    };
+    YTDlpWrap2.prototype.execPromise = function(ytDlpArguments, options, abortSignal) {
+      var _this = this;
+      if (ytDlpArguments === void 0) {
+        ytDlpArguments = [];
+      }
+      if (options === void 0) {
+        options = {};
+      }
+      if (abortSignal === void 0) {
+        abortSignal = null;
+      }
+      var ytDlpProcess;
+      var ytDlpPromise = new Promise(function(resolve2, reject) {
+        options = YTDlpWrap2.setDefaultOptions(options);
+        ytDlpProcess = (0, child_process_1.execFile)(_this.binaryPath, ytDlpArguments, options, function(error2, stdout, stderr) {
+          if (error2)
+            reject(YTDlpWrap2.createError(error2, null, stderr));
+          resolve2(stdout);
+        });
+        YTDlpWrap2.bindAbortSignal(abortSignal, ytDlpProcess);
+      });
+      ytDlpPromise.ytDlpProcess = ytDlpProcess;
+      return ytDlpPromise;
+    };
+    YTDlpWrap2.prototype.execStream = function(ytDlpArguments, options, abortSignal) {
+      if (ytDlpArguments === void 0) {
+        ytDlpArguments = [];
+      }
+      if (options === void 0) {
+        options = {};
+      }
+      if (abortSignal === void 0) {
+        abortSignal = null;
+      }
+      var readStream = new stream_1.Readable({ read: function(size) {
+      } });
+      options = YTDlpWrap2.setDefaultOptions(options);
+      ytDlpArguments = ytDlpArguments.concat(["-o", "-"]);
+      var ytDlpProcess = (0, child_process_1.spawn)(this.binaryPath, ytDlpArguments, options);
+      readStream.ytDlpProcess = ytDlpProcess;
+      YTDlpWrap2.bindAbortSignal(abortSignal, ytDlpProcess);
+      var stderrData = "";
+      var processError;
+      ytDlpProcess.stdout.on("data", function(data) {
+        return readStream.push(data);
+      });
+      ytDlpProcess.stderr.on("data", function(data) {
+        var stringData = data.toString();
+        YTDlpWrap2.emitYoutubeDlEvents(stringData, readStream);
+        stderrData += stringData;
+      });
+      ytDlpProcess.on("error", function(error2) {
+        return processError = error2;
+      });
+      ytDlpProcess.on("close", function(code2) {
+        if (code2 === 0 || ytDlpProcess.killed) {
+          readStream.emit("close");
+          readStream.destroy();
+          readStream.emit("end");
+        } else {
+          var error2 = YTDlpWrap2.createError(code2, processError, stderrData);
+          readStream.emit("error", error2);
+          readStream.destroy(error2);
+        }
+      });
+      return readStream;
+    };
+    YTDlpWrap2.prototype.getExtractors = function() {
+      return __awaiter(this, void 0, void 0, function() {
+        var ytDlpStdout;
+        return __generator(this, function(_a) {
+          switch (_a.label) {
+            case 0:
+              return [4, this.execPromise(["--list-extractors"])];
+            case 1:
+              ytDlpStdout = _a.sent();
+              return [2, ytDlpStdout.split("\n")];
+          }
+        });
+      });
+    };
+    YTDlpWrap2.prototype.getExtractorDescriptions = function() {
+      return __awaiter(this, void 0, void 0, function() {
+        var ytDlpStdout;
+        return __generator(this, function(_a) {
+          switch (_a.label) {
+            case 0:
+              return [4, this.execPromise(["--extractor-descriptions"])];
+            case 1:
+              ytDlpStdout = _a.sent();
+              return [2, ytDlpStdout.split("\n")];
+          }
+        });
+      });
+    };
+    YTDlpWrap2.prototype.getHelp = function() {
+      return __awaiter(this, void 0, void 0, function() {
+        var ytDlpStdout;
+        return __generator(this, function(_a) {
+          switch (_a.label) {
+            case 0:
+              return [4, this.execPromise(["--help"])];
+            case 1:
+              ytDlpStdout = _a.sent();
+              return [2, ytDlpStdout];
+          }
+        });
+      });
+    };
+    YTDlpWrap2.prototype.getUserAgent = function() {
+      return __awaiter(this, void 0, void 0, function() {
+        var ytDlpStdout;
+        return __generator(this, function(_a) {
+          switch (_a.label) {
+            case 0:
+              return [4, this.execPromise(["--dump-user-agent"])];
+            case 1:
+              ytDlpStdout = _a.sent();
+              return [2, ytDlpStdout];
+          }
+        });
+      });
+    };
+    YTDlpWrap2.prototype.getVersion = function() {
+      return __awaiter(this, void 0, void 0, function() {
+        var ytDlpStdout;
+        return __generator(this, function(_a) {
+          switch (_a.label) {
+            case 0:
+              return [4, this.execPromise(["--version"])];
+            case 1:
+              ytDlpStdout = _a.sent();
+              return [2, ytDlpStdout];
+          }
+        });
+      });
+    };
+    YTDlpWrap2.prototype.getVideoInfo = function(ytDlpArguments) {
+      return __awaiter(this, void 0, void 0, function() {
+        var ytDlpStdout;
+        return __generator(this, function(_a) {
+          switch (_a.label) {
+            case 0:
+              if (typeof ytDlpArguments == "string")
+                ytDlpArguments = [ytDlpArguments];
+              if (!ytDlpArguments.includes("-f") && !ytDlpArguments.includes("--format"))
+                ytDlpArguments = ytDlpArguments.concat(["-f", "best"]);
+              return [4, this.execPromise(ytDlpArguments.concat(["--dump-json"]))];
+            case 1:
+              ytDlpStdout = _a.sent();
+              try {
+                return [2, JSON.parse(ytDlpStdout)];
+              } catch (e) {
+                return [2, JSON.parse("[" + ytDlpStdout.replace(/\n/g, ",").slice(0, -1) + "]")];
+              }
+              return [
+                2
+                /*return*/
+              ];
+          }
+        });
+      });
+    };
+    YTDlpWrap2.bindAbortSignal = function(signal, process2) {
+      signal === null || signal === void 0 ? void 0 : signal.addEventListener("abort", function() {
+        try {
+          if (os_1.default.platform() === "win32")
+            (0, child_process_1.execSync)("taskkill /pid ".concat(process2.pid, " /T /F"));
+          else {
+            (0, child_process_1.execSync)("pgrep -P ".concat(process2.pid, " | xargs -L 1 kill"));
+          }
+        } catch (e) {
+        } finally {
+          process2.kill();
+        }
+      });
+    };
+    YTDlpWrap2.setDefaultOptions = function(options) {
+      if (!options.maxBuffer)
+        options.maxBuffer = 1024 * 1024 * 1024;
+      return options;
+    };
+    YTDlpWrap2.createError = function(code2, processError, stderrData) {
+      var errorMessage = "\nError code: " + code2;
+      if (processError)
+        errorMessage += "\n\nProcess error:\n" + processError;
+      if (stderrData)
+        errorMessage += "\n\nStderr:\n" + stderrData;
+      return new Error(errorMessage);
+    };
+    YTDlpWrap2.emitYoutubeDlEvents = function(stringData, emitter) {
+      var outputLines = stringData.split(/\r|\n/g).filter(Boolean);
+      for (var _i = 0, outputLines_1 = outputLines; _i < outputLines_1.length; _i++) {
+        var outputLine = outputLines_1[_i];
+        if (outputLine[0] == "[") {
+          var progressMatch = outputLine.match(progressRegex);
+          if (progressMatch) {
+            var progressObject = {};
+            progressObject.percent = parseFloat(progressMatch[1].replace("%", ""));
+            progressObject.totalSize = progressMatch[2].replace("~", "");
+            progressObject.currentSpeed = progressMatch[4];
+            progressObject.eta = progressMatch[6];
+            emitter.emit("progress", progressObject);
+          }
+          var eventType = outputLine.split(" ")[0].replace("[", "").replace("]", "");
+          var eventData = outputLine.substring(outputLine.indexOf(" "), outputLine.length);
+          emitter.emit("ytDlpEvent", eventType, eventData);
+        }
+      }
+    };
+    return YTDlpWrap2;
+  }()
+);
+var _default = dist$1.default = YTDlpWrap;
 const publicDir = () => {
   const node_serve_path = process.resourcesPath;
   const PUBLIC_PATH = "/public";
@@ -4223,15 +4712,15 @@ const createTask = async (param) => {
       }
     });
     await db.prepare(`INSERT INTO tasks (${query.join(",")}) VALUES (@${query.join(",@")})`).run(_data);
-    const ytdlp = spawn(resolve$5(publicDir(), "yt-dlp/yt-dlp_macos"), ["--cookies", `${resolve$5(publicDir(), "yt-dlp/cookies.txt")}`, "chrome", "-o", `${resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s")}`, param.urls]);
-    ytdlp.stdout.on("data", (data) => {
-      console.log(`stdout: ${data}`);
-    });
-    ytdlp.stderr.on("data", (data) => {
-      console.error(`stderr: ${data}`);
-    });
-    ytdlp.on("close", (code2) => {
-      console.log(`下载进程退出: ${code2}`);
+    let ytDlpWrap = new _default(resolve$5(publicDir(), "yt-dlp/yt-dlp_macos"));
+    ytDlpWrap.exec(["--cookies", `${resolve$5(publicDir(), "yt-dlp/cookies.txt")}`, "-o", `${resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s")}`, param.urls]).on("progress", (progress) => {
+      console.log("正在下载:", progress.percent, "%");
+    }).on("ytDlpEvent", (event) => {
+      console.log("事件:", event);
+    }).on("error", (err) => {
+      console.error("错误:", err);
+    }).on("close", () => {
+      console.log("完成");
     });
     return res;
     _analysisWorker(param.urls, param.id).then((analysisObj) => {
@@ -5033,9 +5522,6 @@ function writeFileSync(filePath, data, options = DEFAULT_WRITE_OPTIONS) {
     if (tempPath)
       Temp.purge(tempPath);
   }
-}
-function getDefaultExportFromCjs(x) {
-  return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
 }
 var _2020 = { exports: {} };
 var core$6 = {};
@@ -6071,12 +6557,12 @@ function alwaysValidSchema$1(it, schema) {
 }
 util$1.alwaysValidSchema = alwaysValidSchema$1;
 function checkUnknownRules$1(it, schema = it.schema) {
-  const { opts, self } = it;
+  const { opts, self: self2 } = it;
   if (!opts.strictSchema)
     return;
   if (typeof schema === "boolean")
     return;
-  const rules2 = self.RULES.keywords;
+  const rules2 = self2.RULES.keywords;
   for (const key in schema) {
     if (!rules2[key])
       checkStrictMode$1(it, `unknown keyword: "${key}"`);
@@ -6433,8 +6919,8 @@ rules$1.getRules = getRules$1;
 var applicability$1 = {};
 Object.defineProperty(applicability$1, "__esModule", { value: true });
 applicability$1.shouldUseRule = applicability$1.shouldUseGroup = applicability$1.schemaHasRulesForType = void 0;
-function schemaHasRulesForType$1({ schema, self }, type2) {
-  const group = self.RULES.types[type2];
+function schemaHasRulesForType$1({ schema, self: self2 }, type2) {
+  const group = self2.RULES.types[type2];
   return group && group !== true && shouldUseGroup$1(schema, group);
 }
 applicability$1.schemaHasRulesForType = schemaHasRulesForType$1;
@@ -6874,7 +7360,7 @@ function validSchemaType$1(schema, schemaType, allowUndefined = false) {
   return !schemaType.length || schemaType.some((st) => st === "array" ? Array.isArray(schema) : st === "object" ? schema && typeof schema == "object" && !Array.isArray(schema) : typeof schema == st || allowUndefined && typeof schema == "undefined");
 }
 keyword$1.validSchemaType = validSchemaType$1;
-function validateKeywordUsage$1({ schema, opts, self, errSchemaPath }, def2, keyword2) {
+function validateKeywordUsage$1({ schema, opts, self: self2, errSchemaPath }, def2, keyword2) {
   if (Array.isArray(def2.keyword) ? !def2.keyword.includes(keyword2) : def2.keyword !== keyword2) {
     throw new Error("ajv implementation error");
   }
@@ -6885,9 +7371,9 @@ function validateKeywordUsage$1({ schema, opts, self, errSchemaPath }, def2, key
   if (def2.validateSchema) {
     const valid2 = def2.validateSchema(schema[keyword2]);
     if (!valid2) {
-      const msg = `keyword "${keyword2}" value is invalid at path "${errSchemaPath}": ` + self.errorsText(def2.validateSchema.errors);
+      const msg = `keyword "${keyword2}" value is invalid at path "${errSchemaPath}": ` + self2.errorsText(def2.validateSchema.errors);
       if (opts.validateSchema === "log")
-        self.logger.error(msg);
+        self2.logger.error(msg);
       else
         throw new Error(msg);
     }
@@ -7323,11 +7809,11 @@ function subschemaCode$1(it, valid2) {
   }
   (0, boolSchema_1$1.boolOrEmptySchema)(it, valid2);
 }
-function schemaCxtHasRules$1({ schema, self }) {
+function schemaCxtHasRules$1({ schema, self: self2 }) {
   if (typeof schema == "boolean")
     return !schema;
   for (const key in schema)
-    if (self.RULES.all[key])
+    if (self2.RULES.all[key])
       return true;
   return false;
 }
@@ -7356,9 +7842,9 @@ function typeAndKeywords$1(it, errsCount) {
   schemaKeywords$1(it, types2, !checkedTypes, errsCount);
 }
 function checkRefsAndKeywords$1(it) {
-  const { schema, errSchemaPath, opts, self } = it;
-  if (schema.$ref && opts.ignoreKeywordsWithRef && (0, util_1$Q.schemaHasRulesButRef)(schema, self.RULES)) {
-    self.logger.warn(`$ref: keywords ignored in schema at path "${errSchemaPath}"`);
+  const { schema, errSchemaPath, opts, self: self2 } = it;
+  if (schema.$ref && opts.ignoreKeywordsWithRef && (0, util_1$Q.schemaHasRulesButRef)(schema, self2.RULES)) {
+    self2.logger.warn(`$ref: keywords ignored in schema at path "${errSchemaPath}"`);
   }
 }
 function checkNoDefault$1(it) {
@@ -7387,9 +7873,9 @@ function commentKeyword$1({ gen, schemaEnv, schema, errSchemaPath, opts }) {
   }
 }
 function returnResults$1(it) {
-  const { gen, schemaEnv, validateName, ValidationError: ValidationError2, opts } = it;
+  const { gen, schemaEnv, validateName, ValidationError: ValidationError3, opts } = it;
   if (schemaEnv.$async) {
-    gen.if((0, codegen_1$X._)`${names_1$d.default.errors} === 0`, () => gen.return(names_1$d.default.data), () => gen.throw((0, codegen_1$X._)`new ${ValidationError2}(${names_1$d.default.vErrors})`));
+    gen.if((0, codegen_1$X._)`${names_1$d.default.errors} === 0`, () => gen.return(names_1$d.default.data), () => gen.throw((0, codegen_1$X._)`new ${ValidationError3}(${names_1$d.default.vErrors})`));
   } else {
     gen.assign((0, codegen_1$X._)`${validateName}.errors`, names_1$d.default.vErrors);
     if (opts.unevaluated)
@@ -7404,8 +7890,8 @@ function assignEvaluated$1({ gen, evaluated, props, items: items2 }) {
     gen.assign((0, codegen_1$X._)`${evaluated}.items`, items2);
 }
 function schemaKeywords$1(it, types2, typeErrors, errsCount) {
-  const { gen, schema, data, allErrors, opts, self } = it;
-  const { RULES } = self;
+  const { gen, schema, data, allErrors, opts, self: self2 } = it;
+  const { RULES } = self2;
   if (schema.$ref && (opts.ignoreKeywordsWithRef || !(0, util_1$Q.schemaHasRulesButRef)(schema, RULES))) {
     gen.block(() => keywordCode$1(it, "$ref", RULES.all.$ref.definition));
     return;
@@ -7733,21 +8219,15 @@ function getData$1($data, { dataLevel, dataNames, dataPathArr }) {
 }
 validate$1.getData = getData$1;
 var validation_error$1 = {};
-var hasRequiredValidation_error;
-function requireValidation_error() {
-  if (hasRequiredValidation_error) return validation_error$1;
-  hasRequiredValidation_error = 1;
-  Object.defineProperty(validation_error$1, "__esModule", { value: true });
-  class ValidationError2 extends Error {
-    constructor(errors2) {
-      super("validation failed");
-      this.errors = errors2;
-      this.ajv = this.validation = true;
-    }
+Object.defineProperty(validation_error$1, "__esModule", { value: true });
+let ValidationError$1 = class ValidationError extends Error {
+  constructor(errors2) {
+    super("validation failed");
+    this.errors = errors2;
+    this.ajv = this.validation = true;
   }
-  validation_error$1.default = ValidationError2;
-  return validation_error$1;
-}
+};
+validation_error$1.default = ValidationError$1;
 var ref_error$1 = {};
 Object.defineProperty(ref_error$1, "__esModule", { value: true });
 const resolve_1$4 = resolve$4;
@@ -7763,7 +8243,7 @@ var compile$1 = {};
 Object.defineProperty(compile$1, "__esModule", { value: true });
 compile$1.resolveSchema = compile$1.getCompilingSchema = compile$1.resolveRef = compile$1.compileSchema = compile$1.SchemaEnv = void 0;
 const codegen_1$W = codegen$1;
-const validation_error_1$1 = requireValidation_error();
+const validation_error_1$1 = validation_error$1;
 const names_1$c = names$3;
 const resolve_1$3 = resolve$4;
 const util_1$P = util$1;
@@ -8719,7 +9199,7 @@ uri$3.default = uri$2;
   Object.defineProperty(exports, "CodeGen", { enumerable: true, get: function() {
     return codegen_12.CodeGen;
   } });
-  const validation_error_12 = requireValidation_error();
+  const validation_error_12 = validation_error$1;
   const ref_error_12 = ref_error$1;
   const rules_12 = rules$1;
   const compile_12 = compile$1;
@@ -9324,11 +9804,11 @@ const def$11 = {
   schemaType: "string",
   code(cxt) {
     const { gen, schema: $ref, it } = cxt;
-    const { baseId, schemaEnv: env2, validateName, opts, self } = it;
+    const { baseId, schemaEnv: env2, validateName, opts, self: self2 } = it;
     const { root } = env2;
     if (($ref === "#" || $ref === "#/") && baseId === root.baseId)
       return callRootRef();
-    const schOrEnv = compile_1$4.resolveRef.call(self, root, baseId, $ref);
+    const schOrEnv = compile_1$4.resolveRef.call(self2, root, baseId, $ref);
     if (schOrEnv === void 0)
       throw new ref_error_1$3.default(it.opts.uriResolver, baseId, $ref);
     if (schOrEnv instanceof compile_1$4.SchemaEnv)
@@ -10663,11 +11143,11 @@ function dynamicAnchor(cxt, anchor) {
 }
 dynamicAnchor$1.dynamicAnchor = dynamicAnchor;
 function _getValidate(cxt) {
-  const { schemaEnv, schema, self } = cxt.it;
+  const { schemaEnv, schema, self: self2 } = cxt.it;
   const { root, baseId, localRefs, meta } = schemaEnv.root;
-  const { schemaId } = self.opts;
+  const { schemaId } = self2.opts;
   const sch = new compile_1$3.SchemaEnv({ schema, schemaId, root, baseId, localRefs, meta });
-  compile_1$3.compileSchema.call(self, sch);
+  compile_1$3.compileSchema.call(self2, sch);
   return (0, ref_1$2.getValidate)(cxt, sch);
 }
 dynamicAnchor$1.default = def$D;
@@ -10904,7 +11384,7 @@ const def$u = {
   error: error$k,
   code(cxt, ruleType) {
     const { gen, data, $data, schema, schemaCode, it } = cxt;
-    const { opts, errSchemaPath, schemaEnv, self } = it;
+    const { opts, errSchemaPath, schemaEnv, self: self2 } = it;
     if (!opts.validateFormats)
       return;
     if ($data)
@@ -10913,7 +11393,7 @@ const def$u = {
       validateFormat();
     function validate$DataFormat() {
       const fmts = gen.scopeValue("formats", {
-        ref: self.formats,
+        ref: self2.formats,
         code: opts.code.formats
       });
       const fDef = gen.const("fDef", (0, codegen_1$x._)`${fmts}[${schemaCode}]`);
@@ -10933,7 +11413,7 @@ const def$u = {
       }
     }
     function validateFormat() {
-      const formatDef = self.formats[schema];
+      const formatDef = self2.formats[schema];
       if (!formatDef) {
         unknownFormat();
         return;
@@ -10945,7 +11425,7 @@ const def$u = {
         cxt.pass(validCondition());
       function unknownFormat() {
         if (opts.strictSchema === false) {
-          self.logger.warn(unknownMsg());
+          self2.logger.warn(unknownMsg());
           return;
         }
         throw new Error(unknownMsg());
@@ -11728,7 +12208,7 @@ jsonSchema202012.default = addMetaSchema2020;
   Object.defineProperty(exports, "CodeGen", { enumerable: true, get: function() {
     return codegen_12.CodeGen;
   } });
-  var validation_error_12 = requireValidation_error();
+  var validation_error_12 = validation_error$1;
   Object.defineProperty(exports, "ValidationError", { enumerable: true, get: function() {
     return validation_error_12.default;
   } });
@@ -12973,12 +13453,12 @@ function alwaysValidSchema(it, schema) {
 }
 util.alwaysValidSchema = alwaysValidSchema;
 function checkUnknownRules(it, schema = it.schema) {
-  const { opts, self } = it;
+  const { opts, self: self2 } = it;
   if (!opts.strictSchema)
     return;
   if (typeof schema === "boolean")
     return;
-  const rules2 = self.RULES.keywords;
+  const rules2 = self2.RULES.keywords;
   for (const key in schema) {
     if (!rules2[key])
       checkStrictMode(it, `unknown keyword: "${key}"`);
@@ -13335,8 +13815,8 @@ rules.getRules = getRules;
 var applicability = {};
 Object.defineProperty(applicability, "__esModule", { value: true });
 applicability.shouldUseRule = applicability.shouldUseGroup = applicability.schemaHasRulesForType = void 0;
-function schemaHasRulesForType({ schema, self }, type2) {
-  const group = self.RULES.types[type2];
+function schemaHasRulesForType({ schema, self: self2 }, type2) {
+  const group = self2.RULES.types[type2];
   return group && group !== true && shouldUseGroup(schema, group);
 }
 applicability.schemaHasRulesForType = schemaHasRulesForType;
@@ -13776,7 +14256,7 @@ function validSchemaType(schema, schemaType, allowUndefined = false) {
   return !schemaType.length || schemaType.some((st) => st === "array" ? Array.isArray(schema) : st === "object" ? schema && typeof schema == "object" && !Array.isArray(schema) : typeof schema == st || allowUndefined && typeof schema == "undefined");
 }
 keyword.validSchemaType = validSchemaType;
-function validateKeywordUsage({ schema, opts, self, errSchemaPath }, def2, keyword2) {
+function validateKeywordUsage({ schema, opts, self: self2, errSchemaPath }, def2, keyword2) {
   if (Array.isArray(def2.keyword) ? !def2.keyword.includes(keyword2) : def2.keyword !== keyword2) {
     throw new Error("ajv implementation error");
   }
@@ -13787,9 +14267,9 @@ function validateKeywordUsage({ schema, opts, self, errSchemaPath }, def2, keywo
   if (def2.validateSchema) {
     const valid2 = def2.validateSchema(schema[keyword2]);
     if (!valid2) {
-      const msg = `keyword "${keyword2}" value is invalid at path "${errSchemaPath}": ` + self.errorsText(def2.validateSchema.errors);
+      const msg = `keyword "${keyword2}" value is invalid at path "${errSchemaPath}": ` + self2.errorsText(def2.validateSchema.errors);
       if (opts.validateSchema === "log")
-        self.logger.error(msg);
+        self2.logger.error(msg);
       else
         throw new Error(msg);
     }
@@ -14197,11 +14677,11 @@ function subschemaCode(it, valid2) {
   }
   (0, boolSchema_1.boolOrEmptySchema)(it, valid2);
 }
-function schemaCxtHasRules({ schema, self }) {
+function schemaCxtHasRules({ schema, self: self2 }) {
   if (typeof schema == "boolean")
     return !schema;
   for (const key in schema)
-    if (self.RULES.all[key])
+    if (self2.RULES.all[key])
       return true;
   return false;
 }
@@ -14230,9 +14710,9 @@ function typeAndKeywords(it, errsCount) {
   schemaKeywords(it, types2, !checkedTypes, errsCount);
 }
 function checkRefsAndKeywords(it) {
-  const { schema, errSchemaPath, opts, self } = it;
-  if (schema.$ref && opts.ignoreKeywordsWithRef && (0, util_1$l.schemaHasRulesButRef)(schema, self.RULES)) {
-    self.logger.warn(`$ref: keywords ignored in schema at path "${errSchemaPath}"`);
+  const { schema, errSchemaPath, opts, self: self2 } = it;
+  if (schema.$ref && opts.ignoreKeywordsWithRef && (0, util_1$l.schemaHasRulesButRef)(schema, self2.RULES)) {
+    self2.logger.warn(`$ref: keywords ignored in schema at path "${errSchemaPath}"`);
   }
 }
 function checkNoDefault(it) {
@@ -14261,9 +14741,9 @@ function commentKeyword({ gen, schemaEnv, schema, errSchemaPath, opts }) {
   }
 }
 function returnResults(it) {
-  const { gen, schemaEnv, validateName, ValidationError: ValidationError2, opts } = it;
+  const { gen, schemaEnv, validateName, ValidationError: ValidationError3, opts } = it;
   if (schemaEnv.$async) {
-    gen.if((0, codegen_1$n._)`${names_1$3.default.errors} === 0`, () => gen.return(names_1$3.default.data), () => gen.throw((0, codegen_1$n._)`new ${ValidationError2}(${names_1$3.default.vErrors})`));
+    gen.if((0, codegen_1$n._)`${names_1$3.default.errors} === 0`, () => gen.return(names_1$3.default.data), () => gen.throw((0, codegen_1$n._)`new ${ValidationError3}(${names_1$3.default.vErrors})`));
   } else {
     gen.assign((0, codegen_1$n._)`${validateName}.errors`, names_1$3.default.vErrors);
     if (opts.unevaluated)
@@ -14278,8 +14758,8 @@ function assignEvaluated({ gen, evaluated, props, items: items2 }) {
     gen.assign((0, codegen_1$n._)`${evaluated}.items`, items2);
 }
 function schemaKeywords(it, types2, typeErrors, errsCount) {
-  const { gen, schema, data, allErrors, opts, self } = it;
-  const { RULES } = self;
+  const { gen, schema, data, allErrors, opts, self: self2 } = it;
+  const { RULES } = self2;
   if (schema.$ref && (opts.ignoreKeywordsWithRef || !(0, util_1$l.schemaHasRulesButRef)(schema, RULES))) {
     gen.block(() => keywordCode(it, "$ref", RULES.all.$ref.definition));
     return;
@@ -14608,14 +15088,14 @@ function getData($data, { dataLevel, dataNames, dataPathArr }) {
 validate.getData = getData;
 var validation_error = {};
 Object.defineProperty(validation_error, "__esModule", { value: true });
-class ValidationError extends Error {
+class ValidationError2 extends Error {
   constructor(errors2) {
     super("validation failed");
     this.errors = errors2;
     this.ajv = this.validation = true;
   }
 }
-validation_error.default = ValidationError;
+validation_error.default = ValidationError2;
 var ref_error = {};
 Object.defineProperty(ref_error, "__esModule", { value: true });
 const resolve_1$1 = resolve$1;
@@ -15509,11 +15989,11 @@ const def$r = {
   schemaType: "string",
   code(cxt) {
     const { gen, schema: $ref, it } = cxt;
-    const { baseId, schemaEnv: env2, validateName, opts, self } = it;
+    const { baseId, schemaEnv: env2, validateName, opts, self: self2 } = it;
     const { root } = env2;
     if (($ref === "#" || $ref === "#/") && baseId === root.baseId)
       return callRootRef();
-    const schOrEnv = compile_1$1.resolveRef.call(self, root, baseId, $ref);
+    const schOrEnv = compile_1$1.resolveRef.call(self2, root, baseId, $ref);
     if (schOrEnv === void 0)
       throw new ref_error_1$1.default(it.opts.uriResolver, baseId, $ref);
     if (schOrEnv instanceof compile_1$1.SchemaEnv)
@@ -16842,7 +17322,7 @@ const def$1 = {
   error: error$1,
   code(cxt, ruleType) {
     const { gen, data, $data, schema, schemaCode, it } = cxt;
-    const { opts, errSchemaPath, schemaEnv, self } = it;
+    const { opts, errSchemaPath, schemaEnv, self: self2 } = it;
     if (!opts.validateFormats)
       return;
     if ($data)
@@ -16851,7 +17331,7 @@ const def$1 = {
       validateFormat();
     function validate$DataFormat() {
       const fmts = gen.scopeValue("formats", {
-        ref: self.formats,
+        ref: self2.formats,
         code: opts.code.formats
       });
       const fDef = gen.const("fDef", (0, codegen_1$1._)`${fmts}[${schemaCode}]`);
@@ -16871,7 +17351,7 @@ const def$1 = {
       }
     }
     function validateFormat() {
-      const formatDef = self.formats[schema];
+      const formatDef = self2.formats[schema];
       if (!formatDef) {
         unknownFormat();
         return;
@@ -16883,7 +17363,7 @@ const def$1 = {
         cxt.pass(validCondition());
       function unknownFormat() {
         if (opts.strictSchema === false) {
-          self.logger.warn(unknownMsg());
+          self2.logger.warn(unknownMsg());
           return;
         }
         throw new Error(unknownMsg());
@@ -17391,17 +17871,17 @@ var ajvExports = ajv.exports;
     error: error2,
     code(cxt) {
       const { gen, data, schemaCode, keyword: keyword2, it } = cxt;
-      const { opts, self } = it;
+      const { opts, self: self2 } = it;
       if (!opts.validateFormats)
         return;
-      const fCxt = new ajv_1.KeywordCxt(it, self.RULES.all.format.definition, "format");
+      const fCxt = new ajv_1.KeywordCxt(it, self2.RULES.all.format.definition, "format");
       if (fCxt.$data)
         validate$DataFormat();
       else
         validateFormat();
       function validate$DataFormat() {
         const fmts = gen.scopeValue("formats", {
-          ref: self.formats,
+          ref: self2.formats,
           code: opts.code.formats
         });
         const fmt = gen.const("fmt", (0, codegen_12._)`${fmts}[${fCxt.schemaCode}]`);
@@ -17409,7 +17889,7 @@ var ajvExports = ajv.exports;
       }
       function validateFormat() {
         const format2 = fCxt.schema;
-        const fmtDef = self.formats[format2];
+        const fmtDef = self2.formats[format2];
         if (!fmtDef || fmtDef === true)
           return;
         if (typeof fmtDef != "object" || fmtDef instanceof RegExp || typeof fmtDef.compare != "function") {
@@ -19748,6 +20228,98 @@ const getSysConfig = () => {
   }
   return res;
 };
+const addCookie = async (param) => {
+  const db = global.db;
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "",
+    data: ""
+  };
+  try {
+    param.updateTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
+    console.warn(param);
+    let query = [];
+    Object.keys(param).forEach((key, val) => {
+      if (key !== "id") {
+        query.push(key);
+      }
+    });
+    await db.prepare(`INSERT INTO cookies (${query.join(",")}) VALUES (@${query.join(",@")})`).run(param);
+  } catch (error2) {
+    res.status = ResultStatus.ERROR;
+    res.message = "添加失败" + error2.message;
+    console.warn("err", error2.message);
+  }
+  return res;
+};
+const updateCookie = async (param) => {
+  const db = global.db;
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "",
+    data: ""
+  };
+  try {
+    param.updateTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
+    console.warn(param);
+    let query = [];
+    Object.keys(param).forEach((key, val) => {
+      if (key !== "id") {
+        query.push(`${key}=@${key}`);
+      }
+    });
+    const update = db.prepare(`UPDATE cookies SET ${query.join(",")} WHERE id=@id`);
+    const updateFunc = db.transaction((signs) => {
+      for (const sign2 of signs) update.run(sign2);
+    });
+    updateFunc([param]);
+  } catch (error2) {
+    res.status = ResultStatus.ERROR;
+    res.message = "修改失败" + error2.message;
+    console.warn("err", error2.message);
+  }
+  return res;
+};
+const delCookie = async (param) => {
+  const db = global.db;
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "",
+    data: ""
+  };
+  try {
+    param.updateTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
+    await db.prepare("DELETE FROM cookies WHERE id == ?").run(
+      param.id
+    );
+  } catch (error2) {
+    res.status = ResultStatus.ERROR;
+    res.message = "删除失败" + error2.message;
+    console.warn("err", error2.message);
+  }
+  return res;
+};
+const getCookieList = async (param) => {
+  const db = global.db;
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "",
+    data: ""
+  };
+  try {
+    console.warn(param);
+    res.data = await db.prepare("SELECT * FROM cookies").all();
+  } catch (error2) {
+    res.status = ResultStatus.ERROR;
+    res.message = "获取cookie失败：" + error2.message;
+    console.warn("err", error2.message);
+  }
+  return res;
+};
 const setSysConfig = (param) => {
   const res = {
     code: 200,
@@ -19791,6 +20363,18 @@ const SysHandler = () => {
         currOperationWindow.close();
         break;
     }
+  });
+  ipcMain$1.handle(`${DOMAIN}:getCookieList`, function(_, param) {
+    return getCookieList(param);
+  });
+  ipcMain$1.handle(`${DOMAIN}:addCookie`, function(_, param) {
+    return addCookie(param);
+  });
+  ipcMain$1.handle(`${DOMAIN}:updateCookie`, function(_, param) {
+    return updateCookie(param);
+  });
+  ipcMain$1.handle(`${DOMAIN}:delCookie`, function(_, param) {
+    return delCookie(param);
   });
 };
 const InitHandler = () => {

@@ -1,4 +1,4 @@
-import {getSysConfig} from "../../electron/models/sysModel.ts";
+import {delCookie, getCookieList, getSysConfig} from "../../electron/models/sysModel.ts";
 
 const API = {
     request: window.ipcRenderer.invoke,
@@ -57,6 +57,34 @@ const API = {
      */
     getSysConfig : (param: any = {}) => {
         return API.request('sys:getSysConfig', param)
+    },
+    /**
+     * 获取cookieList
+     * @param param
+     */
+    getCookieList : (param: any = {}) => {
+        return API.request('sys:getCookieList', param)
+    },
+    /**
+     * 添加cookie
+     * @param param
+     */
+    addCookie : (param: any = {}) => {
+        return API.request('sys:addCookie', param)
+    },
+    /**
+     * 修改cookie
+     * @param param
+     */
+    updateCookie : (param: any = {}) => {
+        return API.request('sys:updateCookie', param)
+    },
+    /**
+     * 删除cookie
+     * @param param
+     */
+    delCookie : (param: any = {}) => {
+        return API.request('sys:delCookie', param)
     },
     /**
      * 更新软件配置

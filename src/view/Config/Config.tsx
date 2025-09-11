@@ -359,6 +359,7 @@ function Config({onClose}: ConfigProps) {
                 title="Cookie 管理"
                 footer={ null }
                 open={cookieDialogVisible}
+                centered={true}
                 classNames={{
                     content: styles.cookieDialog
                 }}

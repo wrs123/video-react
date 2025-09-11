@@ -1,5 +1,5 @@
 import { ipcMain  } from 'electron'
-import {getSysConfig, setSysConfig} from "../models/sysModel.ts";
+import {getSysConfig, setSysConfig, getCookieList, addCookie, updateCookie, delCookie} from "../models/sysModel.ts";
 
 export const SysHandler = () => {
     const DOMAIN = "sys"
@@ -42,6 +42,35 @@ export const SysHandler = () => {
                 currOperationWindow.close()
                 break
         }
+    })
+
+
+    /** 获取cookie列表
+     * @param {Object} event
+     */
+    ipcMain.handle(`${DOMAIN}:getCookieList`, function (_, param) {
+        return getCookieList(param)
+    })
+
+    /** 添加cookie
+     * @param {Object} event
+     */
+    ipcMain.handle(`${DOMAIN}:addCookie`, function (_, param) {
+        return addCookie(param)
+    })
+
+    /** 更新cookie
+     * @param {Object} event
+     */
+    ipcMain.handle(`${DOMAIN}:updateCookie`, function (_, param) {
+        return updateCookie(param)
+    })
+
+    /** 删除cookie
+     * @param {Object} event
+     */
+    ipcMain.handle(`${DOMAIN}:delCookie`, function (_, param) {
+        return delCookie(param)
     })
 
 }

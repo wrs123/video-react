@@ -3,13 +3,14 @@ import {DownloadFileType, DownloadStatus, ResultStatus} from "../../enums.ts";
 import DownloadFile from "../libs/downloadManage.ts";
 import crypto from "crypto"
 import moment from 'moment'
+import YTDlpWrap from 'yt-dlp-wrap';
 import { Worker } from "node:worker_threads";
 import { resolve, dirname } from 'path';
 import {publicDir} from "../utils";
-import { spawn } from "child_process"
 
 
-export function updateDownloadStatus(downloadTask:DownloadTaskType){
+
+export function updateDownloadStatus(downloadTask:any){
     updateTask(downloadTask)
     global.win.webContents.send('download:updateDownload', downloadTask)
 }
@@ -143,20 +144,28 @@ export const createTask = async (param: any) => {
         })
         await db.prepare(`INSERT INTO tasks (${query.join(',')}) VALUES (@${query.join(',@')})`).run(_data)
 
+        // if(){
+        //
+        // }
+        // let param = (1, 1)
         //通用解析
-        const ytdlp = spawn(resolve(publicDir(), 'yt-dlp/yt-dlp_macos'), ["--cookies", `${resolve(publicDir(), 'yt-dlp/cookies.txt')}`, "chrome", "-o", `${resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s') }`, param.urls]);
+        let ytDlpWrap = new YTDlpWrap(resolve(publicDir(), 'yt-dlp/yt-dlp_macos'));
 
-        ytdlp.stdout.on("data", (data) => {
-            console.log(`stdout: ${data}`);
-        });
+        ytDlpWrap
+            .exec(["--cookies", `${resolve(publicDir(), 'yt-dlp/cookies.txt')}`, "-o", `${resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s') }`, param.urls])
+            .on("progress", (progress) => {
+                console.log("正在下载:", progress.percent, "%");
+            })
+            .on("ytDlpEvent", (event) => {
+                console.log("事件:", event);
+            })
+            .on("error", (err) => {
+                console.error("错误:", err);
+            })
+            .on("close", () => {
+                console.log("完成");
+            });
 
-        ytdlp.stderr.on("data", (data) => {
-            console.error(`stderr: ${data}`);
-        });
-
-        ytdlp.on("close", (code) => {
-            console.log(`下载进程退出: ${code}`);
-        });
 
 
         return res
