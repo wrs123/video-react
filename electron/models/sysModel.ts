@@ -188,6 +188,34 @@ export const getCookieList = async (param) => {
 }
 
 /**
+ * 获取cookie详情
+ */
+export const getCookie = async (param) => {
+    const db = global.db
+    const res: BaseResult = {
+        code: 200,
+        status: ResultStatus.OK,
+        message: '',
+        data: ''
+    }
+
+    try{
+        const _data = await db
+            .prepare("SELECT * FROM cookies WHERE domain == ?")
+            .all(param.domain || '')
+
+        res.data = _data[0]
+    }catch(error: any){
+        res.status= ResultStatus.ERROR
+        res.message = "获取cookie失败："+error.message
+        console.warn('err', error.message)
+    }
+
+    return res
+}
+
+
+/**
  * 更新系统设置
  * @param param
  */

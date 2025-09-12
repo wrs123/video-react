@@ -9,25 +9,25 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var _validator, _encryptionKey, _options, _defaultValues;
-import electron, { BrowserWindow, app as app$1, ipcMain as ipcMain$1, dialog, shell as shell$1 } from "electron";
+import electron, { BrowserWindow, app as app$2, ipcMain as ipcMain$1, dialog, shell as shell$1 } from "electron";
 import { fileURLToPath } from "node:url";
 import path$1 from "node:path";
+import { createRequire } from "module";
 import path, { join, resolve as resolve$5 } from "path";
-import crypto from "crypto";
 import require$$0$1 from "events";
 import require$$1$1 from "child_process";
 import fs from "fs";
 import require$$3$2 from "https";
 import require$$4$1 from "os";
 import require$$5$1 from "stream";
-import { Worker } from "node:worker_threads";
+import crypto$1 from "crypto";
 import process$1 from "node:process";
 import { promisify, isDeepStrictEqual } from "node:util";
 import fs$1 from "node:fs";
-import crypto$1 from "node:crypto";
+import crypto from "node:crypto";
 import assert from "node:assert";
 import os from "node:os";
-import { createRequire } from "node:module";
+import { createRequire as createRequire$1 } from "node:module";
 var DownloadStatus = /* @__PURE__ */ ((DownloadStatus2) => {
   DownloadStatus2["PENDING"] = "PENDING";
   DownloadStatus2["ERROR"] = "ERROR";
@@ -35,6 +35,7 @@ var DownloadStatus = /* @__PURE__ */ ((DownloadStatus2) => {
   DownloadStatus2["PAUSE"] = "PAUSE";
   DownloadStatus2["ANAL"] = "ANAL";
   DownloadStatus2["ANALERROR"] = "ANALERROR";
+  DownloadStatus2["MERGER"] = "MERGER";
   return DownloadStatus2;
 })(DownloadStatus || {});
 var ResultStatus = /* @__PURE__ */ ((ResultStatus2) => {
@@ -4031,78 +4032,31 @@ hooks.HTML5_FMT = {
   MONTH: "YYYY-MM"
   // <input type="month" />
 };
-function DownloadFile(downloadObj, savePath, downloadTask) {
-  const win2 = new BrowserWindow({
-    show: false,
-    // 初始不显示窗口
-    skipTaskbar: true,
-    // 不在任务栏显示
-    width: 1,
-    // 最小化尺寸
-    height: 1,
-    x: 0,
-    // 放在屏幕外（可选）
-    y: 0,
-    frame: false,
-    // 无边框
-    transparent: true,
-    // 透明背景（可选）
-    webPreferences: {
-      nodeIntegration: true,
-      // 按需启用
-      contextIsolation: false,
-      // 根据需求调整
-      devTools: false
-      // 生产环境禁用开发者工具
+const require$3 = createRequire(import.meta.url);
+const { app: app$1 } = require$3("electron");
+const publicDir$1 = () => {
+  const node_serve_path = process.resourcesPath;
+  const PUBLIC_PATH = "/public";
+  console.warn(111111);
+  const isPackaged = app$1.isPackaged;
+  let file_path = "";
+  if (!isPackaged) {
+    file_path = join(process.cwd(), PUBLIC_PATH);
+  } else {
+    switch (process.platform) {
+      case "win32":
+        file_path = join(node_serve_path, PUBLIC_PATH);
+        break;
+      case "darwin":
+        file_path = join(node_serve_path, PUBLIC_PATH);
+        break;
+      case "linux":
+        file_path = join(node_serve_path, PUBLIC_PATH);
+        break;
     }
-  });
-  console.warn(JSON.stringify(downloadObj), savePath);
-  win2.webContents.session.once("will-download", (_, item) => {
-    console.warn("#####create download");
-    let startTime = Date.now();
-    let previousBytes = 0;
-    const filePath = path.join(savePath, downloadObj.fileName + downloadObj.suffix);
-    item.setSavePath(filePath);
-    item.on("updated", (_2, state) => {
-      const currentBytes = item.getReceivedBytes();
-      const currentTime = Date.now();
-      const timeDiff = (currentTime - startTime) / 1e3;
-      const bytesDiff = currentBytes - previousBytes;
-      const speed = bytesDiff / timeDiff;
-      previousBytes = currentBytes;
-      startTime = currentTime;
-      if (state === "interrupted") {
-        console.log("下载中断");
-        downloadTask.status = DownloadStatus.PAUSE;
-        updateDownloadStatus(downloadTask);
-      } else if (state === "progressing") {
-        const _progress = (Number(item.getReceivedBytes()) / Number(item.getTotalBytes())).toFixed(2);
-        console.log(`download progress: ${_progress}%`);
-        downloadTask.status = DownloadStatus.PENDING;
-        downloadTask.TotalBytes = item.getTotalBytes();
-        downloadTask.receivedBytes = item.getReceivedBytes();
-        downloadTask.speed = speed;
-        updateDownloadStatus(downloadTask);
-      }
-    });
-    item.on("done", (_2, state) => {
-      win2.destroy();
-      if (state === "completed") {
-        console.log("download finish:", filePath, downloadTask);
-        downloadTask.status = DownloadStatus.FINISH;
-        downloadTask.TotalBytes = item.getTotalBytes();
-        downloadTask.receivedBytes = item.getReceivedBytes();
-        downloadTask.finishTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
-        updateDownloadStatus(downloadTask);
-      } else {
-        console.log("download fail:", state);
-        downloadTask.status = DownloadStatus.ERROR;
-        updateDownloadStatus(downloadTask);
-      }
-    });
-  });
-  win2.webContents.downloadURL(downloadObj.analysisUrl);
-}
+  }
+  return file_path;
+};
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
   return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
@@ -4588,302 +4542,137 @@ var YTDlpWrap = (
   }()
 );
 var _default = dist$1.default = YTDlpWrap;
-const publicDir = () => {
-  const node_serve_path = process.resourcesPath;
-  const PUBLIC_PATH = "/public";
-  const isPackaged = app$1.isPackaged;
-  let file_path = "";
-  if (!isPackaged) {
-    file_path = join(process.cwd(), PUBLIC_PATH);
-  } else {
-    switch (process.platform) {
-      case "win32":
-        file_path = join(node_serve_path, PUBLIC_PATH);
-        break;
-      case "darwin":
-        file_path = join(node_serve_path, PUBLIC_PATH);
-        break;
-      case "linux":
-        file_path = join(node_serve_path, PUBLIC_PATH);
-        break;
-    }
-  }
-  return file_path;
-};
-function updateDownloadStatus(downloadTask) {
-  updateTask(downloadTask);
-  global.win.webContents.send("download:updateDownload", downloadTask);
+function _parseSizeToBytes(sizeStr) {
+  if (!sizeStr) return 0;
+  const units = {
+    B: 1,
+    KB: 1024,
+    MB: 1024 ** 2,
+    GB: 1024 ** 3,
+    TB: 1024 ** 4
+  };
+  sizeStr = sizeStr.trim().toUpperCase();
+  const match = sizeStr.match(/([\d.]+)\s*([KMGT]?I?B)/);
+  if (!match) return 0;
+  let [_, num, unit] = match;
+  num = parseFloat(num);
+  if (unit.endsWith("IB")) unit = unit[0] + "B";
+  return Math.round(num * (units[unit] || 1));
 }
-const _analysisWorker = (path2, id2) => {
-  return new Promise((rev, reject) => {
-    const analysisWorker = new Worker(resolve$5(publicDir(), "pathAnalysisWorker.js"), {
-      workerData: { path: path2 }
+function DownloadFileByDirectURL(downloadObj, savePath, downloadTask) {
+  const win2 = new BrowserWindow({
+    show: false,
+    // 初始不显示窗口
+    skipTaskbar: true,
+    // 不在任务栏显示
+    width: 1,
+    // 最小化尺寸
+    height: 1,
+    x: 0,
+    // 放在屏幕外（可选）
+    y: 0,
+    frame: false,
+    // 无边框
+    transparent: true,
+    // 透明背景（可选）
+    webPreferences: {
+      nodeIntegration: true,
+      // 按需启用
+      contextIsolation: false,
+      // 根据需求调整
+      devTools: false
+      // 生产环境禁用开发者工具
+    }
+  });
+  console.warn(JSON.stringify(downloadObj), savePath);
+  win2.webContents.session.once("will-download", (_, item) => {
+    console.warn("#####create download");
+    let startTime = Date.now();
+    let previousBytes = 0;
+    const filePath = path.join(savePath, downloadObj.fileName + downloadObj.suffix);
+    item.setSavePath(filePath);
+    item.on("updated", (_2, state) => {
+      const currentBytes = item.getReceivedBytes();
+      const currentTime = Date.now();
+      const timeDiff = (currentTime - startTime) / 1e3;
+      const bytesDiff = currentBytes - previousBytes;
+      const speed = bytesDiff / timeDiff;
+      previousBytes = currentBytes;
+      startTime = currentTime;
+      if (state === "interrupted") {
+        console.log("下载中断");
+        downloadTask.status = DownloadStatus.PAUSE;
+        updateDownloadStatus(downloadTask);
+      } else if (state === "progressing") {
+        const _progress = (Number(item.getReceivedBytes()) / Number(item.getTotalBytes())).toFixed(2);
+        console.log(`download progress: ${_progress}%`);
+        downloadTask.status = DownloadStatus.PENDING;
+        downloadTask.TotalBytes = item.getTotalBytes();
+        downloadTask.receivedBytes = item.getReceivedBytes();
+        downloadTask.speed = speed;
+        updateDownloadStatus(downloadTask);
+      }
     });
-    global.taskStack[id2] = analysisWorker;
-    analysisWorker.on("message", (msg) => {
-      console.warn("接收消息", msg);
-      if (msg.type === "done") {
-        rev(msg.data);
-      } else if (msg.type === "error") {
-        reject(msg.message);
+    item.on("done", (_2, state) => {
+      win2.destroy();
+      if (state === "completed") {
+        downloadTask.status = DownloadStatus.FINISH;
+        downloadTask.TotalBytes = item.getTotalBytes();
+        downloadTask.receivedBytes = item.getReceivedBytes();
+        downloadTask.finishTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
+        updateDownloadStatus(downloadTask);
       } else {
-        rev("");
-      }
-      delete global.taskStack[id2];
-      analysisWorker.terminate();
-    });
-    analysisWorker.on("error", (err) => {
-      console.warn(`Worker error: ${err}`);
-      reject(err);
-    });
-    analysisWorker.on("exit", (code2) => {
-      if (code2 !== 0) {
-        console.warn(`Worker 停止，退出码: ${code2}`);
-        reject(new Error(`Worker 停止，退出码: ${code2}`));
+        console.log("download fail:", state);
+        downloadTask.status = DownloadStatus.ERROR;
+        updateDownloadStatus(downloadTask);
       }
     });
   });
-};
-const updateTask = async (param) => {
-  const db = global.db;
-  try {
-    let query = [];
-    Object.keys(param).forEach((key, val) => {
-      console.warn(val, key);
-      if (key !== "speed" && key != "id") {
-        query.push(`${key}=@${key}`);
+  win2.webContents.downloadURL(downloadObj.analysisUrl);
+}
+function DownloadFileByOriginalURL(downloadTask, cookies) {
+  const url = downloadTask.originUrl || "";
+  let ytDlpWrap = new _default(resolve$5(publicDir$1(), "yt-dlp/yt-dlp_macos"));
+  let ffmpgPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg");
+  const savePath = resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s");
+  ytDlpWrap.exec([
+    "--add-header",
+    `Cookie: ${cookies}`,
+    "--ffmpeg-location",
+    ffmpgPath,
+    "-f",
+    "bestvideo+bestaudio",
+    "-o",
+    savePath,
+    url
+  ]).on("ytDlpEvent", (eventType, eventData) => {
+    if (eventType === "download") {
+      const match = eventData.match(/(\d+(?:\.\d+)?)%\s+of\s+([\d.]+\s*[KMG]?i?B)\s+at\s+([\d.]+\s*[KMG]?i?B\/s).*ETA\s+(\d+:\d+)/i);
+      if (match) {
+        downloadTask.status = DownloadStatus.PENDING;
+        downloadTask.TotalBytes = _parseSizeToBytes(match[2]);
+        downloadTask.receivedBytes = parseInt((match[1].replace("%", "") / 100 * downloadTask.TotalBytes).toFixed(0));
+        downloadTask.speed = _parseSizeToBytes(match[3]);
+        updateDownloadStatus(downloadTask);
       }
-    });
-    const update = db.prepare(`UPDATE tasks SET ${query.join(",")} WHERE id=@id`);
-    const updateFunc = db.transaction((signs) => {
-      for (const sign2 of signs) update.run(sign2);
-    });
-    updateFunc([param]);
-  } catch (error2) {
-    console.warn(error2 == null ? void 0 : error2.message);
-  }
-};
-const createTask = async (param) => {
-  const db = global.db;
-  const res = {
-    code: 200,
-    status: ResultStatus.OK,
-    message: "创建成功",
-    data: ""
-  };
-  try {
-    const _data = {
-      id: crypto.randomUUID(),
-      //下载任务id
-      originUrl: param.urls,
-      //原视频地址
-      status: DownloadStatus.ANAL,
-      //下载状态
-      TotalBytes: 0,
-      //视频总字节数
-      receivedBytes: 0,
-      //已下载的字节数
-      speed: 0,
-      createTime: hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss"),
-      finishTime: null,
-      savePath: param.path,
-      //下载的本地地址
-      name: new URL(param.urls).origin,
-      //文件名
-      analysisUrl: "",
-      //解析后的下载地址
-      suffix: "",
-      //文件后缀
-      fileType: DownloadFileType.NONE,
-      cover: ""
-    };
-    const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
-    if ((filterTask.length || []) > 0) {
-      res.status = ResultStatus.ERROR;
-      res.code = 202;
-      res.message = "存在相同下载";
-      res.data = filterTask;
-      return res;
     }
-    let query = [];
-    Object.keys(_data).forEach((key, val) => {
-      if (key !== "speed") {
-        query.push(key);
-      }
-    });
-    await db.prepare(`INSERT INTO tasks (${query.join(",")}) VALUES (@${query.join(",@")})`).run(_data);
-    let ytDlpWrap = new _default(resolve$5(publicDir(), "yt-dlp/yt-dlp_macos"));
-    ytDlpWrap.exec(["--cookies", `${resolve$5(publicDir(), "yt-dlp/cookies.txt")}`, "-o", `${resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s")}`, param.urls]).on("progress", (progress) => {
-      console.log("正在下载:", progress.percent, "%");
-    }).on("ytDlpEvent", (event) => {
-      console.log("事件:", event);
-    }).on("error", (err) => {
-      console.error("错误:", err);
-    }).on("close", () => {
-      console.log("完成");
-    });
-    return res;
-    _analysisWorker(param.urls, param.id).then((analysisObj) => {
-      if (analysisObj.analysisUrl) {
-        _data.name = analysisObj.fileName;
-        _data.analysisUrl = analysisObj.analysisUrl;
-        _data.suffix = analysisObj.suffix;
-        _data.fileType = analysisObj.fileType;
-        _data.cover = analysisObj.cover;
-        DownloadFile(analysisObj, param.path, _data);
-      } else {
-        _data.status = DownloadStatus.ANALERROR;
-        updateDownloadStatus(_data);
-      }
-    });
-    res.data = _data;
-  } catch (error2) {
-    console.warn(error2.message);
-    res.status = ResultStatus.ERROR;
-    res.message = "创建失败" + error2.message;
-  }
-  return res;
-};
-const queryTask = async (param) => {
-  const db = global.db;
-  const { page, pageSize } = param;
-  const res = {
-    code: 200,
-    status: ResultStatus.OK,
-    message: "查询成功",
-    data: ""
-  };
-  try {
-    console.warn(param);
-    let query = "", totalQuery = "";
-    const querys = (val) => {
-      return `SELECT * FROM tasks WHERE status ${val} ? ORDER BY createTime DESC `;
-    };
-    const totalQuerys = (val) => {
-      return `SELECT COUNT(*) as total FROM tasks WHERE status ${val} ?`;
-    };
-    if (param.status === 1) {
-      query = querys("==");
-      totalQuery = totalQuerys("==");
-    } else {
-      query = querys("!=");
-      totalQuery = totalQuerys("!=");
+    if (eventType === "finished") {
+      console.warn("finish ", eventData);
     }
-    const _res = await db.prepare(query).all(
-      "FINISH"
-    );
-    const stmt = db.prepare(totalQuery).all(
-      "FINISH"
-    );
-    res.data = {
-      list: _res,
-      page: {
-        page,
-        pageSize,
-        total: stmt[0].total
-      }
-    };
-  } catch (error2) {
-    console.warn(error2.message);
-    res.status = ResultStatus.ERROR;
-    res.message = "查询失败" + error2.message;
-  }
-  return res;
-};
-const deleteTask = async (param) => {
-  const db = global.db;
-  const res = {
-    code: 200,
-    status: ResultStatus.OK,
-    message: "删除成功",
-    data: ""
-  };
-  try {
-    if (global.taskStack[param.id]) {
-      global.taskStack[param.id].terminate();
-      delete global.taskStack[param.id];
+  }).on("ytDlpEvent", (event) => {
+    console.log("事件:", event);
+    if (event === "Merger") {
+      downloadTask.status = DownloadStatus.MERGER;
+      updateDownloadStatus(downloadTask);
     }
-    await db.prepare("DELETE FROM tasks WHERE id == ?").run(
-      param.id
-    );
-  } catch (error2) {
-    console.warn(error2.message);
-    res.status = ResultStatus.ERROR;
-    res.message = "删除失败" + error2.message;
-  }
-  return res;
-};
-const DownloadHandler = () => {
-  const DOMAIN = "download";
-  ipcMain$1.handle(`${DOMAIN}:editTask`, async (_) => {
-    return "ok";
+  }).on("error", (err) => {
+    console.error("错误:", err);
+  }).on("close", () => {
+    downloadTask.status = DownloadStatus.FINISH;
+    downloadTask.finishTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
+    updateDownloadStatus(downloadTask);
   });
-  ipcMain$1.handle(`${DOMAIN}:createTask`, async (_, param) => {
-    return await createTask(param);
-  });
-  ipcMain$1.handle(`${DOMAIN}:getTaskList`, async (_, param) => {
-    return await queryTask(param);
-  });
-  ipcMain$1.handle(`${DOMAIN}:deleteTask`, async (_, param) => {
-    return await deleteTask(param);
-  });
-  ipcMain$1.handle(`${DOMAIN}:getVideoUrl`, async (_) => {
-    return "ok";
-  });
-};
-const chooseFolderPath = async () => {
-  const res = {
-    code: 200,
-    status: ResultStatus.ERROR,
-    message: "",
-    data: ""
-  };
-  try {
-    const directory = await dialog.showOpenDialog({ properties: ["openDirectory"] });
-    if (!directory.canceled) {
-      const directoryPath = directory.filePaths[0];
-      console.log("Selected directory:", directoryPath);
-      res.data = directoryPath;
-      res.status = ResultStatus.OK;
-      return res;
-    }
-    return res;
-  } catch (e) {
-    return res;
-  }
-};
-const openFolderPath = async (paths) => {
-  const res = {
-    code: 200,
-    status: ResultStatus.OK,
-    message: "",
-    data: ""
-  };
-  try {
-    if (!fs.existsSync(path.join(paths))) {
-      res.status = ResultStatus.ERROR;
-      res.message = "打开失败，目录不存在";
-    } else {
-      await shell$1.openPath(path.join(paths));
-    }
-  } catch (e) {
-    res.status = ResultStatus.ERROR;
-    res.message = "打开失败" + e.message;
-  }
-  return res;
-};
-const FileHandler = () => {
-  const DOMAIN = "file";
-  ipcMain$1.handle(`${DOMAIN}:chooseFolderPath`, async () => {
-    return chooseFolderPath();
-  });
-  ipcMain$1.handle(`${DOMAIN}:openFolderPath`, async (_, param) => {
-    return await openFolderPath(param.path);
-  });
-  ipcMain$1.handle(`${DOMAIN}:deleteFile`, async (_, param) => {
-    return await openFolderPath(param.path);
-  });
-};
+}
 const isObject = (value) => {
   const type2 = typeof value;
   return value !== null && (type2 === "object" || type2 === "function");
@@ -19982,8 +19771,8 @@ class Conf {
     }
     try {
       const initializationVector = data.slice(0, 16);
-      const password = crypto$1.pbkdf2Sync(__privateGet(this, _encryptionKey), initializationVector.toString(), 1e4, 32, "sha512");
-      const decipher = crypto$1.createDecipheriv(encryptionAlgorithm, password, initializationVector);
+      const password = crypto.pbkdf2Sync(__privateGet(this, _encryptionKey), initializationVector.toString(), 1e4, 32, "sha512");
+      const decipher = crypto.createDecipheriv(encryptionAlgorithm, password, initializationVector);
       const slice = data.slice(17);
       const dataUpdate = typeof slice === "string" ? stringToUint8Array(slice) : slice;
       return uint8ArrayToString(concatUint8Arrays([decipher.update(dataUpdate), decipher.final()]));
@@ -20024,9 +19813,9 @@ class Conf {
   _write(value) {
     let data = this._serialize(value);
     if (__privateGet(this, _encryptionKey)) {
-      const initializationVector = crypto$1.randomBytes(16);
-      const password = crypto$1.pbkdf2Sync(__privateGet(this, _encryptionKey), initializationVector.toString(), 1e4, 32, "sha512");
-      const cipher = crypto$1.createCipheriv(encryptionAlgorithm, password, initializationVector);
+      const initializationVector = crypto.randomBytes(16);
+      const password = crypto.pbkdf2Sync(__privateGet(this, _encryptionKey), initializationVector.toString(), 1e4, 32, "sha512");
+      const cipher = crypto.createCipheriv(encryptionAlgorithm, password, initializationVector);
       data = concatUint8Arrays([initializationVector, stringToUint8Array(":"), cipher.update(stringToUint8Array(data)), cipher.final()]);
     }
     if (process$1.env.SNAP) {
@@ -20204,7 +19993,7 @@ const getSysConfig = () => {
     if (!store.has("sysConfig")) {
       store.set("sysConfig", {
         maxDownloadCount: 3,
-        savePath: app$1.getPath("downloads"),
+        savePath: app$2.getPath("downloads"),
         isLimitSpeed: false,
         limitSpeed: 500,
         useProxy: false,
@@ -20320,6 +20109,24 @@ const getCookieList = async (param) => {
   }
   return res;
 };
+const getCookie = async (param) => {
+  const db = global.db;
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "",
+    data: ""
+  };
+  try {
+    const _data = await db.prepare("SELECT * FROM cookies WHERE domain == ?").all(param.domain || "");
+    res.data = _data[0];
+  } catch (error2) {
+    res.status = ResultStatus.ERROR;
+    res.message = "获取cookie失败：" + error2.message;
+    console.warn("err", error2.message);
+  }
+  return res;
+};
 const setSysConfig = (param) => {
   const res = {
     code: 200,
@@ -20337,6 +20144,288 @@ const setSysConfig = (param) => {
     console.warn("err", error2.message);
   }
   return res;
+};
+const require$2 = createRequire(import.meta.url);
+const { Worker } = require$2("node:worker_threads");
+async function _getCookie(domain) {
+  let res = "";
+  const val = await getCookie({ domain });
+  const { status, data } = val;
+  if (status == ResultStatus.OK) {
+    if (data) {
+      res = data.cookies;
+    } else {
+      console.warn("no cookie found");
+    }
+  }
+  return res;
+}
+function updateDownloadStatus(downloadTask) {
+  updateTask(downloadTask);
+  global.win.webContents.send("download:updateDownload", downloadTask);
+}
+const _analysisWorker = (path2, id2, cookies) => {
+  return new Promise((rev, reject) => {
+    const analysisWorker = new Worker(resolve$5(global.__dirname, "../electron/worker/pathAnalysisWorker.js"), {
+      workerData: { path: path2, publicDir: publicDir$1(), cookies },
+      type: "module"
+    });
+    global.taskStack[id2] = analysisWorker;
+    analysisWorker.on("message", (msg) => {
+      console.warn("接收消息", msg);
+      rev(msg);
+      delete global.taskStack[id2];
+      analysisWorker.terminate();
+    });
+    analysisWorker.on("error", (err) => {
+      console.warn(`Worker error: ${err}`);
+      reject(err);
+    });
+    analysisWorker.on("exit", (code2) => {
+      if (code2 !== 0) {
+        console.warn(`Worker 停止，退出码: ${code2}`);
+        reject(new Error(`Worker 停止，退出码: ${code2}`));
+      }
+    });
+  });
+};
+const updateTask = async (param) => {
+  const db = global.db;
+  try {
+    let query = [];
+    console.warn("update task", param);
+    Object.keys(param).forEach((key, val) => {
+      if (key !== "speed" && key != "id") {
+        query.push(`${key}=@${key}`);
+      }
+    });
+    const update = db.prepare(`UPDATE tasks SET ${query.join(",")} WHERE id=@id`);
+    const updateFunc = db.transaction((signs) => {
+      for (const sign2 of signs) update.run(sign2);
+    });
+    updateFunc([param]);
+  } catch (error2) {
+    console.warn(error2 == null ? void 0 : error2.message);
+  }
+};
+const createTask = async (param) => {
+  const db = global.db;
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "创建成功",
+    data: ""
+  };
+  try {
+    const _data = {
+      id: crypto$1.randomUUID(),
+      //下载任务id
+      originUrl: param.urls,
+      //原视频地址
+      status: DownloadStatus.ANAL,
+      //下载状态
+      TotalBytes: 0,
+      //视频总字节数
+      receivedBytes: 0,
+      //已下载的字节数
+      speed: 0,
+      createTime: hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss"),
+      finishTime: null,
+      savePath: param.path,
+      //下载的本地地址
+      name: new URL(param.urls).origin,
+      //文件名
+      analysisUrl: "",
+      //解析后的下载地址
+      suffix: "",
+      //文件后缀
+      fileType: DownloadFileType.NONE,
+      cover: ""
+    };
+    const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
+    if ((filterTask.length || []) > 0) {
+      res.status = ResultStatus.ERROR;
+      res.code = 202;
+      res.message = "存在相同下载";
+      res.data = filterTask;
+      return res;
+    }
+    let query = [];
+    Object.keys(_data).forEach((key, val) => {
+      if (key !== "speed") {
+        query.push(key);
+      }
+    });
+    await db.prepare(`INSERT INTO tasks (${query.join(",")}) VALUES (@${query.join(",@")})`).run(_data);
+    const _cookie = await _getCookie(_data.name);
+    console.warn("get cookie success");
+    _analysisWorker(param.urls, param.id, _cookie).then((analysisObj) => {
+      if (analysisObj.type === "done") {
+        const { data } = analysisObj;
+        console.warn("isUniversal", data.isUniversal);
+        _data.name = data.fileName;
+        _data.analysisUrl = data.analysisUrl;
+        _data.suffix = data.suffix;
+        _data.fileType = data.fileType;
+        _data.cover = data.cover;
+        if (data.isUniversal) {
+          DownloadFileByOriginalURL(_data, _cookie);
+        } else {
+          DownloadFileByDirectURL(analysisObj.data, param.path, _data);
+        }
+      } else {
+        _data.status = DownloadStatus.ANALERROR;
+        updateDownloadStatus(_data);
+      }
+    });
+    res.data = _data;
+  } catch (error2) {
+    console.warn(error2.message);
+    res.status = ResultStatus.ERROR;
+    res.message = "创建失败" + error2.message;
+  }
+  return res;
+};
+const queryTask = async (param) => {
+  const db = global.db;
+  const { page, pageSize } = param;
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "查询成功",
+    data: ""
+  };
+  try {
+    console.warn(param);
+    let query = "", totalQuery = "";
+    const querys = (val) => {
+      return `SELECT * FROM tasks WHERE status ${val} ? ORDER BY createTime DESC `;
+    };
+    const totalQuerys = (val) => {
+      return `SELECT COUNT(*) as total FROM tasks WHERE status ${val} ?`;
+    };
+    if (param.status === 1) {
+      query = querys("==");
+      totalQuery = totalQuerys("==");
+    } else {
+      query = querys("!=");
+      totalQuery = totalQuerys("!=");
+    }
+    const _res = await db.prepare(query).all(
+      "FINISH"
+    );
+    const stmt = db.prepare(totalQuery).all(
+      "FINISH"
+    );
+    res.data = {
+      list: _res,
+      page: {
+        page,
+        pageSize,
+        total: stmt[0].total
+      }
+    };
+  } catch (error2) {
+    console.warn(error2.message);
+    res.status = ResultStatus.ERROR;
+    res.message = "查询失败" + error2.message;
+  }
+  return res;
+};
+const deleteTask = async (param) => {
+  const db = global.db;
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "删除成功",
+    data: ""
+  };
+  try {
+    console.warn("del start", param);
+    if (global.taskStack[param.id]) {
+      global.taskStack[param.id].terminate();
+      delete global.taskStack[param.id];
+    }
+    await db.prepare("DELETE FROM tasks WHERE id == ?").run(
+      param.id
+    );
+  } catch (error2) {
+    console.warn(error2.message);
+    res.status = ResultStatus.ERROR;
+    res.message = "删除失败" + error2.message;
+  }
+  return res;
+};
+const DownloadHandler = () => {
+  const DOMAIN = "download";
+  ipcMain$1.handle(`${DOMAIN}:editTask`, async (_) => {
+    return "ok";
+  });
+  ipcMain$1.handle(`${DOMAIN}:createTask`, async (_, param) => {
+    return await createTask(param);
+  });
+  ipcMain$1.handle(`${DOMAIN}:getTaskList`, async (_, param) => {
+    return await queryTask(param);
+  });
+  ipcMain$1.handle(`${DOMAIN}:deleteTask`, async (_, param) => {
+    return await deleteTask(param);
+  });
+  ipcMain$1.handle(`${DOMAIN}:getVideoUrl`, async (_) => {
+    return "ok";
+  });
+};
+const chooseFolderPath = async () => {
+  const res = {
+    code: 200,
+    status: ResultStatus.ERROR,
+    message: "",
+    data: ""
+  };
+  try {
+    const directory = await dialog.showOpenDialog({ properties: ["openDirectory"] });
+    if (!directory.canceled) {
+      const directoryPath = directory.filePaths[0];
+      console.log("Selected directory:", directoryPath);
+      res.data = directoryPath;
+      res.status = ResultStatus.OK;
+      return res;
+    }
+    return res;
+  } catch (e) {
+    return res;
+  }
+};
+const openFolderPath = async (paths) => {
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "",
+    data: ""
+  };
+  try {
+    if (!fs.existsSync(path.join(paths))) {
+      res.status = ResultStatus.ERROR;
+      res.message = "打开失败，目录不存在";
+    } else {
+      await shell$1.openPath(path.join(paths));
+    }
+  } catch (e) {
+    res.status = ResultStatus.ERROR;
+    res.message = "打开失败" + e.message;
+  }
+  return res;
+};
+const FileHandler = () => {
+  const DOMAIN = "file";
+  ipcMain$1.handle(`${DOMAIN}:chooseFolderPath`, async () => {
+    return chooseFolderPath();
+  });
+  ipcMain$1.handle(`${DOMAIN}:openFolderPath`, async (_, param) => {
+    return await openFolderPath(param.path);
+  });
+  ipcMain$1.handle(`${DOMAIN}:deleteFile`, async (_, param) => {
+    return await openFolderPath(param.path);
+  });
 };
 const SysHandler = () => {
   const DOMAIN = "sys";
@@ -20366,6 +20455,9 @@ const SysHandler = () => {
   });
   ipcMain$1.handle(`${DOMAIN}:getCookieList`, function(_, param) {
     return getCookieList(param);
+  });
+  ipcMain$1.handle(`${DOMAIN}:getCookie`, function(_, param) {
+    return getCookie(param);
   });
   ipcMain$1.handle(`${DOMAIN}:addCookie`, function(_, param) {
     return addCookie(param);
@@ -20406,10 +20498,10 @@ const createTables = async (db) => {
     updateTime datetime
   )`);
 };
-const require$1 = createRequire(import.meta.url);
+const require$1 = createRequire$1(import.meta.url);
 const conDb = () => {
   const DB_NAME = "sql.db";
-  const DB_PATH = resolve$5(publicDir(), DB_NAME);
+  const DB_PATH = resolve$5(publicDir$1(), DB_NAME);
   try {
     if (!fs.existsSync(DB_PATH)) {
       fs.writeFileSync(DB_PATH, "");
@@ -20465,18 +20557,42 @@ function createWindow() {
   }
   win.webContents.openDevTools();
 }
-app$1.on("window-all-closed", () => {
+app$2.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
-    app$1.quit();
+    app$2.quit();
     win = null;
   }
 });
-app$1.on("activate", () => {
+app$2.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
 });
-app$1.whenReady().then(async () => {
+const publicDir = () => {
+  const node_serve_path = process.resourcesPath;
+  const PUBLIC_PATH = "/public";
+  const isPackaged = app$2.isPackaged;
+  let file_path = "";
+  if (!isPackaged) {
+    file_path = path$1.join(process.cwd(), PUBLIC_PATH);
+  } else {
+    switch (process.platform) {
+      case "win32":
+        file_path = path$1.join(node_serve_path, PUBLIC_PATH);
+        break;
+      case "darwin":
+        file_path = path$1.join(node_serve_path, PUBLIC_PATH);
+        break;
+      case "linux":
+        file_path = path$1.join(node_serve_path, PUBLIC_PATH);
+        break;
+    }
+  }
+  return file_path;
+};
+app$2.whenReady().then(async () => {
+  global.__dirname = __dirname;
+  global.publicDir = publicDir();
   global.db = initDB();
   createWindow();
   InitHandler();

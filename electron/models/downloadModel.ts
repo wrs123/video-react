@@ -1,13 +1,30 @@
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 import {BaseResult, DownloadAnalysisType, DownloadTaskType} from "../../types.ts";
 import {DownloadFileType, DownloadStatus, ResultStatus} from "../../enums.ts";
-import DownloadFile from "../libs/downloadManage.ts";
+import {DownloadFileByDirectURL, DownloadFileByOriginalURL} from "../libs/downloadManage.ts";
 import crypto from "crypto"
 import moment from 'moment'
-import YTDlpWrap from 'yt-dlp-wrap';
-import { Worker } from "node:worker_threads";
+const { Worker } = require("node:worker_threads");
 import { resolve, dirname } from 'path';
-import {publicDir} from "../utils";
+import {publicDir} from "../utils/index.js";
+import {getCookie} from "./sysModel.ts";
 
+
+async function _getCookie(domain){
+    let res = ""
+
+    const val = await getCookie({ domain })
+    const { status, data } = val
+    if(status == ResultStatus.OK){
+        if(data){
+            res = data.cookies
+        }else{
+            console.warn('no cookie found');
+        }
+    }
+    return res
+}
 
 
 export function updateDownloadStatus(downloadTask:any){
@@ -19,28 +36,20 @@ export function updateDownloadStatus(downloadTask:any){
  * 地址解析worker
  * @param path
  */
-const _analysisWorker = (path: string, id: string) => {
+const _analysisWorker = (path: string, id: string, cookies: string) => {
     return new Promise((rev, reject) => {
         //解析下载地址
 
-        const analysisWorker = new Worker(resolve(publicDir(), 'pathAnalysisWorker.js'), {
-            workerData: { path },
-
+        const analysisWorker = new Worker(resolve(global.__dirname, '../electron/worker/pathAnalysisWorker.js'), {
+            workerData: { path, publicDir: publicDir(), cookies},
+            type: "module"
         });
         //线程入栈
         global.taskStack[id] = analysisWorker;
 
         analysisWorker.on("message", (msg) => {
             console.warn('接收消息', msg)
-            if(msg.type === 'done'){
-                rev(msg.data)
-            }
-            else if(msg.type === 'error'){
-                reject(msg.message);
-            }
-            else{
-                rev("")
-            }
+            rev(msg)
             //线程出栈
             delete global.taskStack[id]
             //销毁线程
@@ -69,15 +78,12 @@ export const updateTask = async (param) => {
     const db = global.db
 
     try{
-
         let query: any = []
-
+        console.warn('update task', param)
         Object.keys(param).forEach((key, val) => {
-            console.warn(val, key)
             if(key !== 'speed' && key != 'id'){
                 query.push(`${key}=@${key}`)
             }
-
         })
 
         const update = db.prepare(`UPDATE tasks SET ${query.join(',')} WHERE id=@id`);
@@ -144,47 +150,35 @@ export const createTask = async (param: any) => {
         })
         await db.prepare(`INSERT INTO tasks (${query.join(',')}) VALUES (@${query.join(',@')})`).run(_data)
 
-        // if(){
-        //
-        // }
-        // let param = (1, 1)
-        //通用解析
-        let ytDlpWrap = new YTDlpWrap(resolve(publicDir(), 'yt-dlp/yt-dlp_macos'));
+        //获取数据库内的网站cookie
+        const _cookie = await _getCookie(_data.name)
+        console.warn('get cookie success')
 
-        ytDlpWrap
-            .exec(["--cookies", `${resolve(publicDir(), 'yt-dlp/cookies.txt')}`, "-o", `${resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s') }`, param.urls])
-            .on("progress", (progress) => {
-                console.log("正在下载:", progress.percent, "%");
-            })
-            .on("ytDlpEvent", (event) => {
-                console.log("事件:", event);
-            })
-            .on("error", (err) => {
-                console.error("错误:", err);
-            })
-            .on("close", () => {
-                console.log("完成");
-            });
+        _analysisWorker(param.urls, param.id, _cookie).then((analysisObj: any) => {
 
+            if(analysisObj.type === 'done'){
+                const { data } = analysisObj;
+                console.warn('isUniversal', data.isUniversal)
 
+                _data.name = data.fileName
+                _data.analysisUrl = data.analysisUrl
+                _data.suffix = data.suffix
+                _data.fileType = data.fileType
+                _data.cover = data.cover
 
-        return res
-
-        // 通用解析外下载方法
-        _analysisWorker(param.urls, param.id).then((analysisObj: any) => {
-            if(analysisObj.analysisUrl){
-                _data.name = analysisObj.fileName
-                _data.analysisUrl = analysisObj.analysisUrl
-                _data.suffix = analysisObj.suffix
-                _data.fileType = analysisObj.fileType
-                _data.cover = analysisObj.cover
-
-                DownloadFile(analysisObj, param.path, _data)
-            }else{
+                if(data.isUniversal){
+                    DownloadFileByOriginalURL(_data, _cookie)
+                }else{
+                    DownloadFileByDirectURL(analysisObj.data, param.path, _data)
+                }
+            }
+            else {
                 _data.status = DownloadStatus.ANALERROR
                 updateDownloadStatus(_data)
             }
         })
+
+        res.data = _data
 
         // DownloadFile(analysisObj, param.path, _data)
 
@@ -195,8 +189,6 @@ export const createTask = async (param: any) => {
         // setTimeout(() => {
         //     global.downloadStack[_taskid].resume()
         // }, 3000)
-
-        res.data = _data
     }catch(error){
         console.warn(error.message)
         res.status= ResultStatus.ERROR
@@ -275,6 +267,7 @@ export const deleteTask = async (param: any) => {
     }
 
     try{
+        console.warn('del start', param )
         if(global.taskStack[param.id]){
             //销毁线程
             global.taskStack[param.id].terminate();

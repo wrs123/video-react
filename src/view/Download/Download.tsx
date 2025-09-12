@@ -65,7 +65,7 @@ function Download(props: any) {
         setIsModalOpen(false);
     };
 
-    const commandCommon = async (type: string, item: DownloadTaskType) => {
+    const commandCommon = async (type: string, item: DownloadTaskType, delSql: boolean = true) => {
 
         switch (type) {
             case "PAUSE":
@@ -87,9 +87,12 @@ function Download(props: any) {
                 ));
                 break;
             case "DELETE":
-                const res = await API.deleteTask({id: item?.id})
-                console.warn(res)
-                if(res.status === ResultStatus.OK){
+                if(delSql){
+                    const res = await API.deleteTask({id: item?.id})
+                    if(res.status === ResultStatus.OK){
+                        setDownloadList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
+                    }
+                }else{
                     setDownloadList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
                 }
                 break;

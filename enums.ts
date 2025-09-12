@@ -4,7 +4,8 @@ export enum DownloadStatus {
     FINISH = 'FINISH',
     PAUSE = 'PAUSE',
     ANAL = 'ANAL', //解析中
-    ANALERROR = 'ANALERROR' //解析失败
+    ANALERROR = 'ANALERROR', //解析失败
+    MERGER = 'MERGER' //合并
 }
 
 export enum ResultStatus {

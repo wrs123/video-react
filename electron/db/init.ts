@@ -1,7 +1,7 @@
 import { resolve } from 'path'
 import { createRequire } from 'node:module'
 import fs from 'fs'
-import { publicDir } from '../utils'
+import { publicDir } from '../utils/index.js'
 import createTables from './createTable'
 
 const require = createRequire(import.meta.url)

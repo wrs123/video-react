@@ -1,11 +1,13 @@
-import { app } from 'electron'
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { app } = require("electron");
 import { join } from 'path'
 
 export const publicDir = () => {
   /* 执行node命令时候的文件夹地址 */
   const node_serve_path = process.resourcesPath
   const PUBLIC_PATH = '/public'
-  // console.warn(node_serve_path)
+  console.warn(111111)
   /* 判断是否是生产环境 */
   const isPackaged = app.isPackaged
   /* 需要读写的文件地址 */

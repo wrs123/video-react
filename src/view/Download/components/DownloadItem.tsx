@@ -14,7 +14,7 @@ interface DownloadItemProps {
     item?: DownloadTaskType,
     status: number,
     index?: number,
-    commandCommon?: (type: string, item: DownloadTaskType) => Promise<void>
+    commandCommon?: (type: string, item: DownloadTaskType, delSql: boolean) => Promise<void>
 }
 
 function DownloadItem(props: DownloadItemProps) {
@@ -138,7 +138,7 @@ function DownloadItem(props: DownloadItemProps) {
             window['onDownloadUpdate'].get((event: unknown, str: DownloadTaskType) => {
                 if(props.item.id === str.id){
                     if(str.status === DownloadStatus.FINISH){
-                        props.commandCommon && props.commandCommon('DELETE', str)
+                        props.commandCommon && props.commandCommon('DELETE', str, false)
                     }else{
                         setTaskItem({...taskItem, ...str})
                     }
@@ -214,7 +214,10 @@ function DownloadItem(props: DownloadItemProps) {
                             </Then>
                         </If>
                         <If condition={taskItem?.status == DownloadStatus.FINISH}>
-                            {fileSizeFormat(taskItem?.TotalBytes)}
+                            <Then>
+                                {fileSizeFormat(taskItem?.TotalBytes)}
+                                <span style={{paddingLeft: '12px'}}>{taskItem?.finishTime}</span>
+                            </Then>
                         </If>
                         <If condition={taskItem?.status == DownloadStatus.PENDING || taskItem?.status == DownloadStatus.PAUSE}>
                             <Then>

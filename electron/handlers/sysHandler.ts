@@ -1,5 +1,5 @@
 import { ipcMain  } from 'electron'
-import {getSysConfig, setSysConfig, getCookieList, addCookie, updateCookie, delCookie} from "../models/sysModel.ts";
+import {getSysConfig, setSysConfig, getCookieList, getCookie, addCookie, updateCookie, delCookie} from "../models/sysModel.ts";
 
 export const SysHandler = () => {
     const DOMAIN = "sys"
@@ -50,6 +50,13 @@ export const SysHandler = () => {
      */
     ipcMain.handle(`${DOMAIN}:getCookieList`, function (_, param) {
         return getCookieList(param)
+    })
+
+    /** 获取cookie详情
+     * @param {Object} event
+     */
+    ipcMain.handle(`${DOMAIN}:getCookie`, function (_, param) {
+        return getCookie(param)
     })
 
     /** 添加cookie
