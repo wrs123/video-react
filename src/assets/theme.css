@@ -14,6 +14,9 @@
     --color-config-content: #fff;
     --color-block: #f9fafb;
     --color-block-border: #1018280a;
+    --color-window-button-hover: #e8e8e8;
+    --color-download-item-anal: #fff;
+    --color-download-item-err: #ffccc7;
 }
 
 :root[data-theme='dark'] {
@@ -32,4 +35,7 @@
     --color-config-slider-text: #B0B0B0;
     --color-config-slider-active-text: #E0E0E0;
     --color-config-slider-active-bg: rgba(200, 206, 218, 0.2);
+    --color-window-button-hover: #2c2c2c;
+    --color-download-item-anal: #3b3b3b;
+    --color-download-item-err: #451d1f;
 }
