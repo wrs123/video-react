@@ -91,6 +91,7 @@
     flex: 1;
     text-shadow: 0 0 1px rgba(0, 0, 0, .3);
     padding-right: 66px;
+    width: -webkit-fill-available;
 
     &.full{
       padding-right: 0!important;
@@ -102,6 +103,10 @@
       line-height: 1;
       display: flex;
       align-items: flex-end;
+      text-wrap: nowrap;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .content{

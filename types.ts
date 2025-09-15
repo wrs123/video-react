@@ -1,4 +1,4 @@
-import {DownloadFileType, DownloadStatus, ResultStatus} from "./enums.ts";
+import {AnalyzeType, DownloadFileType, DownloadStatus, ResultStatus} from "./enums.ts";
 
 interface DownloadTaskType {
     id: string, //下载任务id
@@ -14,8 +14,10 @@ interface DownloadTaskType {
     analysisUrl: string, //解析后的下载地址
     suffix: string //文件后缀
     fileType: DownloadFileType,
-    cover?: string //文件预览图
+    cover?: string, //文件预览图
+    analyzeType?: AnalyzeType
 }
+
 
 interface BaseResult {
     code: number,

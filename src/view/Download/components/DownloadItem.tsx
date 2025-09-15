@@ -129,6 +129,40 @@ function DownloadItem(props: DownloadItemProps) {
 
     }
 
+    const createTask = async () => {
+        const res = await API.createTask(values)
+        console.warn(res)
+        if(res.status == ResultStatus.OK){
+            onSubmit(res.data)
+            messageApi.open({
+                type: 'success',
+                content: '创建成功',
+            });
+        }else{
+
+            if(res.code === 202){
+
+            }else{
+                messageApi.open({
+                    type: 'warning',
+                    content: `创建失败：${res.message}`,
+                });
+            }
+        }
+    }
+
+
+
+    const commandCommon = async (type: string, item: DownloadTaskType) => {
+
+        switch (type) {
+            case "RELOAD":
+                props.commandCommon && await props.commandCommon('DELETE', item, true)
+                await API.createTask(item)
+                break;
+        }
+    }
+
 
     useEffect(() => {
         setTaskItem(props.item)

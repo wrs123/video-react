@@ -7,6 +7,7 @@ import moment from 'moment'
 import {publicDir} from "../utils";
 import YTDlpWrap from 'yt-dlp-wrap';
 import { resolve } from 'path';
+import { spawn } from "child_process";
 
 /**
  * 将类似 "12.3MiB"、"2.5MB"、"3.21MiB/s" 的字符串转换为字节数
@@ -129,56 +130,63 @@ export function DownloadFileByDirectURL(downloadObj : DownloadAnalysisType, save
  * 通用下载
  * @constructor
  */
-export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, cookies){
-    const url = downloadTask.originUrl || ''
+export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpArgument: string[]){
     //通用解析
-    let ytDlpWrap = new YTDlpWrap(resolve(publicDir(), 'yt-dlp/yt-dlp_macos'));
-    let ffmpgPath = resolve(publicDir(), 'ffmpeg/ffmpeg');
+    const url = downloadTask.originUrl || ''
+    const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg.exe');
     const savePath = resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s')
 
-    ytDlpWrap
-        .exec([
-            "--add-header", `Cookie: ${cookies}`,
-            "--ffmpeg-location", ffmpgPath,
-            "-f", "bestvideo+bestaudio",
-            "-o", savePath,
-            url
-        ])
-        .on("ytDlpEvent", (eventType, eventData) => {
-            if (eventType === "download") {
-                const match = eventData.match(/(\d+(?:\.\d+)?)%\s+of\s+([\d.]+\s*[KMG]?i?B)\s+at\s+([\d.]+\s*[KMG]?i?B\/s).*ETA\s+(\d+:\d+)/i);
-                if (match) {
-                    downloadTask.status = DownloadStatus.PENDING
-                    downloadTask.TotalBytes = _parseSizeToBytes(match[2])
-                    downloadTask.receivedBytes = parseInt((match[1].replace("%", "") / 100 * downloadTask.TotalBytes).toFixed(0))
-                    downloadTask.speed = _parseSizeToBytes(match[3])
-                    updateDownloadStatus(downloadTask)
-                    // const percent = match[1];
-                    // const totalSize = _parseSizeToBytes(match[2]);
-                    // const speed = _parseSizeToBytes(match[3]);
-                    // const eta = match[4];
-                    // console.log(`已完成: ${percent}% | 总大小: ${totalSize} | 速度: ${speed} | 剩余时间: ${eta}`);
-                }
-            }
-            if(eventType === "finished"){
-                console.warn('finish ', eventData)
-            }
-        })
-        .on("ytDlpEvent", (event) => {
-            console.log("事件:", event);
-            if(event === 'Merger'){
-                downloadTask.status = DownloadStatus.MERGER
+    ytDlpArgument.splice(2, 0, ffmpegPath )
+    ytDlpArgument.splice(2, 0, "--ffmpeg-location" )
+    ytDlpArgument.splice(2, 0, "bv*+ba/b" )
+    ytDlpArgument.splice(2, 0, "-f" )
+    ytDlpArgument.splice(2, 0, savePath )
+    ytDlpArgument.splice(2, 0, "-o" )
+
+    ytDlpArgument.splice(2, 0, '{"type": "#DOWNLOAD#","percent": "%(progress._percent)s", "downloaded": "%(progress.downloaded_bytes)s", "total": "%(progress.total_bytes)s", "totalEstimate": "%(progress.total_bytes_estimate)s", "speed": "%(progress.speed)s"}' )
+    ytDlpArgument.splice(2, 0, '--progress-template' )
+
+    // ytDlpArgument.splice(2, 0, '--no-cache-dir' )
+    // ytDlpArgument.splice(2, 0, '--print-json' )
+    ytDlpArgument.splice(2, 0, '--newline' )
+
+
+    console.warn(ytDlpArgument)
+    const ytdlp = spawn(resolve(publicDir(), 'yt-dlp/yt-dlp.exe'), ytDlpArgument, {stdio: ['ignore', 'pipe', 'pipe']})
+
+    ytdlp.stdout.on('data', (data) => {
+        const lines = data.toString().split('\n').filter(Boolean);
+        console.warn(lines)
+        lines.forEach((line) => {
+            if(line.includes('#DOWNLOAD#')){
+                const json = JSON.parse(line);
+
+                console.warn(json)
+
+                downloadTask.status = DownloadStatus.PENDING
+                downloadTask.TotalBytes = json.total === 'NA' ? json.totalEstimate : json.total
+                downloadTask.receivedBytes = json.downloaded
+                downloadTask.speed = json.speed
+                console.warn(downloadTask)
                 updateDownloadStatus(downloadTask)
             }
-        })
-        .on("error", (err) => {
-            console.error("错误:", err);
-        })
-        .on("close", () => {
-            downloadTask.status = DownloadStatus.FINISH
-            downloadTask.finishTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
-            updateDownloadStatus(downloadTask)
+
         });
+    });
+
+    ytdlp.stderr.on('data', (data) => {
+        // console.error('err:', data.toString());
+        // downloadTask.status = DownloadStatus.PAUSE
+        // updateDownloadStatus(downloadTask)
+    });
+
+    ytdlp.on('close', (code) => {
+        console.log('finish:', code);
+        downloadTask.status = DownloadStatus.FINISH
+        downloadTask.finishTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+        updateDownloadStatus(downloadTask)
+    });
+
 }
 
 

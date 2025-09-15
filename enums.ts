@@ -18,3 +18,8 @@ export enum DownloadFileType{
     MP4 = "MP4",
     M3U8 = "M3U8",
 }
+
+export enum AnalyzeType{
+    UNIVERSAL = "UNIVERSAL",
+    YTDLP = "YTDLP",
+}

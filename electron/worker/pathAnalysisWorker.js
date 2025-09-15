@@ -11,7 +11,7 @@ const _pathMap = {
     "www.91porn.com": _91Pron,
 }
 
-async function PathAnalysisWorker(path, publicDir, cookies){
+async function PathAnalysisWorker(path, publicDir, ytDlpArgument){
     console.warn(path)
     if(!path){
         return ''
@@ -24,7 +24,7 @@ async function PathAnalysisWorker(path, publicDir, cookies){
         res = await _pathMap[url.hostname](path, publicDir)
     }else{
         isUniversal = true
-        res = await _universalVideoParser(path, publicDir, cookies)
+        res = await _universalVideoParser(path, publicDir, ytDlpArgument)
     }
 
 
@@ -41,7 +41,7 @@ async function PathAnalysisWorker(path, publicDir, cookies){
  * 通用视频解析
  * @private
  */
-async function _universalVideoParser(path, publicDir, cookies){
+async function _universalVideoParser(path, publicDir, ytDlpArgument){
     const res = {
         status: 'OK',
         message: '解析成功',
@@ -55,7 +55,10 @@ async function _universalVideoParser(path, publicDir, cookies){
     }
     return new Promise((rev, rej) => {
         try{
-            const ytDlp = spawn(resolve(publicDir, 'yt-dlp/yt-dlp_macos'), ["--add-header", `Cookie: ${cookies}`, "-j", path]);
+
+            ytDlpArgument.splice(ytDlpArgument.length - 3, 0, '-j');
+            console.warn(ytDlpArgument)
+            const ytDlp = spawn(resolve(publicDir, 'yt-dlp/yt-dlp.exe'), ytDlpArgument);
 
             let outPut = '',
                 errorOutput = ""
@@ -146,8 +149,8 @@ async function _91Pron(path){
 }
 
 try{
-    const { path, publicDir, cookies } = workerData;
-    await PathAnalysisWorker(path, publicDir, cookies)
+    const { path, publicDir, ytDlpArgument } = workerData;
+    await PathAnalysisWorker(path, publicDir, ytDlpArgument)
 }catch(err){
     parentPort.postMessage({ type: "error", message: err.message });
 }

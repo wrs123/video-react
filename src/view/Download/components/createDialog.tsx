@@ -41,7 +41,7 @@ function CreateDialog ({ onSubmit, onError }){
 
             if(res.code === 202){
                 setPosting(false)
-                onError()
+                onError(res.data)
             }else{
                 messageApi.open({
                     type: 'warning',

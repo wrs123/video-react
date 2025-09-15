@@ -45,6 +45,7 @@ function Download(props: any) {
 
     const createError = async (param) => {
         setIsModalOpen(false)
+        console.log(param);
 
         const confirmed = await modal.confirm({
             title: `提示`,
@@ -57,7 +58,7 @@ function Download(props: any) {
         if(confirmed){
             alert(1)
         }else{
-
+            props.navigateFinishTask(param)
         }
     }
 

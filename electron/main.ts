@@ -1,9 +1,11 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, session } from 'electron'
 // import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { InitHandler } from "./handlers";
 import {initDB} from "./db/init.ts";
+import {getSysConfig} from "./models/sysModel.ts";
+import {ResultStatus} from "../enums.ts";
 
 
 // const require = createRequire(import.meta.url)
@@ -119,7 +121,24 @@ app.whenReady().then(async () => {
   //初始化db实例并注册到全局
   global.db = initDB()
 
+  console.warn(11)
+  //挂载系统代理
+  const cookiesRes = getSysConfig()
 
+  if(cookiesRes.status === ResultStatus.OK){
+    const { data } = cookiesRes
+    global.sysConfig = data
+    if(data.useProxy){
+      // 设置代理（例如 HTTP 代理）
+      const ses = session.defaultSession;
+      await ses.setProxy({
+        proxyRules: `${data.proxyPortal}=${data.proxyHost}:${data.proxyPort}`
+      });
+    }
+  }
+
+
+  console.warn(11111)
   //创建窗口
   createWindow()
   //注册全局事件监听
@@ -129,7 +148,5 @@ app.whenReady().then(async () => {
   global.win = win
   global.downloadStack = []
   global.taskStack = {}
-
-
 
 })

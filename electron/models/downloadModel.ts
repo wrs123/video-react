@@ -9,16 +9,22 @@ const { Worker } = require("node:worker_threads");
 import { resolve, dirname } from 'path';
 import {publicDir} from "../utils/index.js";
 import {getCookie} from "./sysModel.ts";
+import fs from "fs";
 
 
 async function _getCookie(domain){
     let res = ""
 
     const val = await getCookie({ domain })
+    console.warn('cookie', domain)
     const { status, data } = val
     if(status == ResultStatus.OK){
         if(data){
-            res = data.cookies
+            const _host = (new URL(domain)).hostname
+            const _cookiePath = resolve(publicDir(), `.cookies/.cookies_${_host}.cks`)
+            console.warn(_cookiePath)
+            fs.writeFileSync(_cookiePath, data.cookies);
+            res = _cookiePath
         }else{
             console.warn('no cookie found');
         }
@@ -36,12 +42,12 @@ export function updateDownloadStatus(downloadTask:any){
  * 地址解析worker
  * @param path
  */
-const _analysisWorker = (path: string, id: string, cookies: string) => {
+const _analysisWorker = (path: string, id: string, ytDlpArgument: string[]) => {
     return new Promise((rev, reject) => {
         //解析下载地址
 
         const analysisWorker = new Worker(resolve(global.__dirname, '../electron/worker/pathAnalysisWorker.js'), {
-            workerData: { path, publicDir: publicDir(), cookies},
+            workerData: { path, publicDir: publicDir(), ytDlpArgument},
             type: "module"
         });
         //线程入栈
@@ -154,7 +160,20 @@ export const createTask = async (param: any) => {
         const _cookie = await _getCookie(_data.name)
         console.warn('get cookie success')
 
-        _analysisWorker(param.urls, param.id, _cookie).then((analysisObj: any) => {
+        const ytDlpArgument: string[] = [
+            "--cookies", `${resolve(publicDir(), _cookie)}`,
+            // "--add-header", `Cookie: ${cookies}`,
+            param.urls
+        ]
+
+        if(global.sysConfig.useProxy){
+            const { proxyPortal, proxyHost, proxyPort} = global.sysConfig
+            ytDlpArgument.unshift(`${proxyPortal}://${proxyHost}:${proxyPort}`)
+            ytDlpArgument.unshift('--proxy')
+        }
+
+
+        _analysisWorker(param.urls, param.id, ytDlpArgument).then((analysisObj: any) => {
 
             if(analysisObj.type === 'done'){
                 const { data } = analysisObj;
@@ -167,7 +186,7 @@ export const createTask = async (param: any) => {
                 _data.cover = data.cover
 
                 if(data.isUniversal){
-                    DownloadFileByOriginalURL(_data, _cookie)
+                    DownloadFileByOriginalURL(_data, ytDlpArgument)
                 }else{
                     DownloadFileByDirectURL(analysisObj.data, param.path, _data)
                 }

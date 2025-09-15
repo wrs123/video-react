@@ -70,7 +70,7 @@ function Index(){
 
                     <If condition={activeStep === 'download'}>
                         <Then>
-                            <DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={0} />
+                            <DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={0} navigateFinishTask={(val ) => {setActiveStep('finish')}}/>
                         </Then>
                     </If>
                     <If condition={activeStep === 'finish'}>
