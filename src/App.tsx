@@ -3,10 +3,14 @@ import Index from './view/Index/Index';
 import { useEffect, useState } from 'react'
 import API from "./request/api.ts";
 import {ResultStatus} from "../enums.ts";
+import { ThemeProvider, useTheme } from "./components/ThemeProvider.tsx";
 
-function App() {
+
+
+function InitBox() {
 
   const [isInitialized, setIsInitialized] = useState(false);
+  const { toggleTheme } = useTheme();
 
   async function initConfig(){
 
@@ -14,6 +18,7 @@ function App() {
     console.warn(res)
     if(res.status === ResultStatus.OK){
       window["sysConfig"] = res.data
+      toggleTheme(window["sysConfig"].themeMode)
       setIsInitialized(true)
     }
 
@@ -35,8 +40,14 @@ function App() {
   }
 
   return (
-        <Index />
+      <Index />
   )
 }
 
-export default App
+export default function App() {
+  return (
+      <ThemeProvider>
+        <InitBox />
+      </ThemeProvider>
+  );
+}

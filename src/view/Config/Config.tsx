@@ -1,13 +1,17 @@
 import styles from './Config.module.scss'
 import { CloseOutlined, RocketOutlined, RocketFilled, AppstoreOutlined, CloudDownloadOutlined,
     FolderOutlined, AppstoreFilled, CloudServerOutlined, FolderOpenOutlined,
-    SettingFilled} from '@ant-design/icons';
-import { Button, Space, Form, Input, Switch, Select, Flex, Modal } from "antd";
+    SettingFilled, MoonOutlined, SunOutlined} from '@ant-design/icons';
+import { Button, Space, Form, Input, Switch, Select, Flex, Modal, Radio } from "antd";
 import { useState } from 'react'
 import {If, Then} from 'react-if'
 import API from "../../request/api.ts";
 import {ResultStatus} from "../../../enums.ts";
 import CookieList from "./components/CookieList.tsx";
+import { useTheme } from "../../components/ThemeProvider";
+import iconLightTheme from '../../assets/images/light-theme.png';
+import iconDarkTheme from '../../assets/images/dark-theme.png';
+import iconAutoTheme from '../../assets/images/auto-theme.png';
 
 
 interface ConfigProps {
@@ -29,7 +33,7 @@ function Config({onClose}: ConfigProps) {
         themeMode?: string;
         language?: string;
     };
-
+    const { theme, toggleTheme } = useTheme();
     const [formData] = Form.useForm<FieldType>()
     const defaultValue = window['sysConfig']
     const isLimitSpeed = Form.useWatch('isLimitSpeed', formData);
@@ -55,6 +59,25 @@ function Config({onClose}: ConfigProps) {
             icon: <CloudServerOutlined />
         }
     ]
+    const themeList: any[] = [
+        {
+            label: '白天模式',
+            key: 'light',
+            icon: iconLightTheme
+        },
+        {
+            label: '夜间模式',
+            key: 'dark',
+            icon: iconDarkTheme
+        },
+        {
+            label: '跟随系统',
+            key: 'auto',
+            icon: iconAutoTheme
+        }
+    ]
+    const [activeTheme, setActiveTheme] = useState(window['sysConfig'].themeMode)
+
 
     const setSysConfig = async () => {
         console.warn(formData.getFieldsValue(true))
@@ -115,6 +138,37 @@ function Config({onClose}: ConfigProps) {
                                         <div className={styles.configBlock}>
                                             <div className={styles.configItem}>
                                                 <div className={styles.labelPart}>
+                                                    外观
+                                                </div>
+                                                <div className={styles.contentPart}>
+                                                    <Form.Item<FieldType>
+                                                        name="themeMode"
+                                                    >
+                                                        <div className={styles.customRadio}>
+                                                            {
+                                                                themeList.map((item: any) =>
+                                                                    <div className={`${styles.themeButton} ${activeTheme == item.key ? styles.active : ''}`}
+                                                                         key={item.key}
+                                                                         onClick={() => {
+                                                                             setActiveTheme(item.key);
+                                                                             toggleTheme(item.key);
+                                                                             formData.setFieldsValue({
+                                                                                 themeMode: item.key
+                                                                             });
+                                                                             setSysConfig()
+                                                                         }}
+                                                                    >
+                                                                        <img src={item.icon} alt=""/>
+                                                                        <span>{item.label}</span>
+                                                                    </div>
+                                                                )
+                                                            }
+                                                        </div>
+                                                    </Form.Item>
+                                                </div>
+                                            </div>
+                                            <div className={styles.configItem}>
+                                                <div className={styles.labelPart}>
                                                     语言
                                                 </div>
                                                 <div className={styles.contentPart}>
@@ -127,27 +181,6 @@ function Config({onClose}: ConfigProps) {
                                                                 [
                                                                     { value: 'simpleChinese', label: '简体中文' },
                                                                     { value: 'english', label: 'english' },
-                                                                ]
-                                                            }
-                                                        />
-                                                    </Form.Item>
-                                                </div>
-                                            </div>
-                                            <div className={styles.configItem}>
-                                                <div className={styles.labelPart}>
-                                                    外观
-                                                </div>
-                                                <div className={styles.contentPart}>
-                                                    <Form.Item<FieldType>
-                                                        name="themeMode"
-                                                    >
-                                                        <Select
-                                                            style={{ width: '100px' }}
-                                                            options={
-                                                                [
-                                                                    { value: 'auto', label: '跟随系统' },
-                                                                    { value: 'light', label: '浅色模式' },
-                                                                    { value: 'dark', label: '深色模式' }
                                                                 ]
                                                             }
                                                         />

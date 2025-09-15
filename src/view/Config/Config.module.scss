@@ -8,8 +8,6 @@
   $formGap: 14px;
 
 
-
-
   .configContent{
     display: flex;
     height: 100%;
@@ -20,8 +18,8 @@
       width: 180px;
       padding: 24px 18px 18px 18px;
       box-sizing: border-box;
-      border-right: 1px solid #1018280a;
-      background-color: rgba(250, 250, 250, .94);
+      border-right: 1px solid var(--color-border);
+      background-color: var(--color-config-slider);
       backdrop-filter: blur(20px);
 
       .title{
@@ -39,7 +37,7 @@
           padding: 9px 12px;
           cursor: pointer;
           margin-bottom: 4px;
-          color: #495464;
+          color: var(--color-config-slider-text);
 
           font-size: 14px;
           display: flex;
@@ -58,11 +56,11 @@
           }
 
           &.active{
-            background-color: #c8ceda66;
-            color: #18222f!important;
+            background-color: var(--color-config-slider-active-bg);
+            color: var(--color-config-slider-active-text)!important;
 
             span.label{
-              color: #18222f!important;
+              color: var(--color-config-slider-active-text)!important;
             }
           }
         }
@@ -70,7 +68,7 @@
     }
 
     .rightContent{
-      background: #ffffff;
+      background: var(--color-config-content);
       flex: 1;
       height: 100%;
       overflow-y: auto;
@@ -111,20 +109,20 @@
           }
 
           .configBlock{
-            background-color: #f9fafb;
+            background-color: var(--color-block);
             overflow: hidden;
             border-radius: 6px;
-            border: 1px solid #1018280a;
+            border: 1px solid var(--color-block-border);
             margin-bottom:  $formGap;
 
             .configItem{
               margin: 0 0 0  $formGap;
               padding:  $formGap - 4  $formGap  $formGap - 4 0;
-              border-bottom: 1px solid #1018280a;
+              border-bottom: 1px solid var(--color-block-border);
               display: flex;
               align-items: center;
               justify-content: space-between;
-              background-color: #f9fafb;
+              background-color: var(--color-block);
 
               &:last-child{
                 border-bottom: none;
@@ -136,6 +134,41 @@
 
               .contentPart{
 
+                .customRadio{
+                  height: max-content;
+                  padding: 0;
+                  display: flex;
+                  //overflow: hidden;
+
+                  .themeButton{
+                    display: flex;
+                    position: relative;
+                    margin-left: 12px;
+                    flex-direction: column;
+                    align-items: center;
+
+                    &.active{
+                      img{
+                        outline: 1px solid var(--color-primary);
+                        border-color: var(--color-primary);
+                      }
+                    }
+
+                    img{
+                      width: 70px;
+                      border-radius: 6px;
+                      cursor: pointer;
+                      border: 1px solid #1018280f;
+                    }
+
+                    span{
+                      padding-top: 8px;
+                      font-size: 12px;
+                      color: var(--color-text-thr);
+                      line-height: 1;
+                    }
+                  }
+                }
               }
             }
 
@@ -170,8 +203,8 @@
         padding: 28px 12px 14px 18px;
         font-size: 20px;
         font-weight: bold;
-        color: #333333;
-        border-bottom: 1px solid rgba(16, 24, 40, 0.0392156863);
+        color: var(--color-text-primary);
+        border-bottom: 1px solid var(--color-border);
       }
     }
   }

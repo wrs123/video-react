@@ -6,7 +6,9 @@ import DownLoad from '../Download/Download'
 import Config from '../Config/Config'
 import { Button, Modal } from "antd";
 import WindowTitleBar from "../../components/windowTitleBar.tsx";
-import logoIcon from '../../assets/images/logo.png'
+import logoIconLight from '../../assets/images/logo-light.png'
+import logoIconDark from '../../assets/images/logo-dark.png'
+import { useTheme } from "../../components/ThemeProvider.tsx";
 import {If, Else, Then} from 'react-if';
 
 const stepList = [
@@ -28,6 +30,7 @@ const stepList = [
 function Index(){
     const [activeStep, setActiveStep] = useState<string>('download')
     const [sysConfigVisible, setSysConfigVisible] = useState(false);
+    let { theme } = useTheme();
 
     const changeItem = (key: string) => {
         setActiveStep(key)
@@ -44,7 +47,7 @@ function Index(){
             <div className={styles.contentContainer}>
                 <div className={styles.stepBar}>
                     <div className={styles.logoContainer}>
-                        <img src={logoIcon} alt="logo"/>
+                        <img src={ theme === "light" ? logoIconLight : logoIconDark } alt="logo"/>
                     </div>
                     {
                         stepList.map(item =>
