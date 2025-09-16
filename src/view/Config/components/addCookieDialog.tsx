@@ -41,7 +41,17 @@ function AddCookie({ onConfrim, onCancel, activeCookie }) {
                     </Form.Item>
                     <Form.Item<CookieType>
                         name="cookies"
-                        label={'cookie'}
+                        label={
+                            <>
+                                <span>cookie</span>
+                                <Button type="link" onClick={ async () => {
+                                    await API.openParseWindow()
+                                } }>
+                                    获取cookie
+                                </Button>
+
+                            </>
+                        }
                         rules={[{ required: true, message: '请输入cookie' }]}
                         style={{marginBottom: '0px'}}
                     >

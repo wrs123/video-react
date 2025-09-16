@@ -20060,6 +20060,7 @@ const MAIN_DIST = path$1.join(process.env.APP_ROOT, "dist-electron");
 const RENDERER_DIST = path$1.join(process.env.APP_ROOT, "dist");
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path$1.join(process.env.APP_ROOT, "public") : RENDERER_DIST;
 let win;
+let parseWin;
 function createWindow() {
   win = new BrowserWindow({
     icon: path$1.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
@@ -20079,12 +20080,38 @@ function createWindow() {
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
   });
+  console.warn(VITE_DEV_SERVER_URL);
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL);
   } else {
     win.loadFile(path$1.join(RENDERER_DIST, "index.html"));
   }
   win.webContents.openDevTools();
+}
+function createParseWindow() {
+  parseWin = new BrowserWindow({
+    width: 1e3,
+    height: 700,
+    parent: win,
+    modal: true,
+    webPreferences: {
+      preload: path$1.join(__dirname, "preload.mjs"),
+      nodeIntegration: false,
+      contextIsolation: true,
+      webviewTag: true
+      // ✅ 允许 webview
+    }
+  });
+  if (VITE_DEV_SERVER_URL) {
+    console.log(path$1.join(VITE_DEV_SERVER_URL, "#/parse"));
+    parseWin.loadURL(path$1.join(VITE_DEV_SERVER_URL, "#/parse"));
+  } else {
+    parseWin.loadFile(path$1.join(RENDERER_DIST, "index.html"));
+  }
+  parseWin.webContents.once("did-finish-load", () => {
+    parseWin.webContents.send("open-url", "url");
+  });
+  parseWin.webContents.openDevTools();
 }
 app$2.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -20140,6 +20167,14 @@ app$2.whenReady().then(async () => {
   console.warn(11111);
   createWindow();
   InitHandler();
+  ipcMain$1.handle(`open-parse-window`, async () => {
+    createParseWindow();
+    return "ok";
+  });
+  ipcMain$1.handle(`close-parse-window`, async () => {
+    parseWin.close();
+    return "ok";
+  });
   global.win = win;
   global.downloadStack = [];
   global.taskStack = {};

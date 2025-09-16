@@ -2,6 +2,20 @@ import {delCookie, getCookieList, getSysConfig} from "../../electron/models/sysM
 
 const API = {
     request: window.ipcRenderer.invoke,
+    /**
+     * 开启解析窗口
+     * @param param
+     */
+    openParseWindow : (param: any) => {
+        return API.request('open-parse-window', param)
+    },
+    /**
+     * 关闭解析窗口
+     * @param param
+     */
+    closeParseWindow : (param: any) => {
+        return API.request('close-parse-window', param)
+    },
 
     /**
      * 获取任务列表

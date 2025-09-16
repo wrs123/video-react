@@ -1,9 +1,10 @@
 import './App.css'
-import Index from './view/Index/Index';
 import { useEffect, useState } from 'react'
 import API from "./request/api.ts";
 import {ResultStatus} from "../enums.ts";
 import { ThemeProvider, useTheme } from "./components/ThemeProvider.tsx";
+import router from './router/index'
+import { RouterProvider, createHashRouter } from "react-router-dom";
 
 
 
@@ -40,7 +41,7 @@ function InitBox() {
   }
 
   return (
-      <Index />
+      <RouterProvider router={createHashRouter(router)}></RouterProvider>
   )
 }
 

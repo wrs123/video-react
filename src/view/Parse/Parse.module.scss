@@ -1,0 +1,41 @@
+.parseContainer{
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .actionBar{
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #e8e8e8;
+    padding: 0 15px;
+  }
+
+  .viewContainer{
+    display: flex;
+    flex: 1;
+    width: 100%;
+
+    .parseWindow{
+      flex: 1;
+      height: 100%;
+    }
+
+    .consoleContainer{
+      width: 240px;
+      height: 100%;
+      background-color: #f2f2f2;
+      border-left: 1px solid #e8e8e8;
+      transition: width 0.3s;
+      will-change: width;
+
+      &.hide{
+        width: 0!important;
+      }
+    }
+  }
+
+
+}

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session } from 'electron'
+import { app, BrowserWindow, session, ipcMain } from 'electron'
 // import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -32,7 +32,11 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null
+let parseWin: BrowserWindow | null
 
+/**
+ * 创建主窗口
+ */
 function createWindow() {
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
@@ -56,6 +60,8 @@ function createWindow() {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
   })
 
+  console.warn(VITE_DEV_SERVER_URL)
+
   if (VITE_DEV_SERVER_URL) {
     win.loadURL(VITE_DEV_SERVER_URL)
   } else {
@@ -65,6 +71,40 @@ function createWindow() {
 
   win.webContents.openDevTools()
 }
+
+/**
+ * 创建解析窗口
+ * @param url
+ */
+function createParseWindow() {
+  parseWin = new BrowserWindow({
+    width: 1000,
+    height: 700,
+    parent: win,
+    modal: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.mjs'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      webviewTag: true, // ✅ 允许 webview
+    },
+  });
+
+  if (VITE_DEV_SERVER_URL) {
+    console.log(path.join(VITE_DEV_SERVER_URL, '#/parse'))
+    parseWin.loadURL(path.join(VITE_DEV_SERVER_URL, '#/parse'))
+  } else {
+    // win.loadFile('dist/index.html')
+    parseWin.loadFile(path.join(RENDERER_DIST, 'index.html'))
+  }
+
+  parseWin.webContents.once("did-finish-load", () => {
+    parseWin.webContents.send("open-url", 'url');
+  });
+
+  parseWin.webContents.openDevTools()
+}
+
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -145,6 +185,16 @@ app.whenReady().then(async () => {
   createWindow()
   //注册全局事件监听
   InitHandler()
+  ipcMain.handle(`open-parse-window`, async () => {
+    createParseWindow();
+    return "ok"
+  })
+
+  ipcMain.handle(`close-parse-window`, async () => {
+    parseWin.close()
+    return "ok"
+  })
+
 
   //全局注册窗口
   global.win = win
