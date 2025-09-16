@@ -57,7 +57,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         borderRadius: 6,
                         borderRadiusSM: 6,
                         controlHeightSM: 28,
-                        contentFontSizeSM: 13,
+                        // contentFontSizeSM: 13,
                     },
                 }}
             >

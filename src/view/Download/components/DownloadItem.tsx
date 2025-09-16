@@ -73,7 +73,7 @@ function DownloadItem(props: DownloadItemProps) {
         }
     }
 
-    const copyLink: MenuProps['onClick'] = async (key: string, item: DownloadTaskType) => {
+    const copyLink: unknown = async (key: string, item: DownloadTaskType) => {
         console.warn(key, item)
         copyToClipBoard(item[key])
     }
@@ -106,11 +106,13 @@ function DownloadItem(props: DownloadItemProps) {
                     centered: true,
                     content: (
                         <>
-                            确认删除
-                            <span style={{color: "var(--color-primary)", fontWeight: 'bold'}}>
-                            【{item.name.slice(0,15)}{item.name.length > 15 ? '...' : ''}】
-                            </span>
-                            吗?
+                            <div style={{width:'100%'}}>
+                                确认删除
+                                <span style={{color: "var(--color-primary)", fontWeight: 'bold'}}>
+                                【{item.name.slice(0,15)}{item.name.length > 15 ? '...' : ''}】
+                                </span>
+                                吗?
+                            </div>
                             <Checkbox style={{marginTop: '6px'}} onChange={(e) => {
                                 isDelFile = e.target.checked
                             }}>同时删除文件</Checkbox>

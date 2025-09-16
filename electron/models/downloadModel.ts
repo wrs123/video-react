@@ -10,8 +10,12 @@ import { resolve, dirname } from 'path';
 import {publicDir} from "../utils/index.js";
 import {getCookie} from "./sysModel.ts";
 import fs from "fs";
+const { net } = require("electron");
 
-
+/**
+ * 获取cookie
+ * @param domain
+ */
 async function _getCookie(domain){
     let res = ""
 
@@ -32,7 +36,36 @@ async function _getCookie(domain){
     return res
 }
 
+/**
+ * 缓存视频更面
+ * @param url
+ * @param savePath
+ */
+function _cacheThumbnail(url: string, id: string) {
+    return new Promise((rev, rej) => {
+        const request = net.request(url);
+        const savePath: string = resolve(publicDir(), global.cachesPath, `.${id}.png`)
+        const file = fs.createWriteStream(savePath);
 
+        request.on("response", (response: any) => {
+            response.pipe(file);
+            file.on("finish", () => {
+                file.close(() => rev(`./${global.cachesPath}/.${id}.png`));
+            });
+        });
+
+        request.on("error", (e: any) => {
+            console.error(e.message);
+            rej(e.message)
+        });
+        request.end();
+    });
+}
+
+/**
+ * 更新任务状态
+ * @param downloadTask
+ */
 export function updateDownloadStatus(downloadTask:any){
     updateTask(downloadTask)
     global.win.webContents.send('download:updateDownload', downloadTask)
@@ -41,6 +74,8 @@ export function updateDownloadStatus(downloadTask:any){
 /**
  * 地址解析worker
  * @param path
+ * @param id
+ * @param ytDlpArgument
  */
 const _analysisWorker = (path: string, id: string, ytDlpArgument: string[]) => {
     return new Promise((rev, reject) => {
@@ -76,32 +111,6 @@ const _analysisWorker = (path: string, id: string, ytDlpArgument: string[]) => {
     })
 }
 
-/**
- * 更新任务
- * @param param
- */
-export const updateTask = async (param) => {
-    const db = global.db
-
-    try{
-        let query: any = []
-        console.warn('update task', param)
-        Object.keys(param).forEach((key, val) => {
-            if(key !== 'speed' && key != 'id'){
-                query.push(`${key}=@${key}`)
-            }
-        })
-
-        const update = db.prepare(`UPDATE tasks SET ${query.join(',')} WHERE id=@id`);
-        const updateFunc = db.transaction((signs: any) => {
-            for (const sign of signs) update.run(sign);
-        });
-
-        updateFunc([param])
-    }catch(error: any){
-        console.warn(error?.message)
-    }
-}
 
 /**
  * 创建任务
@@ -116,24 +125,24 @@ export const createTask = async (param: any) => {
         message: '创建成功',
         data: ''
     }
+    const _data: DownloadTaskType = {
+        id: crypto.randomUUID(), //下载任务id
+        originUrl: param.urls, //原视频地址
+        status: DownloadStatus.ANAL, //下载状态
+        TotalBytes: 0, //视频总字节数
+        receivedBytes: 0, //已下载的字节数
+        speed: 0,
+        createTime: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
+        finishTime: null,
+        savePath: param.path, //下载的本地地址
+        name: (new URL(param.urls)).origin, //文件名
+        analysisUrl: "", //解析后的下载地址
+        suffix: "", //文件后缀
+        fileType: DownloadFileType.NONE,
+        cover: ""
+    }
 
     try{
-        const _data: DownloadTaskType = {
-            id: crypto.randomUUID(), //下载任务id
-            originUrl: param.urls, //原视频地址
-            status: DownloadStatus.ANAL, //下载状态
-            TotalBytes: 0, //视频总字节数
-            receivedBytes: 0, //已下载的字节数
-            speed: 0,
-            createTime: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
-            finishTime: null,
-            savePath: param.path, //下载的本地地址
-            name: (new URL(param.urls)).origin, //文件名
-            analysisUrl: "", //解析后的下载地址
-            suffix: "", //文件后缀
-            fileType: DownloadFileType.NONE,
-            cover: ""
-        }
 
         //查询重复任务
         const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
@@ -148,43 +157,51 @@ export const createTask = async (param: any) => {
 
 
         //插入任务记录
-        let query = []
-        Object.keys(_data).forEach((key, val) => {
+        const query: string[] = []
+        Object.keys(_data).forEach((key: string) => {
             if(key !== 'speed'){
                 query.push(key)
             }
         })
         await db.prepare(`INSERT INTO tasks (${query.join(',')}) VALUES (@${query.join(',@')})`).run(_data)
 
-        //获取数据库内的网站cookie
-        const _cookie = await _getCookie(_data.name)
-        console.warn('get cookie success')
-
+        //构建yt-dlp基本参数
         const ytDlpArgument: string[] = [
-            "--cookies", `${resolve(publicDir(), _cookie)}`,
-            // "--add-header", `Cookie: ${cookies}`,
             param.urls
         ]
 
+        //获取数据库内的网站cookie
+        const _cookie = await _getCookie(_data.name)
+        if(_cookie){
+            ytDlpArgument.unshift(`${resolve(publicDir(), _cookie)}`)
+            ytDlpArgument.unshift('--cookies')
+        }
+
+        //设置代理
         if(global.sysConfig.useProxy){
             const { proxyPortal, proxyHost, proxyPort} = global.sysConfig
             ytDlpArgument.unshift(`${proxyPortal}://${proxyHost}:${proxyPort}`)
             ytDlpArgument.unshift('--proxy')
         }
-
-
-        _analysisWorker(param.urls, param.id, ytDlpArgument).then((analysisObj: any) => {
+        //解析视频基本信息
+        _analysisWorker(param.urls, param.id, ytDlpArgument).then(async (analysisObj: any) => {
 
             if(analysisObj.type === 'done'){
                 const { data } = analysisObj;
-                console.warn('isUniversal', data.isUniversal)
 
                 _data.name = data.fileName
                 _data.analysisUrl = data.analysisUrl
                 _data.suffix = data.suffix
                 _data.fileType = data.fileType
-                _data.cover = data.cover
 
+                //下载封面
+                let _cacheThumbnailPath: unknown = ''
+                if(data.cover){
+                    _cacheThumbnailPath  = await _cacheThumbnail(data.cover, _data.id)
+                }
+                _data.cover = data.cover ? _cacheThumbnailPath : data.cover
+
+                //下载视频
                 if(data.isUniversal){
                     DownloadFileByOriginalURL(_data, ytDlpArgument)
                 }else{
@@ -217,6 +234,39 @@ export const createTask = async (param: any) => {
     return res
 }
 
+
+/**
+ * 更新任务
+ * @param param
+ */
+export const updateTask = async (param: any) => {
+    const db = global.db
+
+    try{
+        const query: string[] = []
+        console.warn('update task', param)
+        Object.keys(param).forEach((key, val) => {
+            if(key !== 'speed' && key != 'id'){
+                query.push(`${key}=@${key}`)
+            }
+        })
+
+        const update = db.prepare(`UPDATE tasks SET ${query.join(',')} WHERE id=@id`);
+        const updateFunc = db.transaction((signs: any) => {
+            for (const sign of signs) update.run(sign);
+        });
+
+        updateFunc([param])
+    }catch(error: any){
+        console.warn(error?.message)
+    }
+}
+
+
+/**
+ * 查询任务列表
+ * @param param
+ */
 export const queryTask = async (param: any) => {
     const db = global.db
     const { page, pageSize } = param
@@ -274,7 +324,10 @@ export const queryTask = async (param: any) => {
     return res
 }
 
-//删除任务
+/**
+ * 删除任务
+ * @param param
+ */
 export const deleteTask = async (param: any) => {
     const db = global.db
 

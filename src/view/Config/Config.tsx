@@ -1,7 +1,7 @@
 import styles from './Config.module.scss'
 import { CloseOutlined, RocketOutlined, RocketFilled, AppstoreOutlined, CloudDownloadOutlined,
     FolderOutlined, AppstoreFilled, CloudServerOutlined, FolderOpenOutlined,
-    SettingFilled, MoonOutlined, SunOutlined} from '@ant-design/icons';
+    SettingFilled, BellOutlined} from '@ant-design/icons';
 import { Button, Space, Form, Input, Switch, Select, Flex, Modal, Radio } from "antd";
 import { useState } from 'react'
 import {If, Then} from 'react-if'
@@ -52,6 +52,11 @@ function Config({onClose}: ConfigProps) {
             key: 'download',
             icon: <RocketOutlined />,
             activeIcon: <RocketFilled />
+        },
+        {
+            label: '通知',
+            key: 'notify',
+            icon: <BellOutlined />
         },
         {
             label: '代理',
@@ -127,7 +132,7 @@ function Config({onClose}: ConfigProps) {
                                                 </div>
                                                 <div className={styles.contentPart}>
                                                     <Form.Item<FieldType>
-                                                        name="theme"
+
                                                     >
                                                         <Switch checkedChildren="是" unCheckedChildren="否" />
                                                     </Form.Item>
@@ -311,6 +316,52 @@ function Config({onClose}: ConfigProps) {
                                                 </div>
                                             </div>
 
+                                    </Then>
+                                </If>
+                                <If condition={activeGroup === 'notify'}>
+                                    <Then>
+                                        <div className={styles.configTitle}>任务提示</div>
+                                        <div className={styles.configBlock}>
+                                            <div className={styles.configItem}>
+                                                <div className={styles.labelPart}>
+                                                    下载完成后通知
+                                                </div>
+                                                <div className={styles.contentPart}>
+                                                    <Form.Item<FieldType>
+                                                        name="useProxy"
+                                                        layout={'horizontal'}
+                                                    >
+                                                        <Switch checkedChildren="开启" unCheckedChildren="关闭" defaultChecked />
+                                                    </Form.Item>
+                                                </div>
+                                            </div>
+                                            <div className={styles.configItem}>
+                                                <div className={styles.labelPart}>
+                                                    下载完成后播放提示音
+                                                </div>
+                                                <div className={styles.contentPart}>
+                                                    <Form.Item<FieldType>
+                                                        name="useProxy"
+                                                        layout={'horizontal'}
+                                                    >
+                                                        <Switch checkedChildren="开启" unCheckedChildren="关闭" defaultChecked />
+                                                    </Form.Item>
+                                                </div>
+                                            </div>
+                                            <div className={styles.configItem}>
+                                                <div className={styles.labelPart}>
+                                                    在任务栏显示下载进度
+                                                </div>
+                                                <div className={styles.contentPart}>
+                                                    <Form.Item<FieldType>
+                                                        name="useProxy"
+                                                        layout={'horizontal'}
+                                                    >
+                                                        <Switch checkedChildren="开启" unCheckedChildren="关闭" defaultChecked />
+                                                    </Form.Item>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </Then>
                                 </If>
                                 <If condition={activeGroup === 'proxy'}>

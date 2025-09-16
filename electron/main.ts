@@ -117,6 +117,8 @@ const publicDir = () => {
 
 app.whenReady().then(async () => {
   global.__dirname = __dirname
+  global.cachesPath = '.caches'
+  global.cookiesPath = '.cookies'
   global.publicDir = publicDir()
   //初始化db实例并注册到全局
   global.db = initDB()

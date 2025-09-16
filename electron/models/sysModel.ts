@@ -35,9 +35,9 @@ export const getSysConfig = () => {
         }
 
         console.warn('getSys', store.get('sysConfig'))
+        const _sysConfig: any = store.get('sysConfig')
         res.data = {
-            ...store.get('sysConfig'),
-
+            ..._sysConfig,
             platform: process.platform
         }
         global.sysConfig = res.data

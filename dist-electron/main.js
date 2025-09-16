@@ -4125,8 +4125,7 @@ function DownloadFileByDirectURL(downloadObj, savePath, downloadTask) {
   win2.webContents.downloadURL(downloadObj.analysisUrl);
 }
 function DownloadFileByOriginalURL(downloadTask, ytDlpArgument) {
-  downloadTask.originUrl || "";
-  const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg.exe");
+  const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg");
   const savePath = resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s");
   ytDlpArgument.splice(2, 0, ffmpegPath);
   ytDlpArgument.splice(2, 0, "--ffmpeg-location");
@@ -4137,25 +4136,22 @@ function DownloadFileByOriginalURL(downloadTask, ytDlpArgument) {
   ytDlpArgument.splice(2, 0, '{"type": "#DOWNLOAD#","percent": "%(progress._percent)s", "downloaded": "%(progress.downloaded_bytes)s", "total": "%(progress.total_bytes)s", "totalEstimate": "%(progress.total_bytes_estimate)s", "speed": "%(progress.speed)s"}');
   ytDlpArgument.splice(2, 0, "--progress-template");
   ytDlpArgument.splice(2, 0, "--newline");
-  console.warn(ytDlpArgument);
-  const ytdlp = spawn(resolve$5(publicDir$1(), "yt-dlp/yt-dlp.exe"), ytDlpArgument, { stdio: ["ignore", "pipe", "pipe"] });
+  const ytdlp = spawn(resolve$5(publicDir$1(), "yt-dlp/yt-dlp"), ytDlpArgument, { stdio: ["ignore", "pipe", "pipe"] });
   ytdlp.stdout.on("data", (data) => {
     const lines = data.toString().split("\n").filter(Boolean);
-    console.warn(lines);
     lines.forEach((line) => {
       if (line.includes("#DOWNLOAD#")) {
         const json = JSON.parse(line);
-        console.warn(json);
         downloadTask.status = DownloadStatus.PENDING;
         downloadTask.TotalBytes = json.total === "NA" ? json.totalEstimate : json.total;
         downloadTask.receivedBytes = json.downloaded;
         downloadTask.speed = json.speed;
-        console.warn(downloadTask);
         updateDownloadStatus(downloadTask);
       }
     });
   });
   ytdlp.stderr.on("data", (data) => {
+    console.error("err:", data.toString());
   });
   ytdlp.on("close", (code2) => {
     console.log("finish:", code2);
@@ -19499,8 +19495,9 @@ const getSysConfig = () => {
       });
     }
     console.warn("getSys", store.get("sysConfig"));
+    const _sysConfig = store.get("sysConfig");
     res.data = {
-      ...store.get("sysConfig"),
+      ..._sysConfig,
       platform: process.platform
     };
     global.sysConfig = res.data;
@@ -19641,6 +19638,7 @@ const setSysConfig = (param) => {
 };
 const require$2 = createRequire(import.meta.url);
 const { Worker } = require$2("node:worker_threads");
+const { net } = require$2("electron");
 async function _getCookie(domain) {
   let res = "";
   const val = await getCookie({ domain });
@@ -19658,6 +19656,24 @@ async function _getCookie(domain) {
     }
   }
   return res;
+}
+function _cacheThumbnail(url, id2) {
+  return new Promise((rev, rej) => {
+    const request = net.request(url);
+    const savePath = resolve$5(publicDir$1(), global.cachesPath, `.${id2}.png`);
+    const file = fs$1.createWriteStream(savePath);
+    request.on("response", (response) => {
+      response.pipe(file);
+      file.on("finish", () => {
+        file.close(() => rev(`./${global.cachesPath}/.${id2}.png`));
+      });
+    });
+    request.on("error", (e) => {
+      console.error(e.message);
+      rej(e.message);
+    });
+    request.end();
+  });
 }
 function updateDownloadStatus(downloadTask) {
   updateTask(downloadTask);
@@ -19688,25 +19704,6 @@ const _analysisWorker = (path2, id2, ytDlpArgument) => {
     });
   });
 };
-const updateTask = async (param) => {
-  const db = global.db;
-  try {
-    let query = [];
-    console.warn("update task", param);
-    Object.keys(param).forEach((key, val) => {
-      if (key !== "speed" && key != "id") {
-        query.push(`${key}=@${key}`);
-      }
-    });
-    const update = db.prepare(`UPDATE tasks SET ${query.join(",")} WHERE id=@id`);
-    const updateFunc = db.transaction((signs) => {
-      for (const sign2 of signs) update.run(sign2);
-    });
-    updateFunc([param]);
-  } catch (error2) {
-    console.warn(error2 == null ? void 0 : error2.message);
-  }
-};
 const createTask = async (param) => {
   const db = global.db;
   const res = {
@@ -19715,32 +19712,32 @@ const createTask = async (param) => {
     message: "创建成功",
     data: ""
   };
+  const _data = {
+    id: crypto$1.randomUUID(),
+    //下载任务id
+    originUrl: param.urls,
+    //原视频地址
+    status: DownloadStatus.ANAL,
+    //下载状态
+    TotalBytes: 0,
+    //视频总字节数
+    receivedBytes: 0,
+    //已下载的字节数
+    speed: 0,
+    createTime: hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss"),
+    finishTime: null,
+    savePath: param.path,
+    //下载的本地地址
+    name: new URL(param.urls).origin,
+    //文件名
+    analysisUrl: "",
+    //解析后的下载地址
+    suffix: "",
+    //文件后缀
+    fileType: DownloadFileType.NONE,
+    cover: ""
+  };
   try {
-    const _data = {
-      id: crypto$1.randomUUID(),
-      //下载任务id
-      originUrl: param.urls,
-      //原视频地址
-      status: DownloadStatus.ANAL,
-      //下载状态
-      TotalBytes: 0,
-      //视频总字节数
-      receivedBytes: 0,
-      //已下载的字节数
-      speed: 0,
-      createTime: hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss"),
-      finishTime: null,
-      savePath: param.path,
-      //下载的本地地址
-      name: new URL(param.urls).origin,
-      //文件名
-      analysisUrl: "",
-      //解析后的下载地址
-      suffix: "",
-      //文件后缀
-      fileType: DownloadFileType.NONE,
-      cover: ""
-    };
     const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
     if ((filterTask.length || []) > 0) {
       res.status = ResultStatus.ERROR;
@@ -19749,35 +19746,38 @@ const createTask = async (param) => {
       res.data = filterTask;
       return res;
     }
-    let query = [];
-    Object.keys(_data).forEach((key, val) => {
+    const query = [];
+    Object.keys(_data).forEach((key) => {
       if (key !== "speed") {
         query.push(key);
       }
     });
     await db.prepare(`INSERT INTO tasks (${query.join(",")}) VALUES (@${query.join(",@")})`).run(_data);
-    const _cookie = await _getCookie(_data.name);
-    console.warn("get cookie success");
     const ytDlpArgument = [
-      "--cookies",
-      `${resolve$5(publicDir$1(), _cookie)}`,
-      // "--add-header", `Cookie: ${cookies}`,
       param.urls
     ];
+    const _cookie = await _getCookie(_data.name);
+    if (_cookie) {
+      ytDlpArgument.unshift(`${resolve$5(publicDir$1(), _cookie)}`);
+      ytDlpArgument.unshift("--cookies");
+    }
     if (global.sysConfig.useProxy) {
       const { proxyPortal, proxyHost, proxyPort } = global.sysConfig;
       ytDlpArgument.unshift(`${proxyPortal}://${proxyHost}:${proxyPort}`);
       ytDlpArgument.unshift("--proxy");
     }
-    _analysisWorker(param.urls, param.id, ytDlpArgument).then((analysisObj) => {
+    _analysisWorker(param.urls, param.id, ytDlpArgument).then(async (analysisObj) => {
       if (analysisObj.type === "done") {
         const { data } = analysisObj;
-        console.warn("isUniversal", data.isUniversal);
         _data.name = data.fileName;
         _data.analysisUrl = data.analysisUrl;
         _data.suffix = data.suffix;
         _data.fileType = data.fileType;
-        _data.cover = data.cover;
+        let _cacheThumbnailPath = "";
+        if (data.cover) {
+          _cacheThumbnailPath = await _cacheThumbnail(data.cover, _data.id);
+        }
+        _data.cover = data.cover ? _cacheThumbnailPath : data.cover;
         if (data.isUniversal) {
           DownloadFileByOriginalURL(_data, ytDlpArgument);
         } else {
@@ -19795,6 +19795,25 @@ const createTask = async (param) => {
     res.message = "创建失败" + error2.message;
   }
   return res;
+};
+const updateTask = async (param) => {
+  const db = global.db;
+  try {
+    const query = [];
+    console.warn("update task", param);
+    Object.keys(param).forEach((key, val) => {
+      if (key !== "speed" && key != "id") {
+        query.push(`${key}=@${key}`);
+      }
+    });
+    const update = db.prepare(`UPDATE tasks SET ${query.join(",")} WHERE id=@id`);
+    const updateFunc = db.transaction((signs) => {
+      for (const sign2 of signs) update.run(sign2);
+    });
+    updateFunc([param]);
+  } catch (error2) {
+    console.warn(error2 == null ? void 0 : error2.message);
+  }
 };
 const queryTask = async (param) => {
   const db = global.db;
@@ -20102,6 +20121,8 @@ const publicDir = () => {
 };
 app$2.whenReady().then(async () => {
   global.__dirname = __dirname;
+  global.cachesPath = ".caches";
+  global.cookiesPath = ".cookies";
   global.publicDir = publicDir();
   global.db = initDB();
   console.warn(11);
