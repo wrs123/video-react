@@ -163,7 +163,6 @@ app.whenReady().then(async () => {
   //初始化db实例并注册到全局
   global.db = initDB()
 
-  console.warn(11)
   //挂载系统代理
   const cookiesRes = getSysConfig()
 
@@ -179,15 +178,24 @@ app.whenReady().then(async () => {
     }
   }
 
-
-  console.warn(11111)
   //创建窗口
   createWindow()
   //注册全局事件监听
   InitHandler()
+
+
+  function openParseWindow(){
+    return new Promise((rev, rej) => {
+      createParseWindow();
+      parseWin.on("closed", () => {
+        parseWin = null;
+        rev(true)
+      });
+    })
+  }
+
   ipcMain.handle(`open-parse-window`, async () => {
-    createParseWindow();
-    return "ok"
+    return await openParseWindow()
   })
 
   ipcMain.handle(`close-parse-window`, async () => {

@@ -3,6 +3,7 @@ import API from "../../../request/api.ts";
 import { Form, Input, Flex, Button } from "antd";
 const { TextArea, Search } = Input;
 import { useState, useEffect } from 'react'
+import { CloudSyncOutlined } from '@ant-design/icons';
 
 function AddCookie({ onConfrim, onCancel, activeCookie }) {
     const [formData] = Form.useForm<CookieType>()
@@ -13,6 +14,11 @@ function AddCookie({ onConfrim, onCancel, activeCookie }) {
             ...defaultValue,
             ...val
         })
+    }
+
+    const getCookieByBrowser = async () => {
+        const res: any = await API.openParseWindow('')
+        console.warn(res)
     }
 
     useEffect( () => {
@@ -42,15 +48,13 @@ function AddCookie({ onConfrim, onCancel, activeCookie }) {
                     <Form.Item<CookieType>
                         name="cookies"
                         label={
-                            <>
+                            <Flex justify="space-between" style={{ width: '100%' }} align="center">
                                 <span>cookie</span>
-                                <Button type="link" onClick={ async () => {
-                                    await API.openParseWindow()
-                                } }>
+                                <Button type="link" size="small" onClick={ getCookieByBrowser } icon={<CloudSyncOutlined />}>
                                     获取cookie
                                 </Button>
 
-                            </>
+                            </Flex>
                         }
                         rules={[{ required: true, message: '请输入cookie' }]}
                         style={{marginBottom: '0px'}}

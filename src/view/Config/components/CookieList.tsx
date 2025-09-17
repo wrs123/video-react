@@ -86,7 +86,7 @@ function CookieList({ onChange }) {
     return (
         <div style={{marginTop: 20}}>
             <Flex vertical gap={'middle'} >
-                <Button type="primary" style={{width: "max-content"}} onClick={() => {setAddCookieDialogVisible(true)}} size={'small'} icon={<PlusOutlined />}>添加cookie</Button>
+                <Button type="primary" style={{width: "max-content"}} onClick={() => {setActiveCookie(null);setAddCookieDialogVisible(true)}} size={'small'} icon={<PlusOutlined />}>添加cookie</Button>
                 <Table<CookieType>
                     bordered
                     columns={ columns }
