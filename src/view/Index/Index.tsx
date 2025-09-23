@@ -14,6 +14,7 @@ import WindowTitleBar from "../../components/windowTitleBar.tsx";
 import logoIcon from '../../assets/images/icon.png'
 import { useTheme } from "../../components/ThemeProvider.tsx";
 import {If, Else, Then} from 'react-if';
+import Parse from "../Parse/Parse.tsx";
 
 const stepList = [
     {
@@ -78,7 +79,8 @@ function Index(){
                     </If>
                     <If condition={activeStep === 'finish'}>
                         <Then>
-                            <DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={1} />
+                            <Parse />
+                            {/*<DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={1} />*/}
                         </Then>
                     </If>
                 </div>

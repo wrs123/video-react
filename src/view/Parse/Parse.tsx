@@ -5,7 +5,7 @@ import {Button, Input, Space, Flex} from "antd";
 import { useSearchParams } from "react-router-dom";
 import { ReloadOutlined, LeftOutlined, RightOutlined, SettingOutlined, MenuUnfoldOutlined, GlobalOutlined, CloseOutlined } from '@ant-design/icons';
 import { useLocation } from "react-router-dom";
-
+import {If, Else, Then} from 'react-if';
 
 function Parse (){
     const webviewRef = useRef<Electron.WebviewTag>(null);
@@ -125,16 +125,26 @@ function Parse (){
                 </Flex>
             </div>
             <div className={styles.viewContainer}>
-                <webview
-                    ref={ webviewRef }
-                    src={ url }
-                    className={styles.parseWindow}
-                ></webview>
-                <div className={ `${styles.consoleContainer} ${ showConsoleBar ? '' : styles.hide}` }>
-                    <div className={styles.cookiesContent}>
-                        {cookies}
-                    </div>
-                </div>
+                <If condition={url}>
+                    <Then>
+                        <webview
+                            ref={ webviewRef }
+                            src={ url }
+                            className={styles.parseWindow}
+                        ></webview>
+                        <div className={ `${styles.consoleContainer} ${ showConsoleBar ? '' : styles.hide}` }>
+                            <div className={styles.cookiesContent}>
+                                {cookies}
+                            </div>
+                        </div>
+                    </Then>
+                    <Else>
+                        <div className={styles.empty}>
+                            输入网址获取
+                        </div>
+                    </Else>
+                </If>
+
             </div>
         </div>
     )
