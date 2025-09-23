@@ -1,5 +1,5 @@
 import {BaseResult} from "../../types.ts";
-import {ResultStatus} from "../../enums.ts";
+import {ResultStatus} from "../../src/shared/enums.ts";
 import { dialog, shell } from 'electron'
 import path from 'path'
 import fs from 'fs'

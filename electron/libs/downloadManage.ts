@@ -1,7 +1,7 @@
 import { DownloadItem, BrowserWindow} from 'electron'
 import path from 'path'
 import {DownloadAnalysisType, DownloadTaskType} from "../../types.ts";
-import {DownloadStatus} from "../../enums.ts";
+import {DownloadStatus} from "../../src/shared/enums.ts";
 import {updateDownloadStatus} from "../models/downloadModel.ts";
 import moment from 'moment'
 import {publicDir} from "../utils";

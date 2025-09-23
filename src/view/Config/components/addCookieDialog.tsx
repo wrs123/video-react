@@ -16,10 +16,7 @@ function AddCookie({ onConfrim, onCancel, activeCookie }) {
         })
     }
 
-    const getCookieByBrowser = async () => {
-        const res: any = await API.openParseWindow('')
-        console.warn(res)
-    }
+
 
     useEffect( () => {
         console.warn(1111)
@@ -50,9 +47,9 @@ function AddCookie({ onConfrim, onCancel, activeCookie }) {
                         label={
                             <Flex justify="space-between" style={{ width: '100%' }} align="center">
                                 <span>cookie</span>
-                                <Button type="link" size="small" onClick={ getCookieByBrowser } icon={<CloudSyncOutlined />}>
-                                    获取cookie
-                                </Button>
+                                {/*<Button type="link" size="small" onClick={ getCookieByBrowser } icon={<CloudSyncOutlined />}>*/}
+                                {/*    获取cookie*/}
+                                {/*</Button>*/}
 
                             </Flex>
                         }

@@ -26,3 +26,33 @@ export function percentParse(finishSize: number | undefined, size: number | unde
         return parseInt((finishSize / size * 100).toFixed(1).replace(/\.?0+$/, ''));
     }
 }
+
+
+/**
+ * @param {Array} actual
+ * @returns {Array}
+ */
+export function cleanArray(actual) {
+    const newArray = []
+    for (let i = 0; i < actual.length; i++) {
+        if (actual[i]) {
+            newArray.push(actual[i]);
+        }
+    }
+    return newArray;
+}
+
+
+/**
+ * @param {Object} json
+ * @returns {String}
+ */
+export function objToURLParam(json: any) {
+    if (!json) return ''
+    return cleanArray(
+        Object.keys(json).map(key => {
+            if (json[key] === undefined) return ''
+            return key + '=' + json[key]
+        })
+    ).join('&')
+}

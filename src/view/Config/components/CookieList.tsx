@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import {getCookieList} from "../../../../electron/models/sysModel.ts";
 import API from "../../../request/api.ts";
-import {ResultStatus} from "../../../../enums.ts";
+import {ResultStatus} from "../../../shared/enums.ts";
 import AddCookieDialog from "./addCookieDialog.tsx";
 import moment from 'moment'
 

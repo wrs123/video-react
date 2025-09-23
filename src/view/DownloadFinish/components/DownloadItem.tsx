@@ -1,6 +1,6 @@
 import styles from './DownloadItem.module.scss'
 import {DownloadTaskType} from "../../../../types.ts";
-import {DownloadStatus} from "../../../../enums.ts";
+import {DownloadStatus} from "../../../shared/enums.ts";
 import {Button} from "antd";
 import {
     CaretRightOutlined,

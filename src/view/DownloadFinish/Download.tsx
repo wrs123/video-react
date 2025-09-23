@@ -6,7 +6,7 @@ import {
 } from '@ant-design/icons';
 import React, {useState, useEffect} from 'react'
 import {DownloadTaskType} from "../../../types.ts";
-import {DownloadFileType, DownloadStatus} from "../../../enums.ts";
+import {DownloadFileType, DownloadStatus} from "../../shared/enums.ts";
 import {If, Else, Then} from 'react-if';
 import CreateDialog from "./components/createDialog"
 

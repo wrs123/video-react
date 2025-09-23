@@ -7,14 +7,14 @@ const API = {
      * @param param
      */
     openParseWindow : (param: any) => {
-        return API.request('open-parse-window', param)
+        return API.request('sys:openParseWindow', param)
     },
     /**
      * 关闭解析窗口
      * @param param
      */
     closeParseWindow : (param: any) => {
-        return API.request('close-parse-window', param)
+        return API.request('sys:closeParseWindow', param)
     },
 
     /**

@@ -1,7 +1,7 @@
 import styles from './DownloadItem.module.scss'
 import { DownloadTaskType} from "../../../../types.ts";
-import { DownloadStatus, ResultStatus} from "../../../../enums.ts";
-import { message, Modal, Tooltip, Dropdown, Space, Checkbox } from "antd";
+import { DownloadStatus, ResultStatus} from "../../../shared/enums.ts";
+import { message, Modal, Tooltip, Dropdown, Space, Checkbox, Button } from "antd";
 import { CaretRightOutlined, CloseOutlined, FileTextFilled, HddFilled, ReloadOutlined, LinkOutlined, DeleteOutlined, FolderOpenOutlined, PauseOutlined} from '@ant-design/icons';
 import { Else, If, Then} from 'react-if';
 import { fileSizeFormat, percentParse} from '../../../utils/tools.ts'
@@ -20,7 +20,7 @@ interface DownloadItemProps {
 function DownloadItem(props: DownloadItemProps) {
 
     const statusParse = (status: DownloadStatus | undefined) => {
-        let res: string = ""
+        let res: any = ""
 
         switch (status) {
             case DownloadStatus.PENDING:
@@ -40,6 +40,11 @@ function DownloadItem(props: DownloadItemProps) {
                 break;
             case DownloadStatus.ERROR:
                 res = "下载失败"
+                break;
+            case DownloadStatus.COOKIEERROR:
+                res =  <Button color="red" variant="link" onClick={ getCookieByBrowser }>
+                        需要登录, 点击登录
+                        </Button>
                 break;
 
         }
@@ -61,6 +66,32 @@ function DownloadItem(props: DownloadItemProps) {
 
         }
     ]
+    const [ menuItems, setMenuItems] = useState<MenuProps['items'][]>([
+        {
+            label: '打开所在目录',
+            key: 'originUrl',
+            icon: <FolderOpenOutlined />,
+        },
+        {
+            type: 'divider',
+        },
+        {
+            label: '复制原地址',
+            key: 'originUrl',
+            icon: <HddFilled />,
+        },
+        {
+            label: '复制解析地址',
+            key: 'analysisUrl',
+            icon: <FileTextFilled />,
+        },
+
+        {
+            label: '删除',
+            key: 'delete',
+            icon:  <DeleteOutlined />,
+        },
+    ]);
 
     const openFolder = async (path: string) => {
         const res = await API.openFolderPath({path: path})
@@ -156,7 +187,6 @@ function DownloadItem(props: DownloadItemProps) {
 
 
     const commandCommon = async (type: string, item: DownloadTaskType) => {
-
         switch (type) {
             case "RELOAD":
                 props.commandCommon && await props.commandCommon('DELETE', item, true)
@@ -165,12 +195,19 @@ function DownloadItem(props: DownloadItemProps) {
         }
     }
 
+    const getCookieByBrowser = async (domain: string = '') => {
+        const param = {
+            url: props.item.originUrl,
+            command: 'GET_COOKIE'
+        }
+        const res: any = await API.openParseWindow(param)
+        console.warn(res)
+    }
+
 
     useEffect(() => {
         setTaskItem(props.item)
-
         if(props.status === 0){
-
             window['onDownloadUpdate'].get((event: unknown, str: DownloadTaskType) => {
                 if(props.item.id === str.id){
                     if(str.status === DownloadStatus.FINISH){
@@ -184,131 +221,136 @@ function DownloadItem(props: DownloadItemProps) {
     }, [])
 
 
-    // @ts-ignore
     return (
         // style={{backgroundImage: `url("${item?.fileObj.cover ?? ''}")`}}
-        <div  className={`${styles.downloadItem} ${taskItem?.status == DownloadStatus.ANAL ? styles.loader : ''}
-            ${styles.downloadItem} ${taskItem?.status == DownloadStatus.ANALERROR ? styles.loaderErr : ''}
+        <Dropdown menu={{ items: menuItems}} trigger={['contextMenu']}>
+            <div  className={`${styles.downloadItem} ${taskItem?.status == DownloadStatus.ANAL ? styles.loader : ''}
+            ${styles.downloadItem} ${taskItem?.status.includes(DownloadStatus.ERROR) ? styles.loaderErr : ''}
         `} >
-            {confrimContextHolder}
-            {messageContextHolder}
-            <If condition={taskItem?.cover}>
-                <Then>
-                    <div className={styles.downloadCover}>
-                        <div className={styles.mask} style={{width: `${100 - percentParse(taskItem?.receivedBytes, taskItem?.TotalBytes)}%`}}></div>
-                        <img  src={taskItem?.cover} alt=""/>
-                    </div>
-                </Then>
-            </If>
-            <div className={`${styles.leftContainer} ${taskItem?.status == DownloadStatus.FINISH ? styles.full : ''}` }>
-                <div className={styles.title}>{taskItem?.name}</div>
-                <div className={styles.content}>
-                    <div className={styles.contentRight}>
-                        <If condition={() => taskItem?.status === DownloadStatus.ANAL}>
-                            <div className={styles.actionGroup}>
-                                <Tooltip title="复制原地址">
-                                    <div className={styles.actionButton} onClick={() => copyToClipBoard(taskItem?.originUrl)}>
-                                        <LinkOutlined />
-                                    </div>
-                                </Tooltip>
-                            </div>
-                        </If>
-                        <If condition={() => taskItem?.status !== DownloadStatus.ANAL && taskItem?.status !== DownloadStatus.ANALERROR}>
-                            <div className={styles.actionGroup}>
-                                <Tooltip title="打开目录">
-                                    <div className={styles.actionButton} onClick={() => openFolder(taskItem?.savePath)}>
-                                        <FolderOpenOutlined />
-                                    </div>
-                                </Tooltip>
-                                <Tooltip title="复制链接">
-                                    <Dropdown menu={{ items: copyLinkItems, onClick: (e) => copyLink(e.key, taskItem) }} trigger={['click']}>
-                                        <Space>
-                                            <div className={styles.actionButton} >
+                {confrimContextHolder}
+                {messageContextHolder}
+                <If condition={taskItem?.cover}>
+                    <Then>
+                        <div className={styles.downloadCover}>
+                            <div className={styles.mask} style={{width: `${100 - percentParse(taskItem?.receivedBytes, taskItem?.TotalBytes)}%`}}></div>
+                            <img  src={taskItem?.cover} alt=""/>
+                        </div>
+                    </Then>
+                </If>
+                <div className={`${styles.leftContainer} ${taskItem?.status == DownloadStatus.FINISH ? styles.full : ''}` }>
+                    <div className={styles.title}>{taskItem?.name}</div>
+                    <div className={styles.content}>
+                        <div className={styles.contentRight}>
+                            <If condition={() => taskItem?.status === DownloadStatus.ANAL || taskItem?.status.includes(DownloadStatus.ERROR)}>
+                                <Then>
+                                    <div className={styles.actionGroup}>
+                                        <Tooltip title="复制原地址">
+                                            <div className={styles.actionButton} onClick={() => copyToClipBoard(taskItem?.originUrl)}>
                                                 <LinkOutlined />
                                             </div>
-                                        </Space>
-                                    </Dropdown>
-                                    {/*<div className={styles.actionButton} onClick={() => copyLink(taskItem)}>*/}
-                                    {/*    <LinkOutlined />*/}
-                                    {/*</div>*/}
-                                </Tooltip>
-                                <Tooltip title="删除">
-                                    <div className={`${styles.actionButton} ${styles.danger}`} onClick={() => deleteTask(taskItem, true)}>
-                                        <DeleteOutlined />
+                                        </Tooltip>
                                     </div>
-                                </Tooltip>
-                            </div>
-                        </If>
-                    </div>
-                    <div className={styles.contentLeft}>
+                                </Then>
+                                <Else>
+                                    <div className={styles.actionGroup}>
+                                        <Tooltip title="打开目录">
+                                            <div className={styles.actionButton} onClick={() => openFolder(taskItem?.savePath)}>
+                                                <FolderOpenOutlined />
+                                            </div>
+                                        </Tooltip>
+                                        <Tooltip title="复制链接">
+                                            <Dropdown menu={{ items: copyLinkItems, onClick: (e) => copyLink(e.key, taskItem) }} trigger={['click']}>
+                                                <Space>
+                                                    <div className={styles.actionButton} >
+                                                        <LinkOutlined />
+                                                    </div>
+                                                </Space>
+                                            </Dropdown>
+                                            {/*<div className={styles.actionButton} onClick={() => copyLink(taskItem)}>*/}
+                                            {/*    <LinkOutlined />*/}
+                                            {/*</div>*/}
+                                        </Tooltip>
+                                        <Tooltip title="删除">
+                                            <div className={`${styles.actionButton} ${styles.danger}`} onClick={() => deleteTask(taskItem, true)}>
+                                                <DeleteOutlined />
+                                            </div>
+                                        </Tooltip>
+                                    </div>
+                                </Else>
+                            </If>
 
-                        <If condition={() => taskItem?.status != DownloadStatus.FINISH && taskItem?.status != DownloadStatus.PENDING}>
-                            <Then>
+                        </div>
+                        <div className={styles.contentLeft}>
+
+                            <If condition={() => taskItem?.status != DownloadStatus.FINISH && taskItem?.status != DownloadStatus.PENDING}>
+                                <Then>
                                  <span style={{
                                      marginRight: '10px'
                                  }}>{statusParse(taskItem?.status)}</span>
-                            </Then>
-                        </If>
-                        <If condition={taskItem?.status == DownloadStatus.FINISH}>
-                            <Then>
-                                {fileSizeFormat(taskItem?.TotalBytes)}
-                                <span style={{paddingLeft: '12px'}}>{taskItem?.finishTime}</span>
-                            </Then>
-                        </If>
-                        <If condition={taskItem?.status == DownloadStatus.PENDING || taskItem?.status == DownloadStatus.PAUSE}>
-                            <Then>
-                                {fileSizeFormat(taskItem?.receivedBytes)}/{fileSizeFormat(taskItem?.TotalBytes)}
-                                &nbsp;({percentParse(taskItem?.receivedBytes, taskItem?.TotalBytes)}%)
-                            </Then>
-                        </If>
-                        <If condition={taskItem?.status == DownloadStatus.PENDING}>
-                            <Then>
-                                <div className={styles.speed}>{fileSizeFormat(taskItem?.speed)}/s</div>
-                            </Then>
-                        </If>
+                                </Then>
+                            </If>
+                            <If condition={taskItem?.status == DownloadStatus.FINISH}>
+                                <Then>
+                                    {fileSizeFormat(taskItem?.TotalBytes)}
+                                    <span style={{paddingLeft: '12px'}}>{taskItem?.finishTime}</span>
+                                </Then>
+                            </If>
+                            <If condition={taskItem?.status == DownloadStatus.PENDING || taskItem?.status == DownloadStatus.PAUSE}>
+                                <Then>
+                                    {fileSizeFormat(taskItem?.receivedBytes)}/{fileSizeFormat(taskItem?.TotalBytes)}
+                                    &nbsp;({percentParse(taskItem?.receivedBytes, taskItem?.TotalBytes)}%)
+                                </Then>
+                            </If>
+                            <If condition={taskItem?.status == DownloadStatus.PENDING}>
+                                <Then>
+                                    <div className={styles.speed}>{fileSizeFormat(taskItem?.speed)}/s</div>
+                                </Then>
+                            </If>
+                        </div>
+
                     </div>
-
                 </div>
-            </div>
-            <If condition={taskItem?.status == DownloadStatus.PENDING
-                || taskItem?.status == DownloadStatus.PAUSE
-                || taskItem?.status == DownloadStatus.ANAL
-                || taskItem?.status == DownloadStatus.ANALERROR}>
-               <Then>
-                   <div className={styles.rightContainer}>
-                       <If condition={taskItem?.status == DownloadStatus.PENDING}>
-                           <Then>
-                               <div className={styles.actionButton} onClick={() => props.commandCommon && props.commandCommon('PAUSE', taskItem)}>
-                                   <PauseOutlined/>
-                               </div>
-                           </Then>
-                       </If>
-                       <If condition={taskItem?.status == DownloadStatus.PAUSE}>
-                           <Then>
-                               <div className={styles.actionButton} onClick={() => props.commandCommon && props.commandCommon('PAUSE', taskItem)}>
-                                   <CaretRightOutlined/>
-                               </div>
-                           </Then>
-                       </If>
-                       <If condition={taskItem?.status == DownloadStatus.ANAL}>
-                           <Then>
-                               <div className={styles.actionButton} onClick={() => deleteTask(taskItem)}>
-                                   <CloseOutlined />
-                               </div>
-                           </Then>
-                       </If>
-                       <If condition={taskItem?.status === DownloadStatus.ANALERROR}>
-                           <Then>
-                               <div className={styles.actionButton} onClick={() => deleteTask(taskItem)}>
-                                   <ReloadOutlined />
-                               </div>
-                           </Then>
-                       </If>
-                   </div>
-               </Then>
-            </If>
+                <If condition={taskItem?.status == DownloadStatus.PENDING
+                    || taskItem?.status == DownloadStatus.PAUSE
+                    || taskItem?.status == DownloadStatus.ANAL
+                    || taskItem?.status.includes(DownloadStatus.ERROR)}>
+                    <Then>
+                        <div className={styles.rightContainer}>
+                            <If condition={taskItem?.status == DownloadStatus.PENDING}>
+                                <Then>
+                                    <div className={styles.actionButton} onClick={() => props.commandCommon && props.commandCommon('PAUSE', taskItem)}>
+                                        <PauseOutlined/>
+                                    </div>
+                                </Then>
+                            </If>
+                            <If condition={taskItem?.status == DownloadStatus.PAUSE}>
+                                <Then>
+                                    <div className={styles.actionButton} onClick={() => props.commandCommon && props.commandCommon('PAUSE', taskItem)}>
+                                        <CaretRightOutlined/>
+                                    </div>
+                                </Then>
+                            </If>
+                            <If condition={taskItem?.status == DownloadStatus.ANAL}>
+                                <Then>
+                                    <div className={styles.actionButton} onClick={() => deleteTask(taskItem)}>
+                                        <CloseOutlined />
+                                    </div>
+                                </Then>
+                            </If>
+                            <If condition={taskItem?.status.includes(DownloadStatus.ERROR) }>
+                                <Then>
+                                    <div className={styles.actionButton} onClick={() => deleteTask(taskItem)}>
+                                        <ReloadOutlined />
+                                    </div>
+                                </Then>
+                            </If>
+                        </div>
+                    </Then>
+                </If>
 
-        </div>
+            </div>
+        </Dropdown>
+
     )
 }
 

@@ -6,7 +6,7 @@ import { Button, Space, Form, Input, Switch, Select, Flex, Modal, Radio } from "
 import { useState } from 'react'
 import {If, Then} from 'react-if'
 import API from "../../request/api.ts";
-import {ResultStatus} from "../../../enums.ts";
+import {ResultStatus} from "../../shared/enums.ts";
 import CookieList from "./components/CookieList.tsx";
 import { useTheme } from "../../components/ThemeProvider";
 import iconLightTheme from '../../assets/images/light-theme.png';

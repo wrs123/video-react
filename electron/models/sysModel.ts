@@ -1,10 +1,51 @@
 import { BaseResult } from "../../types.ts";
-import {ResultStatus} from "../../enums.ts";
+import {ResultStatus} from "../../src/shared/enums.ts";
 import Store from 'electron-store'
 import { app } from 'electron'
 import moment from 'moment'
-
+import { BrowserWindow} from 'electron'
+import path from "node:path";
+import {objToURLParam} from "../../src/utils/tools.ts";
+import {fileURLToPath} from "node:url";
 const store = new Store()
+
+/**
+ * 创建解析窗口
+ * @param param
+ */
+function _createParseWindow(param: string) {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+    const parseWin = new BrowserWindow({
+        width: 1000,
+        height: 700,
+        parent: global.win,
+        modal: true,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.mjs'),
+            nodeIntegration: false,
+            contextIsolation: true,
+            webviewTag: true, // ✅ 允许 webview
+        },
+    });
+
+    let _path: string = ''
+    if (global.VITE_DEV_SERVER_URL) {
+        _path = path.join(global.VITE_DEV_SERVER_URL, '#/parse')
+    } else {
+        _path = path.join(global.RENDERER_DIST, 'index.html')
+    }
+    _path += `?${param}`
+    parseWin.loadURL(_path)
+    parseWin.webContents.once("did-finish-load", () => {
+        console.warn(111)
+        parseWin.webContents.send("init-data", param);
+    });
+
+    parseWin.webContents.openDevTools()
+
+    return parseWin;
+}
 
 /**
  * 获取系统设置
@@ -234,6 +275,56 @@ export const setSysConfig = (param: any) => {
     }catch(error: any){
         res.status= ResultStatus.ERROR
         res.message = "更新失败"+error.message
+        console.warn('err', error.message)
+    }
+
+    return res
+}
+
+
+/**
+ * 开启解析窗口
+ * @param param
+ */
+export const openParseWindow = (param: any) => {
+    return new Promise((rev, rej) => {
+        const res: BaseResult = {
+            code: 200,
+            status: ResultStatus.OK,
+            message: '',
+            data: ''
+        }
+
+
+
+        const parseWin = _createParseWindow(objToURLParam(param));
+        global.parseWindow = parseWin;
+        parseWin.on("closed", () => {
+            res.data = 'CLOSE'
+            rev(res)
+        });
+    })
+}
+
+/**
+ * 关闭解析窗口
+ * @param param
+ */
+export const closeParseWindow = (param: any) => {
+    const res: BaseResult = {
+        code: 200,
+        status: ResultStatus.OK,
+        message: '',
+        data: ''
+    }
+
+    try{
+        if(global.parseWindow){
+            global.parseWindow.close()
+        }
+    }catch(error: any){
+        res.status= ResultStatus.ERROR
+        res.message = "关闭失败"+error.message
         console.warn('err', error.message)
     }
 

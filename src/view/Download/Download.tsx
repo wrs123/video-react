@@ -1,18 +1,19 @@
 import styles from './Download.module.scss'
-import {Button, Modal, Space, Empty, List} from "antd";
+import {Button, Modal, Space, Empty, Input} from "antd";
 
 import VirtualList from 'rc-virtual-list';
 import {
     PlusOutlined,
-    PauseOutlined
+    PauseOutlined,
+    SearchOutlined
 } from '@ant-design/icons';
 import React, {useState, useEffect, useRef} from 'react'
 import {DownloadTaskType } from "../../../types.ts";
-import {DownloadStatus, ResultStatus} from "../../../enums.ts";
+import {DownloadStatus, ResultStatus} from "../../shared/enums.ts";
 import {If, Else, Then} from 'react-if';
 import CreateDialog from "./components/createDialog"
 import QueueAnim from 'rc-queue-anim';
-
+const { Search } = Input;
 
 import DownloadItem from "./components/DownloadItem.tsx";
 import API from "../../request/api.ts";
@@ -152,12 +153,16 @@ function Download(props: any) {
             {confrimContextHolder}
             <div className={styles.downloadContainer}>
                 <div className={styles.containerTop}>
-                    <div className={styles.leftTitle}>
-                        <h1 >{props.status == 1 ? '已完成' : '下载中'}</h1>
-                        <div className={styles.downloadCount}>{total}</div>
-                    </div>
+                    <Space>
+                        <div className={styles.leftTitle}>
+                            <h1 >{props.status == 1 ? '已完成' : '下载中'}</h1>
+                            <div className={styles.downloadCount}>{total}</div>
+                        </div>
+
+                    </Space>
                     <div>
                         <Space>
+                            <Button icon={<SearchOutlined />}></Button>
                             <Button icon={<PauseOutlined />}></Button>
                             <Button type="primary" icon={<PlusOutlined/>} onClick={showModal}>
                                 新建

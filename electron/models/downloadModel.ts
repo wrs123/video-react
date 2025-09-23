@@ -1,38 +1,74 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 import {BaseResult, DownloadAnalysisType, DownloadTaskType} from "../../types.ts";
-import {DownloadFileType, DownloadStatus, ResultStatus} from "../../enums.ts";
+import {DownloadFileType, DownloadStatus, ResultCode, ResultStatus} from "../../src/shared/enums.ts";
 import {DownloadFileByDirectURL, DownloadFileByOriginalURL} from "../libs/downloadManage.ts";
 import crypto from "crypto"
 import moment from 'moment'
 const { Worker } = require("node:worker_threads");
 import { resolve, dirname } from 'path';
 import {publicDir} from "../utils/index.js";
-import {getCookie} from "./sysModel.ts";
+import {getCookie, openParseWindow} from "./sysModel.ts";
 import fs from "fs";
-const { net } = require("electron");
+const { net, session } = require("electron");
+
+
+/**
+ * 格式化cookie格式
+ * @param cookies
+ */
+function _formatNetscapeCookie(cookies: Electron.Cookie[]) {
+
+    if(!cookies){
+        return ''
+    }
+
+    const lines = [
+        "# Netscape HTTP Cookie File",
+        "# This file is generated for yt-dlp"
+    ];
+
+    cookies.forEach(c => {
+        const domain = c.domain.startsWith(".") ? c.domain : "." + c.domain;
+        const flag = "TRUE";  // 是否适用于子域
+        const path = c.path || "/";
+        const secure = c.secure ? "TRUE" : "FALSE";
+        const expiration = c.expirationDate ? c.expirationDate.toString() : "0";
+        const name = c.name;
+        const value = c.value;
+
+        lines.push([domain, flag, path, secure, expiration, name, value].join("\t"));
+    });
+
+    return lines.join("\n")
+
+}
+
+
+
+async function _initCookie(domain: string): Promise<void> {
+    const cookies = await session.defaultSession.cookies.get({})
+
+    return cookies
+}
 
 /**
  * 获取cookie
  * @param domain
  */
-async function _getCookie(domain){
-    let res = ""
+async function _getCookie(domain: string): Promise<string> {
+    let res = "",
+        cookieStr: string = ''
 
-    const val = await getCookie({ domain })
-    console.warn('cookie', domain)
-    const { status, data } = val
-    if(status == ResultStatus.OK){
-        if(data){
-            const _host = (new URL(domain)).hostname
-            const _cookiePath = resolve(publicDir(), `.cookies/.cookies_${_host}.cks`)
-            console.warn(_cookiePath)
-            fs.writeFileSync(_cookiePath, data.cookies);
-            res = _cookiePath
-        }else{
-            console.warn('no cookie found');
-        }
-    }
+    const cookies: any = await _initCookie(domain)
+
+    const _host = (new URL(domain)).hostname
+    const _cookiePath = resolve(publicDir(), `${global.cookiesPath}/.cookies_${_host}.cks`)
+    console.warn(_cookiePath)
+    fs.writeFileSync(_cookiePath, _formatNetscapeCookie(cookies), "utf8");
+    res = _cookiePath
+
+
     return res
 }
 
@@ -83,7 +119,7 @@ const _analysisWorker = (path: string, id: string, ytDlpArgument: string[]) => {
 
         const analysisWorker = new Worker(resolve(global.__dirname, '../electron/worker/pathAnalysisWorker.js'), {
             workerData: { path, publicDir: publicDir(), ytDlpArgument},
-            type: "module"
+            // type: "module"
         });
         //线程入栈
         global.taskStack[id] = analysisWorker;
@@ -186,8 +222,8 @@ export const createTask = async (param: any) => {
         //解析视频基本信息
         _analysisWorker(param.urls, param.id, ytDlpArgument).then(async (analysisObj: any) => {
 
-            if(analysisObj.type === 'done'){
-                const { data } = analysisObj;
+            if(analysisObj.status === ResultStatus.OK){
+                const data = analysisObj.res;
 
                 _data.name = data.fileName
                 _data.analysisUrl = data.analysisUrl
@@ -209,7 +245,11 @@ export const createTask = async (param: any) => {
                 }
             }
             else {
-                _data.status = DownloadStatus.ANALERROR
+                if(analysisObj.code === ResultCode.COOKIE_ERROR){
+                    _data.status = DownloadStatus.COOKIEERROR
+                }else{
+                    _data.status = DownloadStatus.ANALERROR
+                }
                 updateDownloadStatus(_data)
             }
         })

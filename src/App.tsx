@@ -1,7 +1,7 @@
 import './App.css'
 import { useEffect, useState } from 'react'
 import API from "./request/api.ts";
-import {ResultStatus} from "../enums.ts";
+import {ResultStatus} from "./shared/enums.ts";
 import { ThemeProvider, useTheme } from "./components/ThemeProvider.tsx";
 import router from './router/index'
 import { RouterProvider, createHashRouter } from "react-router-dom";

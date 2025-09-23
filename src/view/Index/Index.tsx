@@ -1,28 +1,32 @@
 import styles from './Index.module.scss'
 import { useState } from 'react'
-import { CheckCircleOutlined, SettingFilled, DownloadOutlined  } from '@ant-design/icons';
+import Icon, { GlobalOutlined, ControlOutlined, DownloadOutlined  } from '@ant-design/icons';
+import DownloadIcon from '../../assets/svgs/download.svg?react'
+import DownloadFillIcon from '../../assets/svgs/download-fill.svg?react'
+import BrowserIcon from '../../assets/svgs/browser.svg?react'
+import BrowserFillIcon from '../../assets/svgs/browser-fill.svg?react'
+import SettingIcon from '../../assets/svgs/setting-icon.svg?react'
 import classnames from 'classnames';
 import DownLoad from '../Download/Download'
 import Config from '../Config/Config'
 import { Button, Modal } from "antd";
 import WindowTitleBar from "../../components/windowTitleBar.tsx";
-import logoIconLight from '../../assets/images/logo-light.png'
-import logoIconDark from '../../assets/images/logo-dark.png'
+import logoIcon from '../../assets/images/icon.png'
 import { useTheme } from "../../components/ThemeProvider.tsx";
 import {If, Else, Then} from 'react-if';
 
 const stepList = [
     {
-        label: '下载中',
+        label: '下载',
         key: 'download',
-        icon: <DownloadOutlined style={{fontSize: '18px'}} />,
-        activeIcon: <DownloadOutlined style={ {color: 'var(--color-primary);', fontSize: '18px'}}/>
+        icon: <Icon component={ DownloadIcon } />,
+        activeIcon: <Icon component={ DownloadFillIcon } />
     },
     {
-        label: '已完成',
+        label: '嗅探',
         key: 'finish',
-        icon: <CheckCircleOutlined style={{fontSize: '18px'}} />,
-        activeIcon: <CheckCircleOutlined style={ {color: 'var(--color-primary)', fontSize: '18px'}}/>
+        icon: <Icon component={ BrowserIcon } />,
+        activeIcon: <Icon component={ BrowserFillIcon } />
     },
 ]
 
@@ -47,7 +51,7 @@ function Index(){
             <div className={styles.contentContainer}>
                 <div className={styles.stepBar}>
                     <div className={styles.logoContainer}>
-                        <img src={ theme === "light" ? logoIconLight : logoIconDark } alt="logo"/>
+                        <img src={ logoIcon } alt="logo"/>
                     </div>
                     {
                         stepList.map(item =>
@@ -61,13 +65,12 @@ function Index(){
                         )
                     }
                     <div className={styles.bottomButton}>
-                        <Button color="primary" variant="outlined" block icon={<SettingFilled />} onClick={openSysConfig}>
-                            软件设置
+                        <Button color="default" variant="link" size='large' icon={<Icon component={ SettingIcon } />} onClick={openSysConfig}>
+                            {/*软件设置*/}
                         </Button>
                     </div>
                 </div>
                 <div className={styles.projectContainer}>
-
                     <If condition={activeStep === 'download'}>
                         <Then>
                             <DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={0} navigateFinishTask={(val ) => {setActiveStep('finish')}}/>

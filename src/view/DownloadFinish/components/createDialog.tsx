@@ -5,7 +5,7 @@ import {
     RocketFilled,
 } from '@ant-design/icons';
 import API from "../../../request/api.ts";
-import {ResultStatus} from "../../../../enums.ts";
+import {ResultStatus} from "../../../shared/enums.ts";
 const { TextArea, Search } = Input;
 
 type FieldType = {

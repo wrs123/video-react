@@ -2,16 +2,22 @@ import styles from "./Parse.module.scss";
 import { useEffect, useRef, useState } from "react";
 import API from "../../request/api.ts";
 import {Button, Input, Space, Flex} from "antd";
+import { useSearchParams } from "react-router-dom";
 import { ReloadOutlined, LeftOutlined, RightOutlined, SettingOutlined, MenuUnfoldOutlined, GlobalOutlined, CloseOutlined } from '@ant-design/icons';
+import { useLocation } from "react-router-dom";
+
+
 function Parse (){
     const webviewRef = useRef<Electron.WebviewTag>(null);
 
     const [ cookies, setCookies] = useState('')
     const [url, setUrl] = useState("");
+    const location = useLocation();
+
     const [loading, setLoading] = useState(false);
     const [ canGoBack, setCanGoBack] = useState(false);
     const [ canGoForward, setCanGoForward] = useState(false);
-    const [showConsoleBar, setShowConsoleBar] = useState(true);
+    const [showConsoleBar, setShowConsoleBar] = useState(false);
 
     const closeParseWindow = async () => {
         await API.closeParseWindow('')
@@ -43,11 +49,36 @@ function Parse (){
         setCanGoForward(webview.canGoForward())
     }
 
+    const getParams = () => {
+        // 优先取正常 search
+        let search = location.search;
+
+        // 如果 search 为空，尝试从 hash 里解析
+        if (!search && location.hash.includes("?")) {
+            search = "?" + location.hash.split("?")[1];
+        }
+
+        const params = new URLSearchParams(search);
+        const query = []
+        for (const [key, value] of params) {
+            query[key] = value;
+        }
+        setUrl(query['url'])
+        if(query['command'] === 'GET_COOKIE'){
+            setShowConsoleBar(false)
+        }
+        console.warn(query, window.location)
+    }
+
+
+
+
 
     useEffect(() => {
+        getParams()
+
         const webview = webviewRef.current;
         if (!webview) return;
-
 
         webview.addEventListener("dom-ready", () => {
             console.log("webview is ready!");
@@ -95,8 +126,8 @@ function Parse (){
             </div>
             <div className={styles.viewContainer}>
                 <webview
-                    ref={webviewRef}
-                    src='https://youtube.com'
+                    ref={ webviewRef }
+                    src={ url }
                     className={styles.parseWindow}
                 ></webview>
                 <div className={ `${styles.consoleContainer} ${ showConsoleBar ? '' : styles.hide}` }>

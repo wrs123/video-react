@@ -4,12 +4,39 @@ const require = createRequire(import.meta.url);
 const { parentPort, workerData } = require("node:worker_threads");
 const { connect } = require("puppeteer-real-browser");
 import { resolve } from 'path';
+import {ResultCode, ResultStatus} from "../../dist-electron/enums.js";
 const { spawn } = require("child_process");
 
 
 const _pathMap = {
     "www.91porn.com": _91Pron,
 }
+
+/**
+ * yt-dlp异常通用解析
+ * @param output
+ * @returns {ResultCode}
+ * @private
+ */
+function _parseYtDlpError(output) {
+    if (!output) return null;
+
+    if (output.includes("Fresh cookies")) {
+        return ResultCode.COOKIE_ERROR;
+    }
+    if (output.includes("Forbidden")) {
+        return ResultCode.COOKIE_ERROR;
+    }
+    if (output.includes("Requested format is not available")) {
+        return ResultCode.FORMAT_AVAILABLE;
+    }
+    if (output.includes("Failed to parse JSON")) {
+        return ResultCode.COOKIE_ERROR;
+    }
+
+    return ResultCode.ERROR;
+}
+
 
 async function PathAnalysisWorker(path, publicDir, ytDlpArgument){
     console.warn(path)
@@ -29,9 +56,11 @@ async function PathAnalysisWorker(path, publicDir, ytDlpArgument){
 
 
     if(res.status === 'OK'){
-        parentPort.postMessage({ type: "done", data: {...res.res, isUniversal } });
+        res.res.isUniversal = isUniversal
+        parentPort.postMessage(res);
     }else{
-        parentPort.postMessage({ type: "error", message: res.message });
+        console.warn(123123123123)
+        parentPort.postMessage(res);
     }
     return res
 }
@@ -43,7 +72,7 @@ async function PathAnalysisWorker(path, publicDir, ytDlpArgument){
  */
 async function _universalVideoParser(path, publicDir, ytDlpArgument){
     const res = {
-        status: 'OK',
+        status: ResultStatus.OK,
         message: '解析成功',
         res: {
             analysisUrl: '', //下载地址
@@ -79,14 +108,16 @@ async function _universalVideoParser(path, publicDir, ytDlpArgument){
                         res.res.cover = info.thumbnail
                         rev(res);
                     } catch (err) {
+                        res.code = _parseYtDlpError(errorOutput)
                         res.status = 'error'
                         res.message = err.message;
-                        rej(res);
+                        rev(res);
                     }
                 } else {
-                    res.status = 'error'
+                    res.code = _parseYtDlpError(errorOutput)
+                    res.status = ResultStatus.ERROR;
                     res.message = errorOutput;
-                    rej(res);
+                    rev(res);
                 }
             });
 
@@ -148,10 +179,6 @@ async function _91Pron(path){
     }
 }
 
-try{
-    const { path, publicDir, ytDlpArgument } = workerData;
-    await PathAnalysisWorker(path, publicDir, ytDlpArgument)
-}catch(err){
-    parentPort.postMessage({ type: "error", message: err.message });
-}
+const { path, publicDir, ytDlpArgument } = workerData;
+await PathAnalysisWorker(path, publicDir, ytDlpArgument)
 

@@ -5,12 +5,22 @@ export enum DownloadStatus {
     PAUSE = 'PAUSE',
     ANAL = 'ANAL', //解析中
     ANALERROR = 'ANALERROR', //解析失败
+    COOKIEERROR = 'COOKIEERROR',
     MERGER = 'MERGER' //合并
 }
 
 export enum ResultStatus {
     ERROR = "ERROR",
-    OK = "OK"
+    OK = "OK",
+    COOKIE_ERROR = "COOKIE_ERROR",
+    FORMAT_AVAILABLE = "FORMAT_AVAILABLE",
+}
+
+export enum ResultCode {
+    ERROR = 500,
+    OK = 200,
+    COOKIE_ERROR = 1501,
+    FORMAT_AVAILABLE = 150,
 }
 
 export enum DownloadFileType{

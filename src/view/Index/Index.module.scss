@@ -1,4 +1,4 @@
-$stepBarWidth: 170px;
+$stepBarWidth: 65px;
 
 .indexContainer{
   display: flex;
@@ -17,7 +17,9 @@ $stepBarWidth: 170px;
   background: var(--cust-slider-bg);
   position: relative;
   width: $stepBarWidth;
-  //box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   z-index: 5;
   border-right: 1px solid var(--color-border);
 
@@ -27,11 +29,11 @@ $stepBarWidth: 170px;
     justify-content: center;
     font-size: 22px;
     font-weight: bolder;
-    padding: 4px 0 12px 0;
+    padding: 4px 0 4px 0;
     align-items: center;
 
     img{
-      height: 40px;
+      height: 50px;
     }
   }
 
@@ -42,6 +44,12 @@ $stepBarWidth: 170px;
     width: -webkit-fill-available;
     padding: 14px 12px 18px 12px;
     left: 0;
+    display: flex;
+    justify-content: center;
+
+    svg{
+      font-size: 24px;
+    }
   }
 }
 
@@ -49,17 +57,22 @@ $stepBarWidth: 170px;
   display: flex;
   //flex-direction: column;
   align-items: center;
-  padding: 12px 6px 12px 16px;
+  justify-content: center;
+  width: 50px;
+  height: 64px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 15px;
   color: var(--color-text-primary);
-  // margin: 0 12px;
-  margin-bottom: 16px;
   position: relative;
   transition: all 0.3s;
-  margin: 8px;
+  margin: 10px 0 0 0;
   transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  flex-direction: column;
+
+  svg{
+    font-size: 24px;
+  }
 
   &:hover {
     color: var(--color-primary);
@@ -71,15 +84,15 @@ $stepBarWidth: 170px;
     font-weight: bold;
     //padding: 10px 6px 20px 6px;
 
-    &:before {
-      content: '';
-      height: 6px;
-      width: 6px;
-      background: var(--color-primary);
-      border-radius: 10px;
-      position: absolute;
-      right: 16px;
-    }
+    //&:before {
+    //  content: '';
+    //  height: 6px;
+    //  width: 6px;
+    //  background: var(--color-primary);
+    //  border-radius: 10px;
+    //  position: absolute;
+    //  right: 16px;
+    //}
   }
 
   &.disabled {
@@ -89,8 +102,9 @@ $stepBarWidth: 170px;
   }
 
   .itemLabel{
-    margin-left: 10px;
     line-height: .94;
+    margin-top: 8px;
+    font-size: 12px;
     display: inline-block;
     font-weight: lighter;
   }

@@ -1,5 +1,14 @@
 import { ipcMain  } from 'electron'
-import {getSysConfig, setSysConfig, getCookieList, getCookie, addCookie, updateCookie, delCookie} from "../models/sysModel.ts";
+import {
+    getSysConfig,
+    setSysConfig,
+    getCookieList,
+    getCookie,
+    addCookie,
+    updateCookie,
+    delCookie,
+    openParseWindow, closeParseWindow
+} from "../models/sysModel.ts";
 
 export const SysHandler = () => {
     const DOMAIN = "sys"
@@ -78,6 +87,16 @@ export const SysHandler = () => {
      */
     ipcMain.handle(`${DOMAIN}:delCookie`, function (_, param) {
         return delCookie(param)
+    })
+
+
+    ipcMain.handle(`${DOMAIN}:openParseWindow`, async (_, param: any) => {
+        return await openParseWindow(param)
+    })
+
+
+    ipcMain.handle(`${DOMAIN}:closeParseWindow`, async (_, param: any) => {
+        return closeParseWindow(param)
     })
 
 }

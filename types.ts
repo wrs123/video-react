@@ -1,4 +1,4 @@
-import {AnalyzeType, DownloadFileType, DownloadStatus, ResultStatus} from "./enums.ts";
+import {AnalyzeType, DownloadFileType, DownloadStatus, ResultStatus} from "./src/shared/enums.ts";
 
 interface DownloadTaskType {
     id: string, //下载任务id

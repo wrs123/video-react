@@ -2,6 +2,9 @@
 const electron = require("electron");
 if (process.contextIsolated) {
   try {
+    electron.contextBridge.exposeInMainWorld("electronAPI", {
+      onInitData: (callback) => electron.ipcRenderer.on("init-data", (event, data) => callback(data))
+    });
     electron.contextBridge.exposeInMainWorld("ipcRenderer", {
       on(...args) {
         const [channel, listener] = args;

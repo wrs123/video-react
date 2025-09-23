@@ -4,10 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "dev": "npm run tscShared && vite",
+    "build": "tsc && tscShared && vite build && electron-builder",
     "preview": "vite preview",
-    "rebuildSql": "electron-rebuild -f -w better-sqlite3"
+    "rebuildSql": "electron-rebuild -f -w better-sqlite3",
+    "tscShared": "tsc -p tsconfig.worker.json"
   },
   "build": {
     "mac": {
@@ -41,6 +42,7 @@
     "react-router-dom": "^7.9.1",
     "sqlite3": "^5.1.7",
     "utf-8-validate": "^6.0.5",
+    "vite-plugin-svgr": "^4.5.0",
     "yt-dlp-wrap": "^2.3.12"
   },
   "devDependencies": {
@@ -56,7 +58,8 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "sass-embedded": "^1.85.1",
-    "typescript": "^5.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2",
     "vite": "^5.1.6",
     "vite-plugin-electron": "^0.28.6",
     "vite-plugin-electron-renderer": "^0.14.5"

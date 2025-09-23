@@ -5,6 +5,10 @@ import { ipcRenderer, contextBridge } from 'electron'
 
 if (process.contextIsolated) {
   try {
+
+    contextBridge.exposeInMainWorld("electronAPI", {
+      onInitData: (callback: any) => ipcRenderer.on("init-data", (event, data) => callback(data))
+    });
     contextBridge.exposeInMainWorld('ipcRenderer', {
       on(...args: Parameters<typeof ipcRenderer.on>) {
         const [channel, listener] = args

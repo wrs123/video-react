@@ -5,12 +5,11 @@ import path from 'node:path'
 import { InitHandler } from "./handlers";
 import {initDB} from "./db/init.ts";
 import {getSysConfig} from "./models/sysModel.ts";
-import {ResultStatus} from "../enums.ts";
+import {ResultStatus} from "../src/shared/enums.ts";
 
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -22,7 +21,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // │
 process.env.APP_ROOT = path.join(__dirname, '..')
 console.log('Node.js environment:', typeof __filename );
-
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -38,18 +36,43 @@ let parseWin: BrowserWindow | null
  * 创建主窗口
  */
 function createWindow() {
-  win = new BrowserWindow({
+  const isMac = process.platform === 'darwin'
+  const isWin = process.platform === 'win32'
+
+  const opts: any = {
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
     width: 1200,
-    height: 650,
+    height: 750,
     minWidth: 1200,
     minHeight: 650,
     frame: false,
+    transparent: true,       // 需要透明以让 backdrop-filter / vibrancy 生效
     titleBarStyle: 'hiddenInset',
+           // 通常无边框更好看（可选）
+
+    // backgroundColor: '#00000000',
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
+      contextIsolation: true,
     },
-  })
+  }
+
+  // 平台差异化设置
+  if (isMac) {
+    // macOS 原生 vibrancy（可选样式：sidebar, titlebar, full-screen-ui, selection, menu, popover, hud, sheet, window）
+    opts.vibrancy = 'sidebar' // 或 'sidebar', 'hud' 等
+    opts.visualEffectState = 'active'
+  } else if (isWin) {
+    // Windows 10/11 的 Material（Electron 新版本支持）
+    // 可选: 'mica' 'acrylic' 'tabbed' 'auto'
+    // 注意：Windows 上即便设置了，仍需要用户系统支持（Win10/11 才生效）
+    opts.backgroundMaterial = 'acrylic'
+  } else {
+    // Linux：没有系统毛玻璃，保留透明并用 CSS 回退
+  }
+
+
+  win = new BrowserWindow(opts)
 
   if (process.platform === 'darwin') {
     win.setWindowButtonVisibility(true) // 显示原生按钮
@@ -70,39 +93,6 @@ function createWindow() {
   }
 
   win.webContents.openDevTools()
-}
-
-/**
- * 创建解析窗口
- * @param url
- */
-function createParseWindow() {
-  parseWin = new BrowserWindow({
-    width: 1000,
-    height: 700,
-    parent: win,
-    modal: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.mjs'),
-      nodeIntegration: false,
-      contextIsolation: true,
-      webviewTag: true, // ✅ 允许 webview
-    },
-  });
-
-  if (VITE_DEV_SERVER_URL) {
-    console.log(path.join(VITE_DEV_SERVER_URL, '#/parse'))
-    parseWin.loadURL(path.join(VITE_DEV_SERVER_URL, '#/parse'))
-  } else {
-    // win.loadFile('dist/index.html')
-    parseWin.loadFile(path.join(RENDERER_DIST, 'index.html'))
-  }
-
-  parseWin.webContents.once("did-finish-load", () => {
-    parseWin.webContents.send("open-url", 'url');
-  });
-
-  parseWin.webContents.openDevTools()
 }
 
 
@@ -162,6 +152,9 @@ app.whenReady().then(async () => {
   global.publicDir = publicDir()
   //初始化db实例并注册到全局
   global.db = initDB()
+  global.VITE_DEV_SERVER_URL = VITE_DEV_SERVER_URL
+  global.MAIN_DIST = MAIN_DIST
+  global.RENDERER_DIST = RENDERER_DIST
 
   //挂载系统代理
   const cookiesRes = getSysConfig()
@@ -182,26 +175,6 @@ app.whenReady().then(async () => {
   createWindow()
   //注册全局事件监听
   InitHandler()
-
-
-  function openParseWindow(){
-    return new Promise((rev, rej) => {
-      createParseWindow();
-      parseWin.on("closed", () => {
-        parseWin = null;
-        rev(true)
-      });
-    })
-  }
-
-  ipcMain.handle(`open-parse-window`, async () => {
-    return await openParseWindow()
-  })
-
-  ipcMain.handle(`close-parse-window`, async () => {
-    parseWin.close()
-    return "ok"
-  })
 
 
   //全局注册窗口

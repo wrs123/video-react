@@ -1,12 +1,12 @@
 :root[data-theme='light'] {
     --cust-content-bg: #ffffff;
-    --cust-slider-bg: #f4f4f4;
+    --cust-slider-bg: rgba(241, 239, 239, .6);
     --color-text-primary: #333;
     --color-text-second: #666;
     --color-text-thr: #999;
     --color-primary: #4d53e8;
     --color-border: rgba(5, 5, 5, 0.06);
-    --color-primary-second: rgba(98, 106, 239, .15);
+    --color-primary-second: rgba(98, 106, 239, .1);
     --color-config-slider: rgba(250, 250, 250, .94);
     --color-config-slider-text: #495464;
     --color-config-slider-active-text: #18222f;
