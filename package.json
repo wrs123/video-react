@@ -43,7 +43,8 @@
     "sqlite3": "^5.1.7",
     "utf-8-validate": "^6.0.5",
     "vite-plugin-svgr": "^4.5.0",
-    "yt-dlp-wrap": "^2.3.12"
+    "yt-dlp-wrap": "^2.3.12",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@types/react": "^18.2.64",

@@ -1,0 +1,45 @@
+.browserContainer{
+  background-color: var(--cuse-browser-bg);
+  height: 100%;
+
+  .tabList{
+    padding: 8px 8px 0 8px;
+    display: flex;
+    position: relative;
+    z-index: 11;
+
+    .tabItem{
+      padding: 8px 16px;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      align-items: center;
+      -webkit-app-region: no-drag;
+      position: relative;
+      margin-left: 10px;
+      cursor: pointer;
+      color: var(--color-text-primary);
+
+
+      &.active{
+        background-color: var(--cust-content-bg);
+
+        //&::after{
+        //  content: '';
+        //  height: 100%;
+        //  position: absolute;
+        //  width: 10px;
+        //  left: 0px;
+        //  border-radius: 10px;
+        //  background-color: #f2f2f2;
+        //}
+      }
+
+      .closeButton{
+        margin-left: 8px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+    }
+  }
+
+}

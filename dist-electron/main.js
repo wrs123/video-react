@@ -20192,14 +20192,16 @@ function createWindow() {
     // 需要透明以让 backdrop-filter / vibrancy 生效
     titleBarStyle: "hiddenInset",
     // 通常无边框更好看（可选）
-    // backgroundColor: '#00000000',
+    backgroundColor: "#00000000",
     webPreferences: {
       preload: path$1.join(__dirname, "preload.mjs"),
-      contextIsolation: true
+      contextIsolation: true,
+      nodeIntegration: true,
+      webviewTag: true
     }
   };
   if (isMac) {
-    opts.vibrancy = "sidebar";
+    opts.vibrancy = "hud";
     opts.visualEffectState = "active";
   } else if (isWin) {
     opts.backgroundMaterial = "acrylic";
@@ -20217,7 +20219,6 @@ function createWindow() {
   } else {
     win.loadFile(path$1.join(RENDERER_DIST, "index.html"));
   }
-  win.webContents.openDevTools();
 }
 app$2.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

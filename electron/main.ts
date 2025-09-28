@@ -50,17 +50,19 @@ function createWindow() {
     titleBarStyle: 'hiddenInset',
            // 通常无边框更好看（可选）
 
-    // backgroundColor: '#00000000',
+    backgroundColor: '#00000000',
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       contextIsolation: true,
+      nodeIntegration: true,
+      webviewTag: true
     },
   }
 
   // 平台差异化设置
   if (isMac) {
     // macOS 原生 vibrancy（可选样式：sidebar, titlebar, full-screen-ui, selection, menu, popover, hud, sheet, window）
-    opts.vibrancy = 'sidebar' // 或 'sidebar', 'hud' 等
+    opts.vibrancy = 'hud' // 或 'sidebar', 'hud' 等
     opts.visualEffectState = 'active'
   } else if (isWin) {
     // Windows 10/11 的 Material（Electron 新版本支持）
@@ -92,7 +94,7 @@ function createWindow() {
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
 
-  win.webContents.openDevTools()
+  // win.webContents.openDevTools()
 }
 
 

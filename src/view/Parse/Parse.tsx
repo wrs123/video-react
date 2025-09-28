@@ -12,6 +12,7 @@ function Parse (){
 
     const [ cookies, setCookies] = useState('')
     const [url, setUrl] = useState("");
+    const [ inputValue, setInputValue ] = useState("");
     const location = useLocation();
 
     const [loading, setLoading] = useState(false);
@@ -63,15 +64,21 @@ function Parse (){
         for (const [key, value] of params) {
             query[key] = value;
         }
-        setUrl(query['url'])
+        changeUrl(query['url'])
         if(query['command'] === 'GET_COOKIE'){
             setShowConsoleBar(false)
         }
         console.warn(query, window.location)
     }
 
+    const search = () => {
 
+    }
 
+    const changeUrl = (url: string) => {
+        setUrl(url)
+        setInputValue(url)
+    }
 
 
     useEffect(() => {
@@ -88,13 +95,14 @@ function Parse (){
         webview.addEventListener("did-navigate", (event) => {
             console.log("Navigated to:", event.url);
             setLoading(true)
-            setUrl(event.url)
+            changeUrl(event.url)
+
             initNav()
         });
 
         webview.addEventListener("did-navigate-in-page", (event) => {
             console.log("In-page navigation:", event.url);
-            setUrl(event.url)
+            changeUrl(event.url)
             initNav()
         });
 
@@ -114,7 +122,7 @@ function Parse (){
                         <Button type="text" size={'small'} disabled={ !canGoBack } icon={<LeftOutlined />} onClick={ goBackWebview }></Button>
                         <Button type="text" size={'small'} disabled={ !canGoForward } icon={<RightOutlined />} onClick={ goForwardWebview }></Button>
                         <Button size={'small'} type="text"  icon={loading ? <CloseOutlined /> : <ReloadOutlined />} onClick={ reloadWebview }></Button>
-                        <Input size={'small'} value={url} onChange={(e) => {setUrl(e.target.value)}} prefix={<GlobalOutlined style={{margin: '0 10px 0 4px'}} />} style={{flex: 1, marginLeft: '10px', marginRight: '10px'}} />
+                        <Input size={'small'} value={ inputValue } onPressEnter={ () => { changeUrl(inputValue) } } onChange={(e) => { setInputValue(e.target.value)} } prefix={<GlobalOutlined style={{margin: '0 10px 0 4px'}} />} style={{flex: 1, marginLeft: '10px', marginRight: '10px'}} />
                         <Button size={'small'} type="text" icon={<SettingOutlined />}></Button>
                         <Button size={'small'} type="text" icon={<MenuUnfoldOutlined />} onClick={() => setShowConsoleBar(!showConsoleBar)}></Button>
                     </Flex>
@@ -125,26 +133,26 @@ function Parse (){
                 </Flex>
             </div>
             <div className={styles.viewContainer}>
-                <If condition={url}>
-                    <Then>
-                        <webview
-                            ref={ webviewRef }
-                            src={ url }
-                            className={styles.parseWindow}
-                        ></webview>
-                        <div className={ `${styles.consoleContainer} ${ showConsoleBar ? '' : styles.hide}` }>
-                            <div className={styles.cookiesContent}>
-                                {cookies}
-                            </div>
-                        </div>
-                    </Then>
-                    <Else>
-                        <div className={styles.empty}>
-                            输入网址获取
-                        </div>
-                    </Else>
-                </If>
-
+                {/*<If condition={url}>*/}
+                {/*    <Then>*/}
+                {/*       */}
+                {/*    </Then>*/}
+                {/*    <Else>*/}
+                {/*        <div className={styles.empty}>*/}
+                {/*            输入网址获取*/}
+                {/*        </div>*/}
+                {/*    </Else>*/}
+                {/*</If>*/}
+                <webview
+                    ref={ webviewRef }
+                    src={ url }
+                    className={styles.parseWindow}
+                ></webview>
+                <div className={ `${styles.consoleContainer} ${ showConsoleBar ? '' : styles.hide}` }>
+                    <div className={styles.cookiesContent}>
+                        {cookies}
+                    </div>
+                </div>
             </div>
         </div>
     )

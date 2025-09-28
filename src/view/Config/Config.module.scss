@@ -38,7 +38,6 @@
           cursor: pointer;
           margin-bottom: 4px;
           color: var(--color-config-slider-text);
-
           font-size: 14px;
           display: flex;
           align-items: center;
@@ -91,7 +90,7 @@
 
         .bottomContent{
           padding: 0 18px;
-          //width: 100%;
+          overflow-x: hidden;
           flex: 1;
           overflow-y: auto;
           padding-top: 14px;

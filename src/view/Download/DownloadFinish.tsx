@@ -23,30 +23,26 @@ const MemoDownloadItem = React.memo(DownloadItem, (prevProps, nextProps) => {
     return JSON.stringify(prevProps) == JSON.stringify(nextProps)
 })
 
-function Download(props: any) {
+function DownloadFinish(props: any) {
     const [listHeight, setListHeight] = useState(200);
-    const downloadingList = useCusStore(state => state.downloadingList);
-    const setDownloadingList = useCusStore(state => state.setDownloadingList);
+    const downloadFinishList = useCusStore(state => state.downloadFinishList);
+    const setDownloadFinishList = useCusStore(state => state.setDownloadFinishList);
     const listRef = useRef(null);
+    const [modal, confrimContextHolder] = Modal.useModal();
 
 
     const commandCommon = async (type: string, item: DownloadTaskType, delSql: boolean = true) => {
 
         switch (type) {
-            case "PAUSE":
-                item.status = DownloadStatus.PAUSE;
-                setdownloadingList && setdownloadingList(prevList => prevList.map(preItem =>
-                    item.id == preItem.id ? {...preItem, ...item} : preItem
-                ));
-                break;
+
             case "PUSH":
                 item.status = DownloadStatus.PENDING;
-                setdownloadingList && setdownloadingList(prevList => prevList.map(preItem =>
+                setDownloadFinishList && setDownloadFinishList(prevList => prevList.map(preItem =>
                     item.id == preItem.id ? {...preItem, ...item} : preItem
                 ));
                 break;
             case "UPDATE":
-                setdownloadingList && setdownloadingList(prevList => prevList.map(preItem =>
+                setDownloadFinishList && setDownloadFinishList(prevList => prevList.map(preItem =>
                     item.id == preItem.id ? {...preItem, ...item} : preItem
                 ));
                 break;
@@ -54,29 +50,15 @@ function Download(props: any) {
                 if(delSql){
                     const res = await API.deleteTask({id: item?.id})
                     if(res.status === ResultStatus.OK){
-                        setdownloadingList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
+                        setDownloadFinishList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
                     }
                 }else{
-                    setdownloadingList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
+                    setDownloadFinishList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
                 }
                 break;
         }
     }
 
-    // const onScroll  = async (e: React.UIEvent<HTMLElement>) => {
-    //     if (
-    //         e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
-    //         listHeight
-    //     ) {
-    //         if( page.page * page.pageSize < total ){
-    //            page.page += 1
-    //             alert(JSON.stringify(page))
-    //             console.warn(page)
-    //             getTaskList()
-    //         }
-    //
-    //     }
-    // }
     const handleResize = () => {
         if (listRef.current) {
             setListHeight(listRef.current.offsetHeight)
@@ -96,12 +78,13 @@ function Download(props: any) {
 
     return (
         <>
+            {confrimContextHolder}
             <div className={styles.downloadContainer}>
                 <div key={1} className={styles.containerTop}>
                     <Space>
                         <div className={styles.leftTitle}>
-                            <h1>下载中</h1>
-                            <div className={styles.downloadCount}>{downloadingList.length}</div>
+                            <h1 >已完成</h1>
+                            <div className={styles.downloadCount}>{downloadFinishList.length}</div>
                         </div>
 
                     </Space>
@@ -115,25 +98,24 @@ function Download(props: any) {
                         </Space>
                     </div>
                 </div>
-                <div key={2} className={styles.downloadingList} ref={listRef}>
-                    <If condition={downloadingList.length != 0}>
+                <div key={2} className={styles.downloadList} ref={listRef}>
+                    <If condition={downloadFinishList.length != 0}>
                         <Then>
                             <VirtualList
-                                data={ downloadingList }
+                                data={ downloadFinishList }
                                 height={ listHeight }
                                 itemKey="id"
                             >
+
                                 {
                                     (item, index) =>
                                         <QueueAnim delay={ index * 20 } ease={'easeOutQuart'} duration={300} type={ 'right' } className={styles.downloadContainer}>
                                             <div key={item.id}>
-                                                <MemoDownloadItem  item={item} status={ 0 } commandCommon={commandCommon}/>
+                                                <MemoDownloadItem  item={item} status={ 1 } commandCommon={commandCommon}/>
                                             </div>
-
                                         </QueueAnim>
                                 }
                             </VirtualList>
-
                         </Then>
                         <Else>
                             <Empty style={{marginTop: '50px'}}/>
@@ -145,4 +127,4 @@ function Download(props: any) {
     )
 }
 
-export default Download
+export default DownloadFinish

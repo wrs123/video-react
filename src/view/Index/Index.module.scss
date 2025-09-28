@@ -59,7 +59,7 @@ $stepBarWidth: 65px;
   align-items: center;
   justify-content: center;
   width: 50px;
-  height: 64px;
+  height: 56px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 15px;
@@ -71,7 +71,7 @@ $stepBarWidth: 65px;
   flex-direction: column;
 
   svg{
-    font-size: 22px;
+    font-size: 24px;
   }
 
   &:hover {
@@ -79,7 +79,7 @@ $stepBarWidth: 65px;
   }
 
   &.active {
-    background: var(--color-primary-second);
+    //background: var(--color-primary-second);
     color: var(--color-primary);
     font-weight: bold;
     //padding: 10px 6px 20px 6px;
@@ -114,7 +114,6 @@ $stepBarWidth: 65px;
   flex: 1;
   height: -webkit-fill-available;
   overflow: hidden;
-  padding-top: var(--window-titlebar-height);
   background-color: var(--cust-content-bg);
 }
 

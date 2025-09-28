@@ -1,6 +1,8 @@
 :root[data-theme='light'] {
     --cust-content-bg: #ffffff;
-    --cust-slider-bg: rgba(241, 239, 239, .6);
+    --cust-slider-bg: rgba(241, 239, 239, .7);
+    --cust-slider-sec-bg: #fafafa;
+    --cuse-browser-bg: #f2f2f2;
     --color-text-primary: #333;
     --color-text-second: #666;
     --color-text-thr: #999;
@@ -20,14 +22,16 @@
 }
 
 :root[data-theme='dark'] {
-    --cust-content-bg: #141414;
-    --cust-slider-bg: #252525;
+    --cust-content-bg: #343434;
+    --cust-slider-bg: rgba(37, 37, 37, .7);
+    --cust-slider-sec-bg: #2d2d2d;
+    --cuse-browser-bg: #2d2d2d;
     --color-text-primary: #E0E0E0;
     --color-text-second: #B0B0B0;
     --color-text-thr: #808080;
-    --color-primary: #7479FF;
+    --color-primary: #9b9fff;
     --color-border: rgba(255, 255, 255, 0.06);
-    --color-primary-second: rgba(116, 121, 255, .12);
+    --color-primary-second: rgba(169, 172, 255, .12);
     --color-config-slider: #2b2b2b;
     --color-config-content: #1f1e1e;
     --color-block: #2A2A2A;

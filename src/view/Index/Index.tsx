@@ -7,7 +7,7 @@ import BrowserIcon from '../../assets/svgs/browser.svg?react'
 import BrowserFillIcon from '../../assets/svgs/browser-fill.svg?react'
 import SettingIcon from '../../assets/svgs/setting-icon.svg?react'
 import classnames from 'classnames';
-import DownLoad from '../Download/Download'
+import DownloadNew from '../Download/DownloadNew'
 import Config from '../Config/Config'
 import { Button, Modal } from "antd";
 import WindowTitleBar from "../../components/windowTitleBar.tsx";
@@ -15,6 +15,8 @@ import logoIcon from '../../assets/images/icon.png'
 import { useTheme } from "../../components/ThemeProvider.tsx";
 import {If, Else, Then} from 'react-if';
 import Parse from "../Parse/Parse.tsx";
+import Browser from "../Browser/Browser.tsx";
+
 
 const stepList = [
     {
@@ -74,13 +76,13 @@ function Index(){
                 <div className={styles.projectContainer}>
                     <If condition={activeStep === 'download'}>
                         <Then>
-                            <DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={0} navigateFinishTask={(val ) => {setActiveStep('finish')}}/>
+                                <DownloadNew />
+                            {/*<DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={0} navigateFinishTask={(val ) => {setActiveStep('finish')}}/>*/}
                         </Then>
                     </If>
                     <If condition={activeStep === 'finish'}>
                         <Then>
-                            <Parse />
-                            {/*<DownLoad style={{ display: activeStep === 'download' ? 'block' : 'none' }} key="1" status={1} />*/}
+                          <Browser />
                         </Then>
                     </If>
                 </div>
