@@ -132,7 +132,7 @@ export function DownloadFileByDirectURL(downloadObj : DownloadAnalysisType, save
  */
 export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpArgument: string[]){
     //通用解析
-    const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg');
+    const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg.exe');
     const savePath = resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s')
 
     ytDlpArgument.splice(2, 0, ffmpegPath )

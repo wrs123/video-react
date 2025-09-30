@@ -37,23 +37,31 @@ function DownloadFinish(props: any) {
 
             case "PUSH":
                 item.status = DownloadStatus.PENDING;
-                setDownloadFinishList && setDownloadFinishList(prevList => prevList.map(preItem =>
+            {
+                const _downloadList = downloadFinishList.map(preItem =>
                     item.id == preItem.id ? {...preItem, ...item} : preItem
-                ));
+                )
+                setDownloadFinishList(_downloadList)
+            }
                 break;
             case "UPDATE":
-                setDownloadFinishList && setDownloadFinishList(prevList => prevList.map(preItem =>
+            {
+                const _downloadList = downloadFinishList.map(preItem =>
                     item.id == preItem.id ? {...preItem, ...item} : preItem
-                ));
+                )
+                setDownloadFinishList(_downloadList)
+            }
                 break;
             case "DELETE":
                 if(delSql){
                     const res = await API.deleteTask({id: item?.id})
                     if(res.status === ResultStatus.OK){
-                        setDownloadFinishList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
+                        const _downloadList = downloadFinishList.filter(preItem => preItem.id !== item.id )
+                        setDownloadFinishList(_downloadList)
                     }
                 }else{
-                    setDownloadFinishList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
+                    const _downloadList = downloadFinishList.filter(preItem => preItem.id !== item.id )
+                    setDownloadFinishList(_downloadList)
                 }
                 break;
         }

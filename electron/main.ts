@@ -46,7 +46,7 @@ function createWindow() {
     minWidth: 1200,
     minHeight: 650,
     frame: false,
-    transparent: true,       // 需要透明以让 backdrop-filter / vibrancy 生效
+    // transparent: true,       // 需要透明以让 backdrop-filter / vibrancy 生效
     titleBarStyle: 'hiddenInset',
            // 通常无边框更好看（可选）
 
@@ -94,7 +94,7 @@ function createWindow() {
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
 
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
 }
 
 

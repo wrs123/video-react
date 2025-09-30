@@ -35,29 +35,40 @@ function Download(props: any) {
         switch (type) {
             case "PAUSE":
                 item.status = DownloadStatus.PAUSE;
-                setdownloadingList && setdownloadingList(prevList => prevList.map(preItem =>
-                    item.id == preItem.id ? {...preItem, ...item} : preItem
-                ));
+                {
+                    const _downloadList = downloadingList.map(preItem =>
+                        item.id == preItem.id ? {...preItem, ...item} : preItem
+                    )
+                    setDownloadingList(_downloadList)
+                }
                 break;
             case "PUSH":
                 item.status = DownloadStatus.PENDING;
-                setdownloadingList && setdownloadingList(prevList => prevList.map(preItem =>
-                    item.id == preItem.id ? {...preItem, ...item} : preItem
-                ));
+                {
+                    const _downloadList = downloadingList.map(preItem =>
+                        item.id == preItem.id ? {...preItem, ...item} : preItem
+                    )
+                    setDownloadingList(_downloadList)
+                }
                 break;
             case "UPDATE":
-                setdownloadingList && setdownloadingList(prevList => prevList.map(preItem =>
-                    item.id == preItem.id ? {...preItem, ...item} : preItem
-                ));
+                {
+                    const _downloadList = downloadingList.map(preItem =>
+                        item.id == preItem.id ? {...preItem, ...item} : preItem
+                    )
+                    setDownloadingList(_downloadList)
+                }
                 break;
             case "DELETE":
                 if(delSql){
                     const res = await API.deleteTask({id: item?.id})
                     if(res.status === ResultStatus.OK){
-                        setdownloadingList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
+                        const _downloadList = downloadingList.filter(preItem => preItem.id !== item.id )
+                        setDownloadingList(_downloadList)
                     }
                 }else{
-                    setdownloadingList(prevList => prevList.filter(preItem => preItem.id !== item.id ));
+                    const _downloadList = downloadingList.filter(preItem => preItem.id !== item.id )
+                    setDownloadingList(_downloadList)
                 }
                 break;
         }
@@ -95,53 +106,50 @@ function Download(props: any) {
 
 
     return (
-        <>
-            <div className={styles.downloadContainer}>
-                <div key={1} className={styles.containerTop}>
-                    <Space>
-                        <div className={styles.leftTitle}>
-                            <h1>下载中</h1>
-                            <div className={styles.downloadCount}>{downloadingList.length}</div>
-                        </div>
-
-                    </Space>
-                    <div>
-                        <Space>
-                            <Button icon={<SearchOutlined />}></Button>
-                            <Button icon={<PauseOutlined />}></Button>
-                            {/*<Button type="primary" icon={<PlusOutlined/>} onClick={showModal}>*/}
-                            {/*    新建*/}
-                            {/*</Button>*/}
-                        </Space>
+        <div className={styles.downloadContainer}>
+            <div className={styles.containerTop}>
+                <Space>
+                    <div className={styles.leftTitle}>
+                        <h1>下载中</h1>
+                        <div className={styles.downloadCount}>{downloadingList.length}</div>
                     </div>
-                </div>
-                <div key={2} className={styles.downloadingList} ref={listRef}>
-                    <If condition={downloadingList.length != 0}>
-                        <Then>
-                            <VirtualList
-                                data={ downloadingList }
-                                height={ listHeight }
-                                itemKey="id"
-                            >
-                                {
-                                    (item, index) =>
-                                        <QueueAnim delay={ index * 20 } ease={'easeOutQuart'} duration={300} type={ 'right' } className={styles.downloadContainer}>
-                                            <div key={item.id}>
-                                                <MemoDownloadItem  item={item} status={ 0 } commandCommon={commandCommon}/>
-                                            </div>
 
-                                        </QueueAnim>
-                                }
-                            </VirtualList>
-
-                        </Then>
-                        <Else>
-                            <Empty style={{marginTop: '50px'}}/>
-                        </Else>
-                    </If>
+                </Space>
+                <div>
+                    <Space>
+                        <Button icon={<SearchOutlined />}></Button>
+                        <Button icon={<PauseOutlined />}></Button>
+                        {/*<Button type="primary" icon={<PlusOutlined/>} onClick={showModal}>*/}
+                        {/*    新建*/}
+                        {/*</Button>*/}
+                    </Space>
                 </div>
             </div>
-        </>
+            <div className={styles.downloadList} ref={listRef}>
+                <If condition={downloadingList.length != 0}>
+                    <Then>
+                        <VirtualList
+                            data={ downloadingList }
+                            height={ listHeight }
+                            itemKey="id"
+                        >
+                            {
+                                (item, index) =>
+                                    <QueueAnim delay={ index * 20 } ease={'easeOutQuart'} duration={300} type={ 'right' } className={styles.downloadContainer}>
+                                        <div key={item.id}>
+                                            <MemoDownloadItem  item={item} status={ 0 } commandCommon={commandCommon}/>
+                                        </div>
+                                    </QueueAnim>
+                            }
+                        </VirtualList>
+
+                    </Then>
+                    <Else>
+                        <Empty style={{marginTop: '50px'}}/>
+                    </Else>
+                </If>
+            </div>
+        </div>
     )
 }
 

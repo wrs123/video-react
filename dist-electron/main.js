@@ -4135,7 +4135,7 @@ function DownloadFileByDirectURL(downloadObj, savePath, downloadTask) {
   win2.webContents.downloadURL(downloadObj.analysisUrl);
 }
 function DownloadFileByOriginalURL(downloadTask, ytDlpArgument) {
-  const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg");
+  const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg.exe");
   const savePath = resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s");
   ytDlpArgument.splice(2, 0, ffmpegPath);
   ytDlpArgument.splice(2, 0, "--ffmpeg-location");
@@ -20188,8 +20188,7 @@ function createWindow() {
     minWidth: 1200,
     minHeight: 650,
     frame: false,
-    transparent: true,
-    // 需要透明以让 backdrop-filter / vibrancy 生效
+    // transparent: true,       // 需要透明以让 backdrop-filter / vibrancy 生效
     titleBarStyle: "hiddenInset",
     // 通常无边框更好看（可选）
     backgroundColor: "#00000000",
@@ -20219,6 +20218,7 @@ function createWindow() {
   } else {
     win.loadFile(path$1.join(RENDERER_DIST, "index.html"));
   }
+  win.webContents.openDevTools();
 }
 app$2.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
