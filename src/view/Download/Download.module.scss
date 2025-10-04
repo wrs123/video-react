@@ -8,6 +8,8 @@
     padding: var(--window-titlebar-height) 12px 12px 12px;
     border-right: 1px solid var(--color-border);
     background-color: var(--cust-slider-sec-bg);
+    position: relative;
+    box-sizing: border-box;
 
     .downloadBtn{
       margin-top: 10px;
@@ -35,6 +37,7 @@
       padding: 5px 16px;
       transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
+
       svg{
         font-size: 20px;
         margin-right: 10px;
@@ -44,6 +47,16 @@
         background-color: var(--color-primary-second);
         color: var(--color-primary);
       }
+    }
+
+    .searchBtn{
+      //border-top: 1px solid var(--color-border);
+      border-radius: 0;
+      position: absolute;
+      bottom: 18px;
+      margin: 0;
+      width: calc(100% - 24px);
+
     }
   }
 

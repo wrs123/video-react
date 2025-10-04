@@ -1,6 +1,6 @@
 import styles from './Download.module.scss'
 import Download from "./Download.tsx";
-import Icon, { PlusOutlined } from '@ant-design/icons';
+import Icon, { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import downloadingIcon from '../../assets/svgs/downloading-icon.svg?react'
 import complateIcon from '../../assets/svgs/complate-icon.svg?react'
 import { Button, Modal } from "antd";
@@ -81,6 +81,11 @@ function DownloadNew(){
                             </div>
                         ))
                     }
+                    <div className={ styles.searchBtn }>
+                        <Button color="primary" block variant="outlined" icon={ <SearchOutlined /> }>
+                            搜索
+                        </Button>
+                    </div>
                 </div>
                 <div key={2} className={styles.leftContainer}>
                     <If condition={activeFilter === 'downloading'}>
