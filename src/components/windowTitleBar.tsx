@@ -7,7 +7,6 @@ import API from "../request/api.ts";
 function WindowTitleBar() {
 
     const [isMaximized, setIsMaximized] = useState<boolean>(false)
-
     function onElectronOperationWindow(type: string){
         if (type == 'max') {
             setIsMaximized(true)
@@ -16,7 +15,6 @@ function WindowTitleBar() {
         if (type == 'restore') {
             setIsMaximized(false)
         }
-
 
         API.operationWindow({
             type,

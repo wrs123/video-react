@@ -18,23 +18,19 @@ function Browser(){
 
     return (
         <div className={ styles.browserContainer}>
-            <QueueAnim delay={0} type={ 'scaleBig' } >
-                <div key={1}  className={styles.tabList}>
-                    {
-                        tabList.map(item => (
-                            <div className={`${styles.tabItem} ${activeTab === item.key ? styles.active : ''}`}>
-                                {item.name}
-                                <div className={styles.closeButton}>
-                                    <CloseOutlined />
-                                </div>
+            <QueueAnim delay={0} type={ 'scaleBig' } className={styles.tabList} >
+                {
+                    tabList.map((item, index) => (
+                        <div key={index} className={`${styles.tabItem} ${activeTab === item.key ? styles.active : ''}`}>
+                            {item.name}
+                            <div className={styles.closeButton}>
+                                <CloseOutlined />
                             </div>
-                        ))
-                    }
-                </div>
+                        </div>
+                    ))
+                }
             </QueueAnim>
-            <QueueAnim delay={0} type={ 'bottom' } >
-                <div key={1}><Parse   /></div>
-            </QueueAnim>
+            <Parse />
         </div>
     )
 }

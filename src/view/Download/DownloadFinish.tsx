@@ -27,6 +27,7 @@ function DownloadFinish(props: any) {
     const [listHeight, setListHeight] = useState(200);
     const downloadFinishList = useCusStore(state => state.downloadFinishList);
     const setDownloadFinishList = useCusStore(state => state.setDownloadFinishList);
+    const delDownloadFinishList = useCusStore(state => state.delDownloadFinishList);
     const listRef = useRef(null);
     const [modal, confrimContextHolder] = Modal.useModal();
 
@@ -53,15 +54,11 @@ function DownloadFinish(props: any) {
             }
                 break;
             case "DELETE":
-                if(delSql){
-                    const res = await API.deleteTask({id: item?.id})
-                    if(res.status === ResultStatus.OK){
-                        const _downloadList = downloadFinishList.filter(preItem => preItem.id !== item.id )
-                        setDownloadFinishList(_downloadList)
-                    }
-                }else{
-                    const _downloadList = downloadFinishList.filter(preItem => preItem.id !== item.id )
-                    setDownloadFinishList(_downloadList)
+                console.warn("del", item)
+                console.warn(downloadFinishList.length)
+                const res = await API.deleteTask({id: item?.id})
+                if(res.status === ResultStatus.OK){
+                    delDownloadFinishList(item?.id)
                 }
                 break;
         }
@@ -112,16 +109,12 @@ function DownloadFinish(props: any) {
                             <VirtualList
                                 data={ downloadFinishList }
                                 height={ listHeight }
+                                itemHeight={ 76 }
                                 itemKey="id"
                             >
-
                                 {
                                     (item, index) =>
-                                        <QueueAnim delay={ index * 20 } ease={'easeOutQuart'} duration={300} type={ 'right' } className={styles.downloadContainer}>
-                                            <div key={item.id}>
-                                                <MemoDownloadItem  item={item} status={ 1 } commandCommon={commandCommon}/>
-                                            </div>
-                                        </QueueAnim>
+                                        <MemoDownloadItem key={item.id} item={item} status={ 1 } commandCommon={commandCommon}/>
                                 }
                             </VirtualList>
                         </Then>

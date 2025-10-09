@@ -122,7 +122,12 @@ function Parse (){
                         <Button type="text" size={'small'} disabled={ !canGoBack } icon={<LeftOutlined />} onClick={ goBackWebview }></Button>
                         <Button type="text" size={'small'} disabled={ !canGoForward } icon={<RightOutlined />} onClick={ goForwardWebview }></Button>
                         <Button size={'small'} type="text"  icon={loading ? <CloseOutlined /> : <ReloadOutlined />} onClick={ reloadWebview }></Button>
-                        <Input size={'small'} value={ inputValue } onPressEnter={ () => { changeUrl(inputValue) } } onChange={(e) => { setInputValue(e.target.value)} } prefix={<GlobalOutlined style={{margin: '0 10px 0 4px'}} />} style={{flex: 1, marginLeft: '10px', marginRight: '10px'}} />
+                        <Input size={'small'} value={ inputValue }
+                               onPressEnter={ () => { changeUrl(inputValue) } }
+                               onChange={(e) => { setInputValue(e.target.value)} }
+                               prefix={<GlobalOutlined style={{margin: '0 10px 0 4px'}} />}
+                               style={{flex: 1, marginLeft: '10px', marginRight: '10px'}}
+                        />
                         <Button size={'small'} type="text" icon={<SettingOutlined />}></Button>
                         <Button size={'small'} type="text" icon={<MenuUnfoldOutlined />} onClick={() => setShowConsoleBar(!showConsoleBar)}></Button>
                     </Flex>

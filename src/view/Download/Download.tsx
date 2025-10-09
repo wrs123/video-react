@@ -27,8 +27,38 @@ function Download(props: any) {
     const [listHeight, setListHeight] = useState(200);
     const downloadingList = useCusStore(state => state.downloadingList);
     const setDownloadingList = useCusStore(state => state.setDownloadingList);
+    const delDownloadingList = useCusStore(state => state.delDownloadingList);
+    const downloadFinishList = useCusStore(state => state.downloadFinishList);
+    const setDownloadFinishList = useCusStore(state => state.setDownloadFinishList);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const listRef = useRef(null);
 
+
+    const createSuccess = (_param: DownloadTaskType) => {
+        console.log(_param);
+        setIsModalOpen(false);
+        setDownloadingList([_param, ...downloadingList]);
+    };
+
+    const createError = async (param) => {
+        setIsModalOpen(false)
+        console.log(param);
+
+        const confirmed = await modal.confirm({
+            title: `提示`,
+            okText: '重新下载',
+            cancelText: '查看任务',
+            centered: true,
+            content: "存在重复任务，是否继续？",
+        });
+
+        if(confirmed){
+            alert(1)
+        }else{
+            // props.navigateFinishTask(param)
+            setActiveFilter('downloaded')
+        }
+    }
 
     const commandCommon = async (type: string, item: DownloadTaskType, delSql: boolean = true) => {
 
@@ -59,12 +89,18 @@ function Download(props: any) {
                     setDownloadingList(_downloadList)
                 }
                 break;
+            case "FINISH":
+                {
+                    delTask(item)
+                }
+                break;
             case "DELETE":
                 if(delSql){
                     const res = await API.deleteTask({id: item?.id})
                     if(res.status === ResultStatus.OK){
                         const _downloadList = downloadingList.filter(preItem => preItem.id !== item.id )
                         setDownloadingList(_downloadList)
+
                     }
                 }else{
                     const _downloadList = downloadingList.filter(preItem => preItem.id !== item.id )
@@ -72,6 +108,14 @@ function Download(props: any) {
                 }
                 break;
         }
+
+
+    }
+
+    const delTask = ( item : any ) => {
+        delDownloadingList(item.id)
+
+        setDownloadFinishList([item, ...downloadFinishList])
     }
 
     // const onScroll  = async (e: React.UIEvent<HTMLElement>) => {
@@ -118,7 +162,9 @@ function Download(props: any) {
                 <div>
                     <Space>
                         <Button icon={<SearchOutlined />}></Button>
-                        <Button icon={<PauseOutlined />}></Button>
+                        <Button color="primary" variant="solid" icon={<PlusOutlined />} block
+                                onClick={() => setIsModalOpen(true)}
+                        >添加</Button>
                         {/*<Button type="primary" icon={<PlusOutlined/>} onClick={showModal}>*/}
                         {/*    新建*/}
                         {/*</Button>*/}
@@ -149,6 +195,16 @@ function Download(props: any) {
                     </Else>
                 </If>
             </div>
+            <Modal title="新建下载"
+                   open={isModalOpen}
+                   onCancel={() => setIsModalOpen(false)}
+                   width="450px"
+                   footer={null}
+                   destroyOnClose
+                   maskClosable={false}
+            >
+                <CreateDialog onSubmit={createSuccess} onError={(param) => {createError(param)}}/>
+            </Modal>
         </div>
     )
 }

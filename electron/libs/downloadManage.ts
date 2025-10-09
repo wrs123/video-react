@@ -132,7 +132,7 @@ export function DownloadFileByDirectURL(downloadObj : DownloadAnalysisType, save
  */
 export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpArgument: string[]){
     //通用解析
-    const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg.exe');
+    const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg');
     const savePath = resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s')
 
     ytDlpArgument.splice(2, 0, ffmpegPath )
@@ -167,8 +167,9 @@ export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpAr
 
     ytdlp.stderr.on('data', (data) => {
         console.error('err:', data.toString());
+        downloadTask.status = DownloadStatus.DOWNLOADERROR
         // downloadTask.status = DownloadStatus.PAUSE
-        // updateDownloadStatus(downloadTask)
+        updateDownloadStatus(downloadTask)
     });
 
     ytdlp.on('close', (code) => {

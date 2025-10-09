@@ -32,6 +32,7 @@ var DownloadStatus = /* @__PURE__ */ ((DownloadStatus2) => {
   DownloadStatus2["ANAL"] = "ANAL";
   DownloadStatus2["ANALERROR"] = "ANALERROR";
   DownloadStatus2["COOKIEERROR"] = "COOKIEERROR";
+  DownloadStatus2["DOWNLOADERROR"] = "DOWNLOADERROR";
   DownloadStatus2["MERGER"] = "MERGER";
   return DownloadStatus2;
 })(DownloadStatus || {});
@@ -4135,7 +4136,7 @@ function DownloadFileByDirectURL(downloadObj, savePath, downloadTask) {
   win2.webContents.downloadURL(downloadObj.analysisUrl);
 }
 function DownloadFileByOriginalURL(downloadTask, ytDlpArgument) {
-  const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg.exe");
+  const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg");
   const savePath = resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s");
   ytDlpArgument.splice(2, 0, ffmpegPath);
   ytDlpArgument.splice(2, 0, "--ffmpeg-location");
@@ -4162,6 +4163,8 @@ function DownloadFileByOriginalURL(downloadTask, ytDlpArgument) {
   });
   ytdlp.stderr.on("data", (data) => {
     console.error("err:", data.toString());
+    downloadTask.status = DownloadStatus.DOWNLOADERROR;
+    updateDownloadStatus(downloadTask);
   });
   ytdlp.on("close", (code2) => {
     console.log("finish:", code2);

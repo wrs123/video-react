@@ -211,7 +211,7 @@ function DownloadItem(props: DownloadItemProps) {
             window['onDownloadUpdate'].get((event: unknown, str: DownloadTaskType) => {
                 if(props.item.id === str.id){
                     if(str.status === DownloadStatus.FINISH){
-                        props.commandCommon && props.commandCommon('DELETE', str, false)
+                        props.commandCommon && props.commandCommon('FINISH', str, false)
                     }else{
                         setTaskItem({...taskItem, ...str})
                     }

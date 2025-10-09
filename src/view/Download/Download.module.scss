@@ -5,14 +5,21 @@
 
   .downloadBar{
     height: 100%;
-    padding: var(--window-titlebar-height) 12px 12px 12px;
+    padding: 28px 12px 12px 12px;
     border-right: 1px solid var(--color-border);
     background-color: var(--cust-slider-sec-bg);
     position: relative;
     box-sizing: border-box;
 
+    .downloadTitle{
+      font-size: 13px;
+      padding-bottom: 20px;
+      padding-left: 6px;
+      color: var(--color-text-thr);
+    }
+
     .downloadBtn{
-      margin-top: 10px;
+      //margin-top: 10px;
       margin-bottom: 28px;
 
       button{
@@ -56,14 +63,20 @@
       bottom: 18px;
       margin: 0;
       width: calc(100% - 24px);
-
     }
   }
+
 
   .leftContainer{
     flex: 1;
     height: 100%;
-    padding-top: var(--window-titlebar-height);
+    padding-top: 22px;
+    overflow: hidden;
+
+    .searchBtn{
+      margin: 0 16px 10px 16px;
+      width: 300px;
+    }
   }
 }
 

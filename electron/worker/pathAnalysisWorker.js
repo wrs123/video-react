@@ -87,7 +87,7 @@ async function _universalVideoParser(path, publicDir, ytDlpArgument){
 
             ytDlpArgument.splice(ytDlpArgument.length - 3, 0, '-j');
             console.warn(ytDlpArgument)
-            const ytDlp = spawn(resolve(publicDir, 'yt-dlp/yt-dlp.exe'), ytDlpArgument);
+            const ytDlp = spawn(resolve(publicDir, 'yt-dlp/yt-dlp'), ytDlpArgument);
 
             let outPut = '',
                 errorOutput = ""

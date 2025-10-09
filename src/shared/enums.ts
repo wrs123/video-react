@@ -6,6 +6,7 @@ export enum DownloadStatus {
     ANAL = 'ANAL', //解析中
     ANALERROR = 'ANALERROR', //解析失败
     COOKIEERROR = 'COOKIEERROR',
+    DOWNLOADERROR = 'DOWNLOADERROR',
     MERGER = 'MERGER' //合并
 }
 

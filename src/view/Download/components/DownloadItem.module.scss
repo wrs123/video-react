@@ -1,5 +1,6 @@
 .downloadItem{
   padding: 16px 12px 6px 12px;
+  height: 76px;
   border: 1px solid rgba(5, 5, 5, 0.06);
   backdrop-filter: blur(4px);
   will-change: transform;
@@ -14,6 +15,7 @@
   color: #fff!important;
   align-items: center;
   overflow: hidden;
+  box-sizing: border-box;
 
   //&:last-child{
   //  margin-bottom: 10px;
@@ -28,6 +30,7 @@
     object-fit: cover;
     z-index: -1;
     border-radius: 6px;
+    transform: translateZ(0);
 
     .mask{
       position: absolute;
