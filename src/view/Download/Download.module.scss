@@ -1,3 +1,63 @@
+.searchContainer{
+
+  :global {
+    .ant-modal-content{
+      padding: 0;
+    }
+  }
+}
+
+.searchDialog{
+  width: 100%;
+
+  .searchHeader{
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+
+    .divider{
+      width: 1px;
+      height: 24px;
+      background: #e8e8e8;
+      margin-right: 10px;
+    }
+
+    .closeBtn{
+      font-size: 18px;
+      color: var(--color-text-primary);
+    }
+  }
+
+  .taskContainer{
+    height: 60vh;
+    overflow-y: auto;
+    border-top: 1px solid #e8e8e8;
+    padding: 8px 12px 0 12px;
+
+    .taskItem{
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--color-text-primary);
+      border-radius: 4px;
+
+      &:hover{
+        background-color: #f2f2f2;
+      }
+
+      .name{
+        flex: 1;
+        padding-right: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+}
+
+
 .downloadMain{
   display: flex;
   height: 100%;

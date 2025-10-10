@@ -9,7 +9,7 @@ var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read fr
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "write to private field"), setter ? setter.call(obj, value) : member.set(obj, value), value);
 var _validator, _encryptionKey, _options, _defaultValues;
-import electron, { BrowserWindow, ipcMain as ipcMain$1, dialog, shell as shell$1, app as app$2, session as session$1 } from "electron";
+import electron, { BrowserWindow, ipcMain as ipcMain$1, dialog, shell as shell$1, app as app$2, nativeTheme, session as session$1 } from "electron";
 import { fileURLToPath } from "node:url";
 import path$1 from "node:path";
 import { createRequire } from "module";
@@ -56,6 +56,12 @@ var DownloadFileType = /* @__PURE__ */ ((DownloadFileType2) => {
   DownloadFileType2["M3U8"] = "M3U8";
   return DownloadFileType2;
 })(DownloadFileType || {});
+var SysTheme = /* @__PURE__ */ ((SysTheme2) => {
+  SysTheme2["LIGHT"] = "light";
+  SysTheme2["DARK"] = "dark";
+  SysTheme2["AUTO"] = "auto";
+  return SysTheme2;
+})(SysTheme || {});
 //! moment.js
 //! version : 2.30.1
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -4382,33 +4388,29 @@ const queryTask = async (param) => {
     data: ""
   };
   try {
-    console.warn(param);
-    let query = "", totalQuery = "";
-    const querys = (val) => {
-      return `SELECT * FROM tasks WHERE status ${val} ? ORDER BY createTime DESC `;
-    };
-    const totalQuerys = (val) => {
-      return `SELECT COUNT(*) as total FROM tasks WHERE status ${val} ?`;
-    };
-    if (param.status === 1) {
-      query = querys("==");
-      totalQuery = totalQuerys("==");
-    } else {
-      query = querys("!=");
-      totalQuery = totalQuerys("!=");
+    let queryParams = "", params = [];
+    if (Object.keys(param).length !== 0) {
+      queryParams = "WHERE ";
     }
-    const _res = await db.prepare(query).all(
-      "FINISH"
-    );
-    const stmt = db.prepare(totalQuery).all(
-      "FINISH"
-    );
+    if (Object.hasOwn(param, "status")) {
+      if (param.status === 1) {
+        queryParams = queryParams + "status == ?";
+      } else {
+        queryParams = queryParams + "status != ?";
+      }
+      params.push("FINISH");
+    }
+    if (Object.hasOwn(param, "name")) {
+      queryParams = queryParams + "name LIKE ?";
+      params.push(`%${param.name}%`);
+    }
+    console.warn(`SELECT * FROM tasks ${queryParams} ORDER BY createTime DESC `);
+    const _res = await db.prepare(`SELECT * FROM tasks ${queryParams} ORDER BY createTime DESC `).all(...params);
     res.data = {
       list: _res,
       page: {
         page,
-        pageSize,
-        total: stmt[0].total
+        pageSize
       }
     };
   } catch (error2) {
@@ -20071,6 +20073,39 @@ const closeParseWindow = (param) => {
   }
   return res;
 };
+const setSysTheme = (param) => {
+  const res = {
+    code: 200,
+    status: ResultStatus.OK,
+    message: "",
+    data: ""
+  };
+  try {
+    console.warn(param);
+    switch (param.theme) {
+      case SysTheme.LIGHT:
+        nativeTheme.themeSource = "light";
+        res.data = SysTheme.LIGHT;
+        break;
+      case SysTheme.DARK:
+        nativeTheme.themeSource = "dark";
+        res.data = SysTheme.DARK;
+        break;
+      case SysTheme.AUTO:
+        nativeTheme.on("updated", () => {
+          console.log("System theme changed:", nativeTheme.themeSource);
+        });
+        nativeTheme.themeSource = "system";
+        res.data = nativeTheme.shouldUseDarkColors ? SysTheme.DARK : SysTheme.LIGHT;
+        break;
+    }
+  } catch (error2) {
+    res.status = ResultStatus.ERROR;
+    res.message = "设置失败" + error2.message;
+    console.warn("err", error2.message);
+  }
+  return res;
+};
 const SysHandler = () => {
   const DOMAIN = "sys";
   ipcMain$1.handle(`${DOMAIN}:getSysConfig`, async () => {
@@ -20117,6 +20152,9 @@ const SysHandler = () => {
   });
   ipcMain$1.handle(`${DOMAIN}:closeParseWindow`, async (_, param) => {
     return closeParseWindow();
+  });
+  ipcMain$1.handle(`${DOMAIN}:setSysTheme`, async (_, param) => {
+    return setSysTheme(param);
   });
 };
 const InitHandler = () => {

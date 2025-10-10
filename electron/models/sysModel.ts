@@ -1,7 +1,7 @@
 import { BaseResult } from "../../types.ts";
-import {ResultStatus} from "../../src/shared/enums.ts";
+import {ResultStatus, SysTheme} from "../../src/shared/enums.ts";
 import Store from 'electron-store'
-import { app } from 'electron'
+import { app, nativeTheme } from 'electron'
 import moment from 'moment'
 import { BrowserWindow} from 'electron'
 import path from "node:path";
@@ -330,3 +330,47 @@ export const closeParseWindow = (param: any) => {
 
     return res
 }
+
+
+/**
+ * 设置主题
+ * @param param
+ */
+export const setSysTheme = (param: any) => {
+    const res: BaseResult = {
+        code: 200,
+        status: ResultStatus.OK,
+        message: '',
+        data: ''
+    }
+
+    try{
+        console.warn(param)
+        switch (param.theme){
+            case SysTheme.LIGHT:
+                nativeTheme.themeSource = 'light';
+                res.data = SysTheme.LIGHT
+                break;
+            case SysTheme.DARK:
+
+                nativeTheme.themeSource = 'dark';
+                res.data = SysTheme.DARK
+                break;
+            case SysTheme.AUTO:
+                // 监听系统主题变化
+                nativeTheme.on('updated', () => {
+                    console.log('System theme changed:', nativeTheme.themeSource);
+                });
+                nativeTheme.themeSource = 'system';
+                res.data = nativeTheme.shouldUseDarkColors ? SysTheme.DARK : SysTheme.LIGHT;
+                break;
+        }
+    }catch(error: any){
+        res.status= ResultStatus.ERROR
+        res.message = "设置失败"+error.message
+        console.warn('err', error.message)
+    }
+
+    return res
+}
+

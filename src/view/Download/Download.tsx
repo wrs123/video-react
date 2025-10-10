@@ -31,6 +31,7 @@ function Download(props: any) {
     const downloadFinishList = useCusStore(state => state.downloadFinishList);
     const setDownloadFinishList = useCusStore(state => state.setDownloadFinishList);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modal, confrimContextHolder] = Modal.useModal();
     const listRef = useRef(null);
 
 
@@ -109,7 +110,6 @@ function Download(props: any) {
                 break;
         }
 
-
     }
 
     const delTask = ( item : any ) => {
@@ -151,6 +151,7 @@ function Download(props: any) {
 
     return (
         <div className={styles.downloadContainer}>
+            { confrimContextHolder }
             <div className={styles.containerTop}>
                 <Space>
                     <div className={styles.leftTitle}>

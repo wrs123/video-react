@@ -37,7 +37,7 @@
     .consoleContainer{
       width: 240px;
       height: 100%;
-      background-color: #f2f2f2;
+      background-color: var(--cust-content-bg);
       border-left: 1px solid #e8e8e8;
       transition: width 0.3s;
       will-change: width;

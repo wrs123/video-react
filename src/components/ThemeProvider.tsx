@@ -1,42 +1,50 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { ConfigProvider, theme as antdTheme } from "antd";
+import {SysTheme} from "../shared/enums.ts";
+import API from "../request/api.ts";
 
 // 定义上下文类型
 type ThemeType = "light" | "dark" | "auto";
 
 interface ThemeContextType {
     theme: ThemeType;
-    toggleTheme: (val) => (val) => void;
+    toggleTheme: (val: SysTheme) => (val: SysTheme) => void;
 }
 
 // 创建上下文
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [theme, setTheme] = useState<ThemeType>("light");
+    const [theme, setTheme] = useState<SysTheme>(SysTheme.LIGHT);
     const media = window.matchMedia("(prefers-color-scheme: dark)");
 
-    function handleThemeChange(e) {
+    async function themeChange(theme: SysTheme) {
+        const res = await API.setSysTheme({ theme })
+        setTheme(res.data)
+    }
+
+
+    function handleThemeChange(e: any) {
+        console.warn(e)
         if (e.matches) {
-            setTheme('dark');
+            themeChange(SysTheme.DARK);
         } else {
-            setTheme('light');
+            themeChange(SysTheme.LIGHT);
         }
     }
 
 
 
     // 切换主题
-    const toggleTheme = (val: ThemeType) => {
-        if(val == "auto"){
+    const toggleTheme = (val: SysTheme) => {
+        if(val === SysTheme.AUTO){
             handleThemeChange(media)
             // 监听系统主题变化
             media.addEventListener("change", handleThemeChange);
             return
         }
-        // 监听系统主题变化
-        media.removeEventListener("change", handleThemeChange);
-        setTheme(val);
+
+        themeChange(val);
     };
 
 

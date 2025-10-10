@@ -6,7 +6,7 @@ import { Button, Space, Form, Input, Switch, Select, Flex, Modal, Radio } from "
 import { useState } from 'react'
 import {If, Then} from 'react-if'
 import API from "../../request/api.ts";
-import {ResultStatus} from "../../shared/enums.ts";
+import {ResultStatus, SysTheme} from "../../shared/enums.ts";
 import CookieList from "./components/CookieList.tsx";
 import { useTheme } from "../../components/ThemeProvider";
 import iconLightTheme from '../../assets/images/light-theme.png';
@@ -31,7 +31,7 @@ function Config({onClose}: ConfigProps) {
         proxyPortal?: string;
         proxyHost?: string;
         proxyPort?: number;
-        themeMode?: string;
+        themeMode?: SysTheme;
         language?: string;
     };
     const { theme, toggleTheme } = useTheme();
@@ -68,21 +68,21 @@ function Config({onClose}: ConfigProps) {
     const themeList: any[] = [
         {
             label: '白天模式',
-            key: 'light',
+            key: SysTheme.LIGHT,
             icon: iconLightTheme
         },
         {
             label: '夜间模式',
-            key: 'dark',
+            key: SysTheme.DARK,
             icon: iconDarkTheme
         },
         {
             label: '跟随系统',
-            key: 'auto',
+            key: SysTheme.AUTO,
             icon: iconAutoTheme
         }
     ]
-    const [activeTheme, setActiveTheme] = useState(window['sysConfig'].themeMode)
+    const [activeTheme, setActiveTheme] = useState<SysTheme>(window['sysConfig'].themeMode)
 
 
     const setSysConfig = async () => {

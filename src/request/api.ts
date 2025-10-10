@@ -1,4 +1,4 @@
-import {delCookie, getCookieList, getSysConfig} from "../../electron/models/sysModel.ts";
+import {delCookie, getCookieList, getSysConfig, setSysTheme} from "../../electron/models/sysModel.ts";
 
 const API = {
     request: window.ipcRenderer.invoke,
@@ -108,12 +108,20 @@ const API = {
         return API.request('sys:setSysConfig', param)
     },
     /**
+     * 设置主题
+     * @param param
+     */
+    setSysTheme : (param: any = {}) => {
+        return API.request('sys:setSysTheme', param)
+    },
+    /**
      * 窗口操作
      * @param param
      */
     operationWindow : (param: any = {}) => {
         return API.request('sys:operationWindow', param)
     }
+
 }
 
 export default API

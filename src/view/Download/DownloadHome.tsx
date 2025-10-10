@@ -1,6 +1,6 @@
 import styles from './Download.module.scss'
 import Download from "./Download.tsx";
-import Icon, { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import Icon, { CloseOutlined } from '@ant-design/icons';
 import downloadingIcon from '../../assets/svgs/downloading-icon.svg?react'
 import complateIcon from '../../assets/svgs/complate-icon.svg?react'
 import recycleIcon from '../../assets/svgs/recycle-icon.svg?react'
@@ -14,6 +14,9 @@ import DownloadFinish from "./DownloadFinish.tsx";
 import CreateDialog from "./components/createDialog.tsx";
 import {DownloadTaskType} from "../../../types.ts";
 import {useCusStore} from "../../store";
+import API from "../../request/api.ts";
+import {ResultStatus} from "../../shared/enums.ts";
+import SearchDialog from "./components/searchDialog.tsx";
 
 
 const filterList = [
@@ -34,11 +37,10 @@ const filterList = [
     }
 ]
 
-function DownloadNew(){
+function DownloadHome(){
     const [activeFilter, setActiveFilter] = useState('downloading')
     const [modal, confrimContextHolder] = Modal.useModal();
-    const downloadingList = useCusStore(state => state.downloadingList);
-    const setDownloadingList = useCusStore(state => state.setDownloadingList);
+    const [searchDialogVisible, setSearchDialogVisible] = useState<boolean>(false);
 
 
     return (
@@ -59,7 +61,7 @@ function DownloadNew(){
                     }
                 </div>
                 <div key={2} className={styles.leftContainer}>
-                    <Input className={styles.searchBtn} placeholder="搜索下载过的文件" variant="filled" />
+                    <Input className={styles.searchBtn} placeholder="搜索下载过的文件" variant="filled" onClick={ () => setSearchDialogVisible(true) } />
                     <If condition={activeFilter === 'downloading'}>
                         <Then>
                             <DownLoad key="1"/>
@@ -72,9 +74,30 @@ function DownloadNew(){
                     </If>
                 </div>
             </QueueAnim>
+            <Modal
+                title=""
+                closable={ false }
+                width={700}
+                open={ searchDialogVisible }
+                onCancel={ () => setSearchDialogVisible(false) }
+                footer={ null }
+                mask={ true }
+                className={styles.searchContainer}
+                styles={{
+                    mask: {
+                        backdropFilter: 'blur(20px)',
+                        backgroundColor: 'rgba(200, 200, 200, .4)',
+                    },
+                    content: {
+                        boxShadow: '4px 4px 20px #cdcaca',
+                    },
+                }}
+            >
+                <SearchDialog close={ () => setSearchDialogVisible(false) } />
+            </Modal>
         </>
 
     )
 }
 
-export default DownloadNew;
+export default DownloadHome;

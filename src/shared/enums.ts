@@ -30,6 +30,12 @@ export enum DownloadFileType{
     M3U8 = "M3U8",
 }
 
+export enum SysTheme {
+    LIGHT = 'light',
+    DARK = 'dark',
+    AUTO = 'auto'
+}
+
 export enum AnalyzeType{
     UNIVERSAL = "UNIVERSAL",
     YTDLP = "YTDLP",

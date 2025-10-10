@@ -7,7 +7,7 @@ import {
     addCookie,
     updateCookie,
     delCookie,
-    openParseWindow, closeParseWindow
+    openParseWindow, closeParseWindow, setSysTheme
 } from "../models/sysModel.ts";
 
 export const SysHandler = () => {
@@ -98,5 +98,13 @@ export const SysHandler = () => {
     ipcMain.handle(`${DOMAIN}:closeParseWindow`, async (_, param: any) => {
         return closeParseWindow(param)
     })
+
+    /** 设置主题
+     * @param {Object} event
+     */
+    ipcMain.handle(`${DOMAIN}:setSysTheme`, async (_, param: any) => {
+        return setSysTheme(param)
+    })
+
 
 }

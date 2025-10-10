@@ -319,39 +319,41 @@ export const queryTask = async (param: any) => {
     }
 
     try{
-        console.warn(param)
-        let query = '',
-            totalQuery = ''
-        const querys = (val) => {
-            return `SELECT * FROM tasks WHERE status ${val} ? ORDER BY createTime DESC `
-        }
-        const totalQuerys = (val) => {
-            return `SELECT COUNT(*) as total FROM tasks WHERE status ${val} ?`
+
+
+        let queryParams = '',
+            params = []
+
+        if(Object.keys(param).length !== 0){
+            queryParams = 'WHERE '
         }
 
-        if(param.status === 1){
-            query = querys('==')
-            totalQuery = totalQuerys('==')
-        }else{
-            query = querys('!=')
-            totalQuery = totalQuerys('!=')
+        // @ts-ignore
+        if(Object.hasOwn(param, 'status')){
+            if(param.status === 1){
+                queryParams = queryParams + 'status == ?'
+            }else{
+                queryParams = queryParams + 'status != ?'
+            }
+            params.push('FINISH')
         }
 
+        // @ts-ignore
+        if(Object.hasOwn(param, 'name')){
+            queryParams = queryParams + 'name LIKE ?'
+            params.push(`%${param.name}%`)
+        }
+
+        console.warn(`SELECT * FROM tasks ${queryParams} ORDER BY createTime DESC `)
         const _res = await db
-            .prepare(query)
-            .all(
-                'FINISH',
-            )
+            .prepare(`SELECT * FROM tasks ${queryParams} ORDER BY createTime DESC `)
+            .all(...params)
 
-        const stmt = db.prepare(totalQuery).all(
-            'FINISH'
-        );
         res.data = {
             list: _res,
             page: {
                 page,
                 pageSize,
-                total: stmt[0].total
             }
         }
     }catch(error){
