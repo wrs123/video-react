@@ -42,4 +42,5 @@
     --color-window-button-hover: #2c2c2c;
     --color-download-item-anal: #4b4a4a;
     --color-download-item-err: #451d1f;
+    --ant-color-bg-mask: rgba(255,255,255,0.85);
 }

@@ -2,10 +2,10 @@ import styles from './Download.module.scss'
 import {Button, Modal, Space, Empty, Input} from "antd";
 
 import VirtualList from 'rc-virtual-list';
-import {
+import Icon, {
     PlusOutlined,
     PauseOutlined,
-    SearchOutlined
+    CaretRightOutlined
 } from '@ant-design/icons';
 import React, {useState, useEffect, useRef} from 'react'
 import {DownloadTaskType } from "../../../types.ts";
@@ -13,7 +13,9 @@ import {DownloadStatus, ResultStatus} from "../../shared/enums.ts";
 import {If, Else, Then} from 'react-if';
 import CreateDialog from "./components/createDialog"
 import QueueAnim from 'rc-queue-anim';
-const { Search } = Input;
+import playIcon from '../../assets/svgs/play-icon.svg?react'
+import pauseIcon from '../../assets/svgs/pause-icon.svg?react'
+import downloadAddIcon from '../../assets/svgs/download-add-icon.svg.svg?react'
 
 import DownloadItem from "./components/DownloadItem.tsx";
 import API from "../../request/api.ts";
@@ -162,7 +164,12 @@ function Download(props: any) {
                 </Space>
                 <div>
                     <Space>
-                        <Button icon={<SearchOutlined />}></Button>
+                        <Button icon={<CaretRightOutlined />}>
+                            全部开始
+                        </Button>
+                        <Button icon={<PauseOutlined />}>
+                            全部暂停
+                        </Button>
                         <Button color="primary" variant="solid" icon={<PlusOutlined />} block
                                 onClick={() => setIsModalOpen(true)}
                         >添加</Button>

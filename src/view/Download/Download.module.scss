@@ -9,6 +9,8 @@
 
 .searchDialog{
   width: 100%;
+  background-color: var(--color-config-slider);
+  border-radius: 6px;
 
   .searchHeader{
     display: flex;
@@ -18,7 +20,7 @@
     .divider{
       width: 1px;
       height: 24px;
-      background: #e8e8e8;
+      background: var(--color-border);
       margin-right: 10px;
     }
 
@@ -31,7 +33,7 @@
   .taskContainer{
     height: 60vh;
     overflow-y: auto;
-    border-top: 1px solid #e8e8e8;
+    border-top: 1px solid var(--color-border);
     padding: 8px 12px 0 12px;
 
     .taskItem{
@@ -65,7 +67,7 @@
 
   .downloadBar{
     height: 100%;
-    padding: 28px 12px 12px 12px;
+    padding: 26px 12px 12px 12px;
     border-right: 1px solid var(--color-border);
     background-color: var(--cust-slider-sec-bg);
     position: relative;
@@ -130,7 +132,7 @@
   .leftContainer{
     flex: 1;
     height: 100%;
-    padding-top: 22px;
+    padding-top: 16px;
     overflow: hidden;
 
     .searchBtn{

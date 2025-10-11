@@ -95,7 +95,6 @@ function DownloadFinish(props: any) {
                     </Space>
                     <div>
                         <Space>
-                            <Button icon={<PauseOutlined />}></Button>
                             {/*<Button type="primary" icon={<PlusOutlined/>} onClick={showModal}>*/}
                             {/*    新建*/}
                             {/*</Button>*/}

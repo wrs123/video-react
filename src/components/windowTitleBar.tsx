@@ -22,7 +22,6 @@ function WindowTitleBar() {
         })
     }
 
-
     return (
         <div className={styles.windowTitleContainer}>
             <div></div>

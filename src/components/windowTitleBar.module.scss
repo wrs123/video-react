@@ -11,6 +11,7 @@ $windowTitleBarHeight: 35px;
   height: $windowTitleBarHeight;
   -webkit-app-region: drag;
   background: transparent;
+
   //border-bottom: 1px solid #e9e9e9;
 
   &.immerse {
@@ -58,6 +59,8 @@ $windowTitleBarHeight: 35px;
     align-items: center;
     -webkit-app-region: no-drag;
     height: 100%;
+    margin: 16px;
+    padding-top: 16px;
 
     .windowBotton {
       height: 100%;
@@ -66,6 +69,7 @@ $windowTitleBarHeight: 35px;
       display: flex;
       align-items: center;
       color: var(--color-text-primary);
+      border-radius: 6px;
 
       &.closeButton {
         &:hover {

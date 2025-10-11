@@ -86,10 +86,6 @@ function DownloadHome(){
                 styles={{
                     mask: {
                         backdropFilter: 'blur(20px)',
-                        backgroundColor: 'rgba(200, 200, 200, .4)',
-                    },
-                    content: {
-                        boxShadow: '4px 4px 20px #cdcaca',
                     },
                 }}
             >
