@@ -131,54 +131,57 @@ export function DownloadFileByDirectURL(downloadObj : DownloadAnalysisType, save
  * @constructor
  */
 export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpArgument: string[]){
-    //通用解析
-    const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg');
-    const savePath = resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s')
+    try{
+        //通用解析
+        const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg');
+        const savePath = resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s')
 
-    ytDlpArgument.splice(2, 0, ffmpegPath )
-    ytDlpArgument.splice(2, 0, "--ffmpeg-location" )
-    ytDlpArgument.splice(2, 0, "bv*+ba/b" )
-    ytDlpArgument.splice(2, 0, "-f" )
-    ytDlpArgument.splice(2, 0, savePath )
-    ytDlpArgument.splice(2, 0, "-o" )
-    ytDlpArgument.splice(2, 0, '{"type": "#DOWNLOAD#","percent": "%(progress._percent)s", "downloaded": "%(progress.downloaded_bytes)s", "total": "%(progress.total_bytes)s", "totalEstimate": "%(progress.total_bytes_estimate)s", "speed": "%(progress.speed)s"}' )
-    ytDlpArgument.splice(2, 0, '--progress-template' )
-    // ytDlpArgument.splice(2, 0, '--no-cache-dir' )
-    // ytDlpArgument.splice(2, 0, '--print-json' )
-    ytDlpArgument.splice(2, 0, '--newline' )
+        ytDlpArgument.splice(2, 0, ffmpegPath )
+        ytDlpArgument.splice(2, 0, "--ffmpeg-location" )
+        ytDlpArgument.splice(2, 0, "bv*+ba/b" )
+        ytDlpArgument.splice(2, 0, "-f" )
+        ytDlpArgument.splice(2, 0, savePath )
+        ytDlpArgument.splice(2, 0, "-o" )
+        ytDlpArgument.splice(2, 0, '{"type": "#DOWNLOAD#","percent": "%(progress._percent)s", "downloaded": "%(progress.downloaded_bytes)s", "total": "%(progress.total_bytes)s", "totalEstimate": "%(progress.total_bytes_estimate)s", "speed": "%(progress.speed)s"}' )
+        ytDlpArgument.splice(2, 0, '--progress-template' )
+        // ytDlpArgument.splice(2, 0, '--no-cache-dir' )
+        // ytDlpArgument.splice(2, 0, '--print-json' )
+        ytDlpArgument.splice(2, 0, '--newline' )
 
-    const ytdlp = spawn(resolve(publicDir(), 'yt-dlp/yt-dlp'), ytDlpArgument, {stdio: ['ignore', 'pipe', 'pipe']})
+        const ytdlp = spawn(resolve(publicDir(), 'yt-dlp/yt-dlp'), ytDlpArgument, {stdio: ['ignore', 'pipe', 'pipe']})
 
-    ytdlp.stdout.on('data', (data) => {
-        const lines = data.toString().split('\n').filter(Boolean);
-        lines.forEach((line) => {
-            if(line.includes('#DOWNLOAD#')){
-                const json = JSON.parse(line);
+        ytdlp.stdout.on('data', (data) => {
+            const lines = data.toString().split('\n').filter(Boolean);
+            lines.forEach((line) => {
+                if(line.includes('#DOWNLOAD#')){
+                    const json = JSON.parse(line);
 
-                downloadTask.status = DownloadStatus.PENDING
-                downloadTask.TotalBytes = json.total === 'NA' ? json.totalEstimate : json.total
-                downloadTask.receivedBytes = json.downloaded
-                downloadTask.speed = json.speed
-                updateDownloadStatus(downloadTask)
-            }
+                    downloadTask.status = DownloadStatus.PENDING
+                    downloadTask.TotalBytes = json.total === 'NA' ? json.totalEstimate : json.total
+                    downloadTask.receivedBytes = json.downloaded
+                    downloadTask.speed = json.speed
+                    updateDownloadStatus(downloadTask)
+                }
 
+            });
         });
-    });
 
-    ytdlp.stderr.on('data', (data) => {
-        console.error('err:', data.toString());
-        downloadTask.status = DownloadStatus.DOWNLOADERROR
-        // downloadTask.status = DownloadStatus.PAUSE
-        updateDownloadStatus(downloadTask)
-    });
+        ytdlp.stderr.on('data', (data) => {
+            console.error('err:', data.toString());
+            downloadTask.status = DownloadStatus.DOWNLOADERROR
+            // downloadTask.status = DownloadStatus.PAUSE
+            updateDownloadStatus(downloadTask)
+        });
 
-    ytdlp.on('close', (code) => {
-        console.log('finish:', code);
-        downloadTask.status = DownloadStatus.FINISH
-        downloadTask.finishTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
-        updateDownloadStatus(downloadTask)
-    });
-
+        ytdlp.on('close', (code) => {
+            console.log('finish:', code);
+            downloadTask.status = DownloadStatus.FINISH
+            downloadTask.finishTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss')
+            updateDownloadStatus(downloadTask)
+        });
+    }catch(e){
+        console.error('232332', e.message);
+    }
 }
 
 

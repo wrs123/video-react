@@ -15,7 +15,7 @@ import CreateDialog from "./components/createDialog"
 import QueueAnim from 'rc-queue-anim';
 import playIcon from '../../assets/svgs/play-icon.svg?react'
 import pauseIcon from '../../assets/svgs/pause-icon.svg?react'
-import downloadAddIcon from '../../assets/svgs/download-add-icon.svg.svg?react'
+import downloadAddIcon from '../../assets/svgs/download-add-icon.svg?react'
 
 import DownloadItem from "./components/DownloadItem.tsx";
 import API from "../../request/api.ts";
@@ -28,7 +28,7 @@ const MemoDownloadItem = React.memo(DownloadItem, (prevProps, nextProps) => {
 function Download(props: any) {
     const [listHeight, setListHeight] = useState(200);
     const downloadingList = useCusStore(state => state.downloadingList);
-    const setDownloadingList = useCusStore(state => state.setDownloadingList);
+    const { updateDownloadingList, pushDownloadingList } = useCusStore()
     const delDownloadingList = useCusStore(state => state.delDownloadingList);
     const downloadFinishList = useCusStore(state => state.downloadFinishList);
     const setDownloadFinishList = useCusStore(state => state.setDownloadFinishList);
@@ -40,7 +40,7 @@ function Download(props: any) {
     const createSuccess = (_param: DownloadTaskType) => {
         console.log(_param);
         setIsModalOpen(false);
-        setDownloadingList([_param, ...downloadingList]);
+        updateDownloadingList(_param);
     };
 
     const createError = async (param) => {
@@ -68,29 +68,14 @@ function Download(props: any) {
         switch (type) {
             case "PAUSE":
                 item.status = DownloadStatus.PAUSE;
-                {
-                    const _downloadList = downloadingList.map(preItem =>
-                        item.id == preItem.id ? {...preItem, ...item} : preItem
-                    )
-                    setDownloadingList(_downloadList)
-                }
+                updateDownloadingList(item)
                 break;
             case "PUSH":
                 item.status = DownloadStatus.PENDING;
-                {
-                    const _downloadList = downloadingList.map(preItem =>
-                        item.id == preItem.id ? {...preItem, ...item} : preItem
-                    )
-                    setDownloadingList(_downloadList)
-                }
+                pushDownloadingList(item)
                 break;
             case "UPDATE":
-                {
-                    const _downloadList = downloadingList.map(preItem =>
-                        item.id == preItem.id ? {...preItem, ...item} : preItem
-                    )
-                    setDownloadingList(_downloadList)
-                }
+                updateDownloadingList(item)
                 break;
             case "FINISH":
                 {
@@ -162,15 +147,15 @@ function Download(props: any) {
                     </div>
 
                 </Space>
-                <div>
+                <div className={ styles.actionGroup}>
                     <Space>
-                        <Button icon={<CaretRightOutlined />}>
+                        <Button icon={<Icon component={ playIcon } />}>
                             全部开始
                         </Button>
-                        <Button icon={<PauseOutlined />}>
+                        <Button icon={<Icon component={ pauseIcon } />}>
                             全部暂停
                         </Button>
-                        <Button color="primary" variant="solid" icon={<PlusOutlined />} block
+                        <Button color="primary" variant="solid" icon={ <Icon component={ downloadAddIcon } /> } block
                                 onClick={() => setIsModalOpen(true)}
                         >添加</Button>
                         {/*<Button type="primary" icon={<PlusOutlined/>} onClick={showModal}>*/}

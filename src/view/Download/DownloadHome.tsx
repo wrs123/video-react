@@ -5,7 +5,7 @@ import downloadingIcon from '../../assets/svgs/downloading-icon.svg?react'
 import complateIcon from '../../assets/svgs/complate-icon.svg?react'
 import recycleIcon from '../../assets/svgs/recycle-icon.svg?react'
 import { Button, Modal, Input } from "antd";
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Browser from "../Browser/Browser.tsx";
 import {If, Else, Then} from 'react-if';
 import DownLoad from '../Download/Download'
@@ -17,6 +17,7 @@ import {useCusStore} from "../../store";
 import API from "../../request/api.ts";
 import {ResultStatus} from "../../shared/enums.ts";
 import SearchDialog from "./components/searchDialog.tsx";
+import searchIcon from '../../assets/svgs/search-icon.svg?react'
 
 
 const filterList = [
@@ -41,7 +42,7 @@ function DownloadHome(){
     const [activeFilter, setActiveFilter] = useState('downloading')
     const [modal, confrimContextHolder] = Modal.useModal();
     const [searchDialogVisible, setSearchDialogVisible] = useState<boolean>(false);
-
+    const inputRef = useRef(null)
 
     return (
         <>
@@ -61,7 +62,10 @@ function DownloadHome(){
                     }
                 </div>
                 <div key={2} className={styles.leftContainer}>
-                    <Input className={styles.searchBtn} placeholder="搜索下载过的文件" variant="filled" onClick={ () => setSearchDialogVisible(true) } />
+                    <Input ref={ inputRef } prefix={ <Icon component={ searchIcon } /> } className={styles.searchBtn} placeholder="搜索下载过的文件" variant="filled" onClick={ () => {
+                        inputRef.current.blur();
+                        setSearchDialogVisible(true)
+                    } } />
                     <If condition={activeFilter === 'downloading'}>
                         <Then>
                             <DownLoad key="1"/>

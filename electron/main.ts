@@ -41,9 +41,9 @@ function createWindow() {
 
   const opts: any = {
     icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
-    width: 1200,
+    width: 1000,
     height: 750,
-    minWidth: 1200,
+    minWidth: 1000,
     minHeight: 650,
     frame: false,
     // transparent: true,       // 需要透明以让 backdrop-filter / vibrancy 生效

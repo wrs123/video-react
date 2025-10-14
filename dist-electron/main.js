@@ -4142,42 +4142,46 @@ function DownloadFileByDirectURL(downloadObj, savePath, downloadTask) {
   win2.webContents.downloadURL(downloadObj.analysisUrl);
 }
 function DownloadFileByOriginalURL(downloadTask, ytDlpArgument) {
-  const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg");
-  const savePath = resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s");
-  ytDlpArgument.splice(2, 0, ffmpegPath);
-  ytDlpArgument.splice(2, 0, "--ffmpeg-location");
-  ytDlpArgument.splice(2, 0, "bv*+ba/b");
-  ytDlpArgument.splice(2, 0, "-f");
-  ytDlpArgument.splice(2, 0, savePath);
-  ytDlpArgument.splice(2, 0, "-o");
-  ytDlpArgument.splice(2, 0, '{"type": "#DOWNLOAD#","percent": "%(progress._percent)s", "downloaded": "%(progress.downloaded_bytes)s", "total": "%(progress.total_bytes)s", "totalEstimate": "%(progress.total_bytes_estimate)s", "speed": "%(progress.speed)s"}');
-  ytDlpArgument.splice(2, 0, "--progress-template");
-  ytDlpArgument.splice(2, 0, "--newline");
-  const ytdlp = spawn(resolve$5(publicDir$1(), "yt-dlp/yt-dlp"), ytDlpArgument, { stdio: ["ignore", "pipe", "pipe"] });
-  ytdlp.stdout.on("data", (data) => {
-    const lines = data.toString().split("\n").filter(Boolean);
-    lines.forEach((line) => {
-      if (line.includes("#DOWNLOAD#")) {
-        const json = JSON.parse(line);
-        downloadTask.status = DownloadStatus.PENDING;
-        downloadTask.TotalBytes = json.total === "NA" ? json.totalEstimate : json.total;
-        downloadTask.receivedBytes = json.downloaded;
-        downloadTask.speed = json.speed;
-        updateDownloadStatus(downloadTask);
-      }
+  try {
+    const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg");
+    const savePath = resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s");
+    ytDlpArgument.splice(2, 0, ffmpegPath);
+    ytDlpArgument.splice(2, 0, "--ffmpeg-location");
+    ytDlpArgument.splice(2, 0, "bv*+ba/b");
+    ytDlpArgument.splice(2, 0, "-f");
+    ytDlpArgument.splice(2, 0, savePath);
+    ytDlpArgument.splice(2, 0, "-o");
+    ytDlpArgument.splice(2, 0, '{"type": "#DOWNLOAD#","percent": "%(progress._percent)s", "downloaded": "%(progress.downloaded_bytes)s", "total": "%(progress.total_bytes)s", "totalEstimate": "%(progress.total_bytes_estimate)s", "speed": "%(progress.speed)s"}');
+    ytDlpArgument.splice(2, 0, "--progress-template");
+    ytDlpArgument.splice(2, 0, "--newline");
+    const ytdlp = spawn(resolve$5(publicDir$1(), "yt-dlp/yt-dlp"), ytDlpArgument, { stdio: ["ignore", "pipe", "pipe"] });
+    ytdlp.stdout.on("data", (data) => {
+      const lines = data.toString().split("\n").filter(Boolean);
+      lines.forEach((line) => {
+        if (line.includes("#DOWNLOAD#")) {
+          const json = JSON.parse(line);
+          downloadTask.status = DownloadStatus.PENDING;
+          downloadTask.TotalBytes = json.total === "NA" ? json.totalEstimate : json.total;
+          downloadTask.receivedBytes = json.downloaded;
+          downloadTask.speed = json.speed;
+          updateDownloadStatus(downloadTask);
+        }
+      });
     });
-  });
-  ytdlp.stderr.on("data", (data) => {
-    console.error("err:", data.toString());
-    downloadTask.status = DownloadStatus.DOWNLOADERROR;
-    updateDownloadStatus(downloadTask);
-  });
-  ytdlp.on("close", (code2) => {
-    console.log("finish:", code2);
-    downloadTask.status = DownloadStatus.FINISH;
-    downloadTask.finishTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
-    updateDownloadStatus(downloadTask);
-  });
+    ytdlp.stderr.on("data", (data) => {
+      console.error("err:", data.toString());
+      downloadTask.status = DownloadStatus.DOWNLOADERROR;
+      updateDownloadStatus(downloadTask);
+    });
+    ytdlp.on("close", (code2) => {
+      console.log("finish:", code2);
+      downloadTask.status = DownloadStatus.FINISH;
+      downloadTask.finishTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
+      updateDownloadStatus(downloadTask);
+    });
+  } catch (e) {
+    console.error("232332", e.message);
+  }
 }
 const require$2 = createRequire(import.meta.url);
 const { Worker } = require$2("node:worker_threads");
@@ -20224,9 +20228,9 @@ function createWindow() {
   const isWin = process.platform === "win32";
   const opts = {
     icon: path$1.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
-    width: 1200,
+    width: 1e3,
     height: 750,
-    minWidth: 1200,
+    minWidth: 1e3,
     minHeight: 650,
     frame: false,
     // transparent: true,       // 需要透明以让 backdrop-filter / vibrancy 生效

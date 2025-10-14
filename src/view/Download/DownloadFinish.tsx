@@ -26,7 +26,7 @@ const MemoDownloadItem = React.memo(DownloadItem, (prevProps, nextProps) => {
 function DownloadFinish(props: any) {
     const [listHeight, setListHeight] = useState(200);
     const downloadFinishList = useCusStore(state => state.downloadFinishList);
-    const setDownloadFinishList = useCusStore(state => state.setDownloadFinishList);
+    const { updateDownloadFinishList, pushDownloadFinishList } = useCusStore()
     const delDownloadFinishList = useCusStore(state => state.delDownloadFinishList);
     const listRef = useRef(null);
     const [modal, confrimContextHolder] = Modal.useModal();
@@ -38,24 +38,12 @@ function DownloadFinish(props: any) {
 
             case "PUSH":
                 item.status = DownloadStatus.PENDING;
-            {
-                const _downloadList = downloadFinishList.map(preItem =>
-                    item.id == preItem.id ? {...preItem, ...item} : preItem
-                )
-                setDownloadFinishList(_downloadList)
-            }
+                pushDownloadFinishList(item)
                 break;
             case "UPDATE":
-            {
-                const _downloadList = downloadFinishList.map(preItem =>
-                    item.id == preItem.id ? {...preItem, ...item} : preItem
-                )
-                setDownloadFinishList(_downloadList)
-            }
+                updateDownloadFinishList(item)
                 break;
             case "DELETE":
-                console.warn("del", item)
-                console.warn(downloadFinishList.length)
                 const res = await API.deleteTask({id: item?.id})
                 if(res.status === ResultStatus.OK){
                     delDownloadFinishList(item?.id)
