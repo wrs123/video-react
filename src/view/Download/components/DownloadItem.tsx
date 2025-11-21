@@ -154,36 +154,12 @@ function DownloadItem(props: DownloadItemProps) {
             if(showConfrim && !confirmed){
                 return
             }
-
-            props.commandCommon && props.commandCommon('DELETE', item)
+            props.commandCommon('DELETE', item)
         }catch(e){
             console.error(e)
         }
 
     }
-
-    const createTask = async () => {
-        const res = await API.createTask(values)
-        console.warn(res)
-        if(res.status == ResultStatus.OK){
-            onSubmit(res.data)
-            messageApi.open({
-                type: 'success',
-                content: '创建成功',
-            });
-        }else{
-
-            if(res.code === 202){
-
-            }else{
-                messageApi.open({
-                    type: 'warning',
-                    content: `创建失败：${res.message}`,
-                });
-            }
-        }
-    }
-
 
 
     const commandCommon = async (type: string, item: DownloadTaskType) => {

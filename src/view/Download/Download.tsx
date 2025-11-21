@@ -28,8 +28,7 @@ const MemoDownloadItem = React.memo(DownloadItem, (prevProps, nextProps) => {
 function Download(props: any) {
     const [listHeight, setListHeight] = useState(200);
     const downloadingList = useCusStore(state => state.downloadingList);
-    const { updateDownloadingList, pushDownloadingList } = useCusStore()
-    const delDownloadingList = useCusStore(state => state.delDownloadingList);
+    const { updateDownloadingList, pushDownloadingList, delDownloadingList } = useCusStore()
     const downloadFinishList = useCusStore(state => state.downloadFinishList);
     const setDownloadFinishList = useCusStore(state => state.setDownloadFinishList);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,7 +39,7 @@ function Download(props: any) {
     const createSuccess = (_param: DownloadTaskType) => {
         console.log(_param);
         setIsModalOpen(false);
-        updateDownloadingList(_param);
+        pushDownloadingList(_param);
     };
 
     const createError = async (param) => {
@@ -59,7 +58,7 @@ function Download(props: any) {
             alert(1)
         }else{
             // props.navigateFinishTask(param)
-            setActiveFilter('downloaded')
+            // setActiveFilter('downloaded')
         }
     }
 
@@ -78,22 +77,13 @@ function Download(props: any) {
                 updateDownloadingList(item)
                 break;
             case "FINISH":
-                {
-                    delTask(item)
-                }
+                delTask(item)
                 break;
             case "DELETE":
                 if(delSql){
                     const res = await API.deleteTask({id: item?.id})
-                    if(res.status === ResultStatus.OK){
-                        const _downloadList = downloadingList.filter(preItem => preItem.id !== item.id )
-                        setDownloadingList(_downloadList)
-
-                    }
-                }else{
-                    const _downloadList = downloadingList.filter(preItem => preItem.id !== item.id )
-                    setDownloadingList(_downloadList)
                 }
+                delDownloadingList(item.id)
                 break;
         }
 

@@ -4143,7 +4143,7 @@ function DownloadFileByDirectURL(downloadObj, savePath, downloadTask) {
 }
 function DownloadFileByOriginalURL(downloadTask, ytDlpArgument) {
   try {
-    const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg");
+    const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg.exe");
     const savePath = resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s");
     ytDlpArgument.splice(2, 0, ffmpegPath);
     ytDlpArgument.splice(2, 0, "--ffmpeg-location");
@@ -4154,7 +4154,7 @@ function DownloadFileByOriginalURL(downloadTask, ytDlpArgument) {
     ytDlpArgument.splice(2, 0, '{"type": "#DOWNLOAD#","percent": "%(progress._percent)s", "downloaded": "%(progress.downloaded_bytes)s", "total": "%(progress.total_bytes)s", "totalEstimate": "%(progress.total_bytes_estimate)s", "speed": "%(progress.speed)s"}');
     ytDlpArgument.splice(2, 0, "--progress-template");
     ytDlpArgument.splice(2, 0, "--newline");
-    const ytdlp = spawn(resolve$5(publicDir$1(), "yt-dlp/yt-dlp"), ytDlpArgument, { stdio: ["ignore", "pipe", "pipe"] });
+    const ytdlp = spawn(resolve$5(publicDir$1(), "yt-dlp/yt-dlp.exe"), ytDlpArgument, { stdio: ["ignore", "pipe", "pipe"] });
     ytdlp.stdout.on("data", (data) => {
       const lines = data.toString().split("\n").filter(Boolean);
       lines.forEach((line) => {
@@ -4332,7 +4332,7 @@ const createTask = async (param) => {
     _analysisWorker(param.urls, param.id, ytDlpArgument).then(async (analysisObj) => {
       if (analysisObj.status === ResultStatus.OK) {
         const data = analysisObj.res;
-        _data.name = data.fileName;
+        _data.name = data.fileName + "-" + hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD+HH:mm:ss");
         _data.analysisUrl = data.analysisUrl;
         _data.suffix = data.suffix;
         _data.fileType = data.fileType;
@@ -7511,9 +7511,9 @@ function commentKeyword$1({ gen, schemaEnv, schema, errSchemaPath, opts }) {
   }
 }
 function returnResults$1(it) {
-  const { gen, schemaEnv, validateName, ValidationError: ValidationError3, opts } = it;
+  const { gen, schemaEnv, validateName, ValidationError: ValidationError2, opts } = it;
   if (schemaEnv.$async) {
-    gen.if((0, codegen_1$X._)`${names_1$d.default.errors} === 0`, () => gen.return(names_1$d.default.data), () => gen.throw((0, codegen_1$X._)`new ${ValidationError3}(${names_1$d.default.vErrors})`));
+    gen.if((0, codegen_1$X._)`${names_1$d.default.errors} === 0`, () => gen.return(names_1$d.default.data), () => gen.throw((0, codegen_1$X._)`new ${ValidationError2}(${names_1$d.default.vErrors})`));
   } else {
     gen.assign((0, codegen_1$X._)`${validateName}.errors`, names_1$d.default.vErrors);
     if (opts.unevaluated)
@@ -7857,15 +7857,21 @@ function getData$1($data, { dataLevel, dataNames, dataPathArr }) {
 }
 validate$1.getData = getData$1;
 var validation_error$1 = {};
-Object.defineProperty(validation_error$1, "__esModule", { value: true });
-let ValidationError$1 = class ValidationError extends Error {
-  constructor(errors2) {
-    super("validation failed");
-    this.errors = errors2;
-    this.ajv = this.validation = true;
+var hasRequiredValidation_error;
+function requireValidation_error() {
+  if (hasRequiredValidation_error) return validation_error$1;
+  hasRequiredValidation_error = 1;
+  Object.defineProperty(validation_error$1, "__esModule", { value: true });
+  class ValidationError2 extends Error {
+    constructor(errors2) {
+      super("validation failed");
+      this.errors = errors2;
+      this.ajv = this.validation = true;
+    }
   }
-};
-validation_error$1.default = ValidationError$1;
+  validation_error$1.default = ValidationError2;
+  return validation_error$1;
+}
 var ref_error$1 = {};
 Object.defineProperty(ref_error$1, "__esModule", { value: true });
 const resolve_1$4 = resolve$4;
@@ -7881,7 +7887,7 @@ var compile$1 = {};
 Object.defineProperty(compile$1, "__esModule", { value: true });
 compile$1.resolveSchema = compile$1.getCompilingSchema = compile$1.resolveRef = compile$1.compileSchema = compile$1.SchemaEnv = void 0;
 const codegen_1$W = codegen$1;
-const validation_error_1$1 = validation_error$1;
+const validation_error_1$1 = requireValidation_error();
 const names_1$c = names$3;
 const resolve_1$3 = resolve$4;
 const util_1$P = util$1;
@@ -8837,7 +8843,7 @@ uri$3.default = uri$2;
   Object.defineProperty(exports, "CodeGen", { enumerable: true, get: function() {
     return codegen_12.CodeGen;
   } });
-  const validation_error_12 = validation_error$1;
+  const validation_error_12 = requireValidation_error();
   const ref_error_12 = ref_error$1;
   const rules_12 = rules$1;
   const compile_12 = compile$1;
@@ -11846,7 +11852,7 @@ jsonSchema202012.default = addMetaSchema2020;
   Object.defineProperty(exports, "CodeGen", { enumerable: true, get: function() {
     return codegen_12.CodeGen;
   } });
-  var validation_error_12 = validation_error$1;
+  var validation_error_12 = requireValidation_error();
   Object.defineProperty(exports, "ValidationError", { enumerable: true, get: function() {
     return validation_error_12.default;
   } });
@@ -14379,9 +14385,9 @@ function commentKeyword({ gen, schemaEnv, schema, errSchemaPath, opts }) {
   }
 }
 function returnResults(it) {
-  const { gen, schemaEnv, validateName, ValidationError: ValidationError3, opts } = it;
+  const { gen, schemaEnv, validateName, ValidationError: ValidationError2, opts } = it;
   if (schemaEnv.$async) {
-    gen.if((0, codegen_1$n._)`${names_1$3.default.errors} === 0`, () => gen.return(names_1$3.default.data), () => gen.throw((0, codegen_1$n._)`new ${ValidationError3}(${names_1$3.default.vErrors})`));
+    gen.if((0, codegen_1$n._)`${names_1$3.default.errors} === 0`, () => gen.return(names_1$3.default.data), () => gen.throw((0, codegen_1$n._)`new ${ValidationError2}(${names_1$3.default.vErrors})`));
   } else {
     gen.assign((0, codegen_1$n._)`${validateName}.errors`, names_1$3.default.vErrors);
     if (opts.unevaluated)
@@ -14726,14 +14732,14 @@ function getData($data, { dataLevel, dataNames, dataPathArr }) {
 validate.getData = getData;
 var validation_error = {};
 Object.defineProperty(validation_error, "__esModule", { value: true });
-class ValidationError2 extends Error {
+class ValidationError extends Error {
   constructor(errors2) {
     super("validation failed");
     this.errors = errors2;
     this.ajv = this.validation = true;
   }
 }
-validation_error.default = ValidationError2;
+validation_error.default = ValidationError;
 var ref_error = {};
 Object.defineProperty(ref_error, "__esModule", { value: true });
 const resolve_1$1 = resolve$1;

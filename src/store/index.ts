@@ -17,7 +17,7 @@ export const useCusStore = create((set: any) => ({
         )
     })),
     pushDownloadingList: (value: any) => set((state: any) => ({
-        downloadingList:  state.downloadingList.push(value)
+        downloadingList:  [value, ...state.downloadingList]
     })),
     setDownloadFinishList: (value: any) => set((state: any) => ({
         downloadFinishList:  value

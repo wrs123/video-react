@@ -225,7 +225,7 @@ export const createTask = async (param: any) => {
             if(analysisObj.status === ResultStatus.OK){
                 const data = analysisObj.res;
 
-                _data.name = data.fileName
+                _data.name = data.fileName + '-' + moment(new Date()).format('YYYY-MM-DD+HH:mm:ss')
                 _data.analysisUrl = data.analysisUrl
                 _data.suffix = data.suffix
                 _data.fileType = data.fileType

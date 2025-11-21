@@ -133,7 +133,7 @@ export function DownloadFileByDirectURL(downloadObj : DownloadAnalysisType, save
 export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpArgument: string[]){
     try{
         //通用解析
-        const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg');
+        const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg.exe');
         const savePath = resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s')
 
         ytDlpArgument.splice(2, 0, ffmpegPath )
@@ -148,7 +148,7 @@ export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpAr
         // ytDlpArgument.splice(2, 0, '--print-json' )
         ytDlpArgument.splice(2, 0, '--newline' )
 
-        const ytdlp = spawn(resolve(publicDir(), 'yt-dlp/yt-dlp'), ytDlpArgument, {stdio: ['ignore', 'pipe', 'pipe']})
+        const ytdlp = spawn(resolve(publicDir(), 'yt-dlp/yt-dlp.exe'), ytDlpArgument, {stdio: ['ignore', 'pipe', 'pipe']})
 
         ytdlp.stdout.on('data', (data) => {
             const lines = data.toString().split('\n').filter(Boolean);
