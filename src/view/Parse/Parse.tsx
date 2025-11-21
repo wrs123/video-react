@@ -131,10 +131,10 @@ function Parse (){
                         <Button size={'small'} type="text" icon={<SettingOutlined />}></Button>
                         <Button size={'small'} type="text" icon={<MenuUnfoldOutlined />} onClick={() => setShowConsoleBar(!showConsoleBar)}></Button>
                     </Flex>
-                    <Space>
-                        <Button size={'small'} color="danger" onClick={closeParseWindow} variant="text">退出</Button>
-                        <Button type="text" size={'small'} >确认</Button>
-                    </Space>
+                    {/*<Space>*/}
+                    {/*    <Button size={'small'} color="danger" onClick={closeParseWindow} variant="text">退出</Button>*/}
+                    {/*    <Button type="text" size={'small'} >确认</Button>*/}
+                    {/*</Space>*/}
                 </Flex>
             </div>
             <div className={styles.viewContainer}>

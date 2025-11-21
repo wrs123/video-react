@@ -48,8 +48,10 @@ function createWindow() {
     frame: false,
     // transparent: true,       // 需要透明以让 backdrop-filter / vibrancy 生效
     titleBarStyle: 'hiddenInset',
-           // 通常无边框更好看（可选）
-
+    trafficLightPosition: {
+      x: 14,   // 水平位置（通常保持较小值）
+      y: 16 // 👈 关键：增大这个值，让红绿灯下移
+    },
     backgroundColor: '#00000000',
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),

@@ -4,111 +4,23 @@ $stepBarWidth: 66px;
   display: flex;
   height: 100vh;
   flex-direction: column;
+  background-color: var(--cust-slider-bg);
+
+
 
   .contentContainer{
     display: flex;
-    height: 100%;
+    height: calc(100% - var(--window-titlebar-height));
+    margin: 0 10px 10px 10px;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 0 14px rgba(0, 0, 0, .02);
   }
 }
 
-.stepBar{
-  height: -webkit-fill-available;
-  padding: var(--window-titlebar-height) 6px 12px 6px;
-  background: var(--cust-slider-bg);
-  position: relative;
-  width: $stepBarWidth;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 5;
-  border-right: 1px solid var(--color-border);
 
-  .logoContainer{
-    width: -webkit-fill-available;
-    display: flex;
-    justify-content: center;
-    font-size: 22px;
-    font-weight: bolder;
-    padding: 4px 0 4px 0;
-    align-items: center;
 
-    img{
-      height: 50px;
-    }
-  }
 
-  .bottomButton{
-    position: absolute;
-    bottom: 0;
-    //border-top: 1px solid rgba(5, 5, 5, 0.06);
-    width: -webkit-fill-available;
-    padding: 14px 12px 18px 12px;
-    left: 0;
-    display: flex;
-    justify-content: center;
-
-    svg{
-      font-size: 24px;
-    }
-  }
-}
-
-.stepBarItem{
-  display: flex;
-  //flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 50px;
-  height: 56px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 15px;
-  color: var(--color-text-primary);
-  position: relative;
-  transition: all 0.3s;
-  margin: 10px 0 0 0;
-  transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  flex-direction: column;
-
-  svg{
-    font-size: 24px;
-  }
-
-  &:hover {
-    color: var(--color-primary);
-  }
-
-  &.active {
-    //background: var(--color-primary-second);
-    color: var(--color-primary);
-    font-weight: bold;
-    //padding: 10px 6px 20px 6px;
-
-    //&:before {
-    //  content: '';
-    //  height: 6px;
-    //  width: 6px;
-    //  background: var(--color-primary);
-    //  border-radius: 10px;
-    //  position: absolute;
-    //  right: 16px;
-    //}
-  }
-
-  &.disabled {
-    color: #c3c3c3;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-
-  .itemLabel{
-    line-height: .94;
-    margin-top: 8px;
-    font-size: 12px;
-    display: inline-block;
-    font-weight: lighter;
-  }
-}
 
 .projectContainer{
   flex: 1;
