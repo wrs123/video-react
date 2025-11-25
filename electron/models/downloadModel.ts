@@ -73,7 +73,7 @@ async function _getCookie(domain: string): Promise<string> {
 }
 
 /**
- * 缓存视频更面
+ * 缓存视频封面
  * @param url
  * @param savePath
  */
@@ -116,7 +116,6 @@ export function updateDownloadStatus(downloadTask:any){
 const _analysisWorker = (path: string, id: string, ytDlpArgument: string[]) => {
     return new Promise((rev, reject) => {
         //解析下载地址
-
         const analysisWorker = new Worker(resolve(global.__dirname, '../electron/worker/pathAnalysisWorker.js'), {
             workerData: { path, publicDir: publicDir(), ytDlpArgument},
             // type: "module"
@@ -134,8 +133,23 @@ const _analysisWorker = (path: string, id: string, ytDlpArgument: string[]) => {
         });
 
         analysisWorker.on("error", (err) => {
-            console.warn(`Worker error: ${err}`)
-            reject(err);
+            console.warn(`Worker error: ${err.message}`)
+            const _msg = {
+                status: ResultStatus.ERROR,
+                message: '解析失败',
+                res: {
+                    analysisUrl: '', //下载地址
+                    fileName: '', //文件名称
+                    suffix: '.mp4', //文件后缀
+                    fileType: 'MP4',
+                    cover: ''
+                }
+            }
+            //线程出栈
+            delete global.taskStack[id]
+            //销毁线程
+            analysisWorker.terminate();
+            rev(_msg);
         });
 
         analysisWorker.on("exit", (code) => {
@@ -163,15 +177,15 @@ export const createTask = async (param: any) => {
     }
     const _data: DownloadTaskType = {
         id: crypto.randomUUID(), //下载任务id
-        originUrl: param.urls, //原视频地址
+        originUrl: param.originUrl, //原视频地址
         status: DownloadStatus.ANAL, //下载状态
         TotalBytes: 0, //视频总字节数
         receivedBytes: 0, //已下载的字节数
         speed: 0,
         createTime: moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
         finishTime: null,
-        savePath: param.path, //下载的本地地址
-        name: (new URL(param.urls)).origin, //文件名
+        savePath: param.savePath, //下载的本地地址
+        name: (new URL(param.originUrl)).origin, //文件名
         analysisUrl: "", //解析后的下载地址
         suffix: "", //文件后缀
         fileType: DownloadFileType.NONE,
@@ -179,7 +193,6 @@ export const createTask = async (param: any) => {
     }
 
     try{
-
         //查询重复任务
         const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
 
@@ -220,7 +233,7 @@ export const createTask = async (param: any) => {
             ytDlpArgument.unshift('--proxy')
         }
         //解析视频基本信息
-        _analysisWorker(param.urls, param.id, ytDlpArgument).then(async (analysisObj: any) => {
+        _analysisWorker(param.originUrl, param.id, ytDlpArgument).then(async (analysisObj: any) => {
 
             if(analysisObj.status === ResultStatus.OK){
                 const data = analysisObj.res;

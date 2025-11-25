@@ -71,6 +71,7 @@ function DownloadItem(props: DownloadItemProps) {
             label: '打开所在目录',
             key: 'originUrl',
             icon: <FolderOpenOutlined />,
+
         },
         {
             type: 'divider',
@@ -90,6 +91,10 @@ function DownloadItem(props: DownloadItemProps) {
             label: '删除',
             key: 'delete',
             icon:  <DeleteOutlined />,
+            onClick: (key, keyPath, domEvent) => {
+                console.warn(key, keyPath, domEvent)
+               // props.commandCommon && await props.commandCommon('DELETE', item, true)
+            }
         },
     ]);
 
@@ -165,8 +170,16 @@ function DownloadItem(props: DownloadItemProps) {
     const commandCommon = async (type: string, item: DownloadTaskType) => {
         switch (type) {
             case "RELOAD":
+                console.warn(item)
                 props.commandCommon && await props.commandCommon('DELETE', item, true)
-                await API.createTask(item)
+                const res = await API.createTask(item)
+                if(res.status == ResultStatus.OK){
+                    props.onSubmit(res.data)
+                    // messageApi.open({
+                    //     type: 'success',
+                    //     content: '创建成功',
+                    // });
+                }
                 break;
         }
     }
@@ -315,7 +328,7 @@ function DownloadItem(props: DownloadItemProps) {
                             </If>
                             <If condition={taskItem?.status.includes(DownloadStatus.ERROR) }>
                                 <Then>
-                                    <div className={styles.actionButton} onClick={() => deleteTask(taskItem)}>
+                                    <div className={styles.actionButton} onClick={() => commandCommon('RELOAD', taskItem)}>
                                         <ReloadOutlined />
                                     </div>
                                 </Then>

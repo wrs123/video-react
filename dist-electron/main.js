@@ -4050,7 +4050,6 @@ const { app: app$1 } = require$3("electron");
 const publicDir$1 = () => {
   const node_serve_path = process.resourcesPath;
   const PUBLIC_PATH = "/public";
-  console.warn(111111);
   const isPackaged = app$1.isPackaged;
   let file_path = "";
   if (!isPackaged) {
@@ -4256,8 +4255,24 @@ const _analysisWorker = (path2, id2, ytDlpArgument) => {
       analysisWorker.terminate();
     });
     analysisWorker.on("error", (err) => {
-      console.warn(`Worker error: ${err}`);
-      reject(err);
+      console.warn(`Worker error: ${err.message}`);
+      const _msg = {
+        status: ResultStatus.ERROR,
+        message: "解析失败",
+        res: {
+          analysisUrl: "",
+          //下载地址
+          fileName: "",
+          //文件名称
+          suffix: ".mp4",
+          //文件后缀
+          fileType: "MP4",
+          cover: ""
+        }
+      };
+      delete global.taskStack[id2];
+      analysisWorker.terminate();
+      rev(_msg);
     });
     analysisWorker.on("exit", (code2) => {
       if (code2 !== 0) {
@@ -4278,7 +4293,7 @@ const createTask = async (param) => {
   const _data = {
     id: crypto.randomUUID(),
     //下载任务id
-    originUrl: param.urls,
+    originUrl: param.originUrl,
     //原视频地址
     status: DownloadStatus.ANAL,
     //下载状态
@@ -4289,9 +4304,9 @@ const createTask = async (param) => {
     speed: 0,
     createTime: hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss"),
     finishTime: null,
-    savePath: param.path,
+    savePath: param.savePath,
     //下载的本地地址
-    name: new URL(param.urls).origin,
+    name: new URL(param.originUrl).origin,
     //文件名
     analysisUrl: "",
     //解析后的下载地址
@@ -4329,7 +4344,7 @@ const createTask = async (param) => {
       ytDlpArgument.unshift(`${proxyPortal}://${proxyHost}:${proxyPort}`);
       ytDlpArgument.unshift("--proxy");
     }
-    _analysisWorker(param.urls, param.id, ytDlpArgument).then(async (analysisObj) => {
+    _analysisWorker(param.originUrl, param.id, ytDlpArgument).then(async (analysisObj) => {
       if (analysisObj.status === ResultStatus.OK) {
         const data = analysisObj.res;
         _data.name = data.fileName + "-" + hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD+HH:mm:ss");
@@ -20236,9 +20251,9 @@ function createWindow() {
     // transparent: true,       // 需要透明以让 backdrop-filter / vibrancy 生效
     titleBarStyle: "hiddenInset",
     trafficLightPosition: {
-      x: 14,
+      x: 8,
       // 水平位置（通常保持较小值）
-      y: 16
+      y: 14
       // 👈 关键：增大这个值，让红绿灯下移
     },
     backgroundColor: "#00000000",

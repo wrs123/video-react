@@ -166,7 +166,7 @@ function Download(props: any) {
                                 (item, index) =>
                                     <QueueAnim delay={ index * 20 } ease={'easeOutQuart'} duration={300} type={ 'right' } className={styles.downloadContainer}>
                                         <div key={item.id}>
-                                            <MemoDownloadItem  item={item} status={ 0 } commandCommon={commandCommon}/>
+                                            <MemoDownloadItem  item={item} status={ 0 } commandCommon={commandCommon} onSubmit={createSuccess} />
                                         </div>
                                     </QueueAnim>
                             }

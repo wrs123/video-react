@@ -41,9 +41,28 @@ interface CookieType {
     updateTime?: string;
 }
 
+interface TabType {
+    id: string;
+    url: string;
+    title?: string;
+    favicon?: string;
+
+    // 👇 关键：缓存 WebView 状态
+    cachedState?: {
+        scrollY: number;
+        formInputs?: Record<string, string>; // 如搜索框内容
+        extractedResources?: Resource[];     // 已解析的视频/音频链接
+        lastHTML?: string;                  // 可选：完整 HTML 快照（慎用）
+    };
+
+    // 页面是否已“预热”（加载过）
+    hasLoaded?: boolean;
+}
+
 export type {
     DownloadTaskType,
     BaseResult,
     DownloadAnalysisType,
-    CookieType
+    CookieType,
+    TabType
 }

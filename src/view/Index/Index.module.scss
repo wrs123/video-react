@@ -11,14 +11,12 @@ $stepBarWidth: 66px;
   .contentContainer{
     display: flex;
     height: calc(100% - var(--window-titlebar-height));
-    margin: 0 10px 10px 10px;
+    margin: 0 var(--base-space) var(--base-space) var(--base-space);
     overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0 0 14px rgba(0, 0, 0, .02);
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, .04);
   }
 }
-
-
 
 
 

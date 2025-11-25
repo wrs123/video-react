@@ -10,9 +10,10 @@ html, body, #root{
   font-size: 14px;
   --color-white: #fff;
   --color-background: var(--color-white);
-  --window-titlebar-height: 48px;
+  --window-titlebar-height: 46px;
   --color-danger: #ff4d4f;
   --color-danger-second: #ff4d4f;
+  --base-space: 8px;
 }
 
 $windowTitleBarHeight: 35px;

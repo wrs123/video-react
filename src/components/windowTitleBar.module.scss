@@ -14,13 +14,16 @@ $windowTitleBarHeight: var(--window-titlebar-height);
 
   .stepBar{
     height: 100%;
-    padding-left: 84px;
+    padding-left: 60px;
     position: relative;
     width: 100vw;
     display: flex;
     align-items: center;
+    padding-right: var(--base-space);
+    box-sizing: border-box;
+
     z-index: 5;
-    border-right: 1px solid var(--color-border);
+    //border-right: 1px solid var(--color-border);
 
     .tabList{
       flex: 1;
@@ -29,9 +32,7 @@ $windowTitleBarHeight: var(--window-titlebar-height);
       display: flex;
       height: 100%;
       align-items: center;
-
-
-
+      padding-left: 10px;
     }
 
 
@@ -67,21 +68,82 @@ $windowTitleBarHeight: var(--window-titlebar-height);
       //flex-direction: column;
       align-items: center;
       justify-content: center;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       color: var(--color-text-primary);
       transform-origin: bottom;
       position: relative;
       transition: all 0.3s;
-      position: relative;
       //margin: 0 0 0 8px;
-      transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
       -webkit-app-region: no-drag;
       padding:0 16px;
       height: 34px;
-      box-shadow: 0 0 14px rgba(0, 0, 0, .02);
       animation: fadeLeft .35s;
-      animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      animation-timing-function: cubic-bezier(0.175, 0.885, 0.22, 1.175);
+      min-width: 0;
+
+
+      .icon{
+        svg{
+          font-size: 14px;
+        }
+      }
+
+
+      &.tabBar{
+        height: 34px;
+        border-radius: 8px;
+        margin: 2px 2px 0 3px;
+        padding: 0 16px;
+
+
+        &::before, &::after {
+          content: "";
+          position: absolute;
+          z-index: -1;
+          width: 16px;
+          height: 24px;
+        }
+        &::before { left: -12px; transform: skew(-22deg); }
+        &::after { right: -12px; transform: skew(22deg); }
+
+        .itemLabel{
+          flex: 1;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+
+        &.active{
+          border-radius: 8px 8px 0 0;
+          position: relative;
+          padding-bottom: 10px;
+          margin-top: 10px;
+          box-shadow: 0 0 8px rgba(0, 0, 0, .04);
+
+
+          &::before {
+            content: "";
+            left: -4px;
+            bottom: 4px;
+            width: 6px;
+            height: 25px;
+            border-bottom-right-radius: 300px;
+            box-shadow: 5px 5px 0px 4px var(--cust-content-bg);
+            transition: box-shadow .35s;
+          }
+          &::after {
+            content: "";
+            right: -4px;
+            bottom: 4px;
+            width: 6px;
+            height: 25px;
+            border-bottom-left-radius: 300px;
+            box-shadow: -5px 5px 0px 4px var(--cust-content-bg);
+            transition: box-shadow .35s;
+          }
+        }
+      }
+
 
       .tabDivider{
         width: 1.5px;
@@ -101,6 +163,7 @@ $windowTitleBarHeight: var(--window-titlebar-height);
         margin-left: 6px;
         border-radius: 50%;
         width: 16px;
+        min-width: 16px;
         height: 16px;
         display: flex;
         align-items: center;
@@ -123,8 +186,9 @@ $windowTitleBarHeight: var(--window-titlebar-height);
       &.configBtn{
         width: 34px;
         padding: 0;
-        margin-right: 10px;
+
         margin-left: 10px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, .04);
 
         svg{
           font-size: 18px;
@@ -134,9 +198,15 @@ $windowTitleBarHeight: var(--window-titlebar-height);
 
       &.addBtn{
         width: 34px;
+        min-width: 34px;
         padding: 0;
         margin-right: 10px;
         background-color: transparent!important;
+        margin-left: 4px;
+
+        &:hover{
+          background-color: rgba(0,0,0,.06)!important;
+        }
 
         svg{
           font-size: 16px;
@@ -144,9 +214,6 @@ $windowTitleBarHeight: var(--window-titlebar-height);
         }
       }
 
-      svg{
-        font-size: 16px;
-      }
 
       &:hover {
         //color: var(--color-primary);
@@ -157,11 +224,23 @@ $windowTitleBarHeight: var(--window-titlebar-height);
         }
       }
 
+      &:has(+ .stepBarItem.active){
+
+        .tabDivider{
+          display: none;
+        }
+
+      }
+
+
+
       &.active {
         background: var(--cust-content-bg);
         //color: var(--color-primary);
         font-weight: bold;
         //padding: 10px 6px 20px 6px;
+
+
         .itemLabel{
           font-weight: bold;
         }
@@ -188,7 +267,6 @@ $windowTitleBarHeight: var(--window-titlebar-height);
       }
 
       .itemLabel{
-        line-height: .94;
         font-size: 14px;
         display: inline-block;
         font-weight: lighter;

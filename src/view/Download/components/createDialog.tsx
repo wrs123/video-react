@@ -9,8 +9,8 @@ import {ResultStatus} from "../../../shared/enums.ts";
 const { TextArea, Search } = Input;
 
 type FieldType = {
-    urls?: string;
-    path?: string;
+    originUrl?: string;
+    savePath?: string;
 };
 
 
@@ -23,7 +23,7 @@ function CreateDialog ({ onSubmit, onError }){
 
     useEffect(() => {
         formData.setFieldsValue({
-            path: window['sysConfig'].savePath,
+            savePath: window['sysConfig'].savePath,
         })
     }, [])
 
@@ -58,7 +58,7 @@ function CreateDialog ({ onSubmit, onError }){
          if(res.status == "OK"){
              // https://www.91porn.com/view_video.php?viewkey=a68aa309566890ce4144&c=piktl&viewtype=&category=
              formData.setFieldsValue({
-                 path: res.data,
+                 savePath: res.data,
              })
          }
     }
@@ -73,14 +73,14 @@ function CreateDialog ({ onSubmit, onError }){
             {contextHolder}
             <Space direction="vertical"  style={{ display: 'flex' }}>
                 <Form.Item<FieldType>
-                    name="urls"
+                    name="originUrl"
                     rules={[{ required: true, message: '请输入下载链接' }]}
                     style={{marginBottom: '0px'}}
                 >
                     <TextArea placeholder="多链接下载请换行" autoSize={{ minRows: 5, maxRows: 5 }}></TextArea>
                 </Form.Item>
                 <Form.Item<FieldType>
-                    name="path"
+                    name="savePath"
                     rules={[{ required: true, message: '请选择下载地址' }]}
                     style={{marginBottom: '0px'}}
                 >

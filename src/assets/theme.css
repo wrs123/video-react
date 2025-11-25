@@ -1,6 +1,6 @@
 :root[data-theme='light'] {
-    --cust-content-bg: #ffffff;
-    --cust-slider-bg: rgba(241, 239, 239, .7);
+    --cust-content-bg: #fdfdfd;
+    --cust-slider-bg: rgba(240, 239, 239, 0.8);
     --cust-slider-sec-bg: #fafafa;
     --cuse-browser-bg: #f2f2f2;
     --color-text-primary: #333;
@@ -22,8 +22,8 @@
 }
 
 :root[data-theme='dark'] {
-    --cust-content-bg: #343434;
-    --cust-slider-bg: rgba(37, 37, 37, .7);
+    --cust-content-bg: #232323;
+    --cust-slider-bg: rgba(47, 47, 47, .7);
     --cust-slider-sec-bg: #2d2d2d;
     --cuse-browser-bg: #2d2d2d;
     --color-text-primary: #E0E0E0;

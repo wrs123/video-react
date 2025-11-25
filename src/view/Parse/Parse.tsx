@@ -50,6 +50,14 @@ function Parse (){
         setCanGoForward(webview.canGoForward())
     }
 
+    const jsInject = async () => {
+        await webviewRef.executeJavaScript(`
+            (function(){
+                alert(1)
+            })()
+        `)
+    }
+
     const getParams = () => {
         // 优先取正常 search
         let search = location.search;
@@ -89,6 +97,7 @@ function Parse (){
 
         webview.addEventListener("dom-ready", () => {
             console.log("webview is ready!");
+            jsInject()
             initNav()
         });
 
@@ -118,7 +127,7 @@ function Parse (){
         <div className={ styles.parseContainer }>
             <div className={styles.actionBar}>
                 <Flex gap="middle" align="center" justify="space-between" style={{width:'100%'}}>
-                    <Flex style={{flex: 1}} gap="10px">
+                    <Flex style={{flex: 1}} gap="6px">
                         <Button type="text" size={'small'} disabled={ !canGoBack } icon={<LeftOutlined />} onClick={ goBackWebview }></Button>
                         <Button type="text" size={'small'} disabled={ !canGoForward } icon={<RightOutlined />} onClick={ goForwardWebview }></Button>
                         <Button size={'small'} type="text"  icon={loading ? <CloseOutlined /> : <ReloadOutlined />} onClick={ reloadWebview }></Button>
@@ -128,7 +137,7 @@ function Parse (){
                                prefix={<GlobalOutlined style={{margin: '0 10px 0 4px'}} />}
                                style={{flex: 1, marginLeft: '10px', marginRight: '10px'}}
                         />
-                        <Button size={'small'} type="text" icon={<SettingOutlined />}></Button>
+                        {/*<Button size={'small'} type="text" icon={<SettingOutlined />}></Button>*/}
                         <Button size={'small'} type="text" icon={<MenuUnfoldOutlined />} onClick={() => setShowConsoleBar(!showConsoleBar)}></Button>
                     </Flex>
                     {/*<Space>*/}
@@ -138,21 +147,20 @@ function Parse (){
                 </Flex>
             </div>
             <div className={styles.viewContainer}>
-                {/*<If condition={url}>*/}
-                {/*    <Then>*/}
-                {/*       */}
-                {/*    </Then>*/}
-                {/*    <Else>*/}
-                {/*        <div className={styles.empty}>*/}
-                {/*            输入网址获取*/}
-                {/*        </div>*/}
-                {/*    </Else>*/}
-                {/*</If>*/}
-                <webview
-                    ref={ webviewRef }
-                    src={ url }
-                    className={styles.parseWindow}
-                ></webview>
+                <If condition={url}>
+                    <Then>
+                        <webview
+                            ref={ webviewRef }
+                            src={ url }
+                            className={styles.parseWindow}
+                        ></webview>
+                    </Then>
+                    <Else>
+                        <div className={styles.empty}>
+                            输入网址获取
+                        </div>
+                    </Else>
+                </If>
                 <div className={ `${styles.consoleContainer} ${ showConsoleBar ? '' : styles.hide}` }>
                     <div className={styles.cookiesContent}>
                         {cookies}

@@ -39,7 +39,6 @@ function _parseYtDlpError(output) {
 
 
 async function PathAnalysisWorker(path, publicDir, ytDlpArgument){
-    console.warn(path)
     if(!path){
         return ''
     }
@@ -84,7 +83,6 @@ async function _universalVideoParser(path, publicDir, ytDlpArgument){
     }
     return new Promise((rev, rej) => {
         try{
-
             ytDlpArgument.splice(ytDlpArgument.length - 3, 0, '-j');
             console.warn(ytDlpArgument)
             const ytDlp = spawn(resolve(publicDir, 'yt-dlp/yt-dlp.exe'), ytDlpArgument);
@@ -97,6 +95,11 @@ async function _universalVideoParser(path, publicDir, ytDlpArgument){
             });
 
             ytDlp.stderr.on("data", (data) => {
+                errorOutput += data.toString();
+            });
+
+            ytDlp.stderr.on('error', (err) => {
+                console.warn(err.message);
                 errorOutput += data.toString();
             });
 
@@ -181,4 +184,5 @@ async function _91Pron(path){
 
 const { path, publicDir, ytDlpArgument } = workerData;
 await PathAnalysisWorker(path, publicDir, ytDlpArgument)
+
 

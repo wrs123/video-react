@@ -1,5 +1,5 @@
 import styles from './windowTitleBar.module.scss'
-import Icon, { LineOutlined, CompressOutlined, CloseOutlined, ExpandOutlined, PlusOutlined } from '@ant-design/icons';
+import Icon, { LineOutlined, CompressOutlined, CloseOutlined, ExpandOutlined, PlusOutlined, FileOutlined } from '@ant-design/icons';
 import {If, Else, Then} from 'react-if';
 import {useState} from 'react'
 import API from "../request/api.ts";
@@ -9,6 +9,7 @@ import DownloadFillIcon from '../assets/svgs/download-fill.svg?react'
 import BrowserIcon from '../assets/svgs/browser.svg?react'
 import BrowserFillIcon from '../assets/svgs/browser-fill.svg?react'
 import SettingIconRound from '../assets/svgs/setting-icon-round.svg?react'
+import searchIcon from '../assets/svgs/search-icon.svg?react'
 import classnames from 'classnames';
 import { Button } from "antd";
 import moment from 'moment'
@@ -35,7 +36,8 @@ function WindowTitleBar(props: any) {
     const [ tabList, setTabList] = useState<any[]>([
         {
             name: '新标签',
-            key: 'newTab'
+            key: 'newTab',
+            icon: <div class={styles.icon}><FileOutlined /></div>,
         }
     ])
 
@@ -59,18 +61,19 @@ function WindowTitleBar(props: any) {
         const key = moment().valueOf()
         setTabList([...tabList, {
             name: '新标签',
-            key
+            key,
+            icon: <div class={styles.icon}><FileOutlined /></div>,
         }])
         tabChange('tab', key)
     }
 
-    function closeTab(e, item){
-        console.warn(e)
+    function closeTab(e, activeTab){
+        console.warn(e.stopPropagation, activeTab)
         e.stopPropagation();
         setTabList(prevList =>
-            prevList.filter((item, index) => item.key !== activeTab)
+            prevList.filter((item, index) => item.key !== activeTab.key)
         );
-        tabChange('tab', tabList[tabList.length - 1].key)
+        tabChange('tab', tabList[tabList.length - 2].key)
     }
 
     function tabChange (type, key: string){
@@ -86,15 +89,16 @@ function WindowTitleBar(props: any) {
                 {/*    <img src={ logoIcon } alt="logo"/>*/}
                 {/*</div>*/}
 
-                <div class={styles.tabList}>
+                <div className={styles.tabList}>
                     {
                         tabList.map((item, index) => (
                             <div
                                 key={index}
-                                className={classnames(styles.stepBarItem, activeTab === item.key && styles.active)}
+                                className={classnames(styles.stepBarItem, styles.tabBar, activeTab === item.key && styles.active)}
                                 onClick={ () => tabChange('tab', item.key)}
                             >
-                                {item.name}
+                                { item.icon }
+                                <div className={ styles.itemLabel }>{item.name}</div>
                                 <div className={styles.closeButton} onClick={(e) => closeTab(e, item)}>
                                     <CloseOutlined />
                                 </div>
@@ -119,6 +123,11 @@ function WindowTitleBar(props: any) {
                 >
                     <Icon component={ DownloadFillIcon } />
                     <span className={styles.itemLabel}>下载</span>
+                </div>
+                <div className={classnames(styles.stepBarItem, styles.active, styles.configBtn, styles.fixBtn)}>
+                    <Button color="default" variant="link" size='large' icon={<Icon component={ searchIcon } />} onClick={props.openSysConfig}>
+                        {/*软件设置*/}
+                    </Button>
                 </div>
                 <div className={classnames(styles.stepBarItem, styles.active, styles.configBtn, styles.fixBtn)}>
                     <Button color="default" variant="link" size='large' icon={<Icon component={ SettingIconRound } />} onClick={props.openSysConfig}>

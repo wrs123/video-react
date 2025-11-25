@@ -7,7 +7,6 @@ export const publicDir = () => {
   /* 执行node命令时候的文件夹地址 */
   const node_serve_path = process.resourcesPath
   const PUBLIC_PATH = '/public'
-  console.warn(111111)
   /* 判断是否是生产环境 */
   const isPackaged = app.isPackaged
   /* 需要读写的文件地址 */
