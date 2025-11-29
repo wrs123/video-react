@@ -37,7 +37,7 @@ function WindowTitleBar(props: any) {
         {
             name: '新标签',
             key: 'newTab',
-            icon: <div class={styles.icon}><FileOutlined /></div>,
+            icon: <div className={styles.icon}><FileOutlined /></div>,
         }
     ])
 
@@ -81,10 +81,9 @@ function WindowTitleBar(props: any) {
         props.tabChange(type, key)
     }
 
-
     return (
         <div className={styles.windowTitleContainer}>
-            <div className={styles.stepBar}>
+            <div className={classnames(styles.stepBar, window['sysConfig'].platform != 'darwin' ? styles.winMode : '')}>
                 {/*<div className={styles.logoContainer}>*/}
                 {/*    <img src={ logoIcon } alt="logo"/>*/}
                 {/*</div>*/}
@@ -119,13 +118,13 @@ function WindowTitleBar(props: any) {
                     </div>
                 </div>
                 <div className={ classnames(styles.stepBarItem, styles.active, styles.fixBtn) }
-                     onClick={() =>  tabChange('action', 'download')}
+                     onClick={() => tabChange('action', 'download')}
                 >
                     <Icon component={ DownloadFillIcon } />
                     <span className={styles.itemLabel}>下载</span>
                 </div>
                 <div className={classnames(styles.stepBarItem, styles.active, styles.configBtn, styles.fixBtn)}>
-                    <Button color="default" variant="link" size='large' icon={<Icon component={ searchIcon } />} onClick={props.openSysConfig}>
+                    <Button color="default" variant="link" size='large' icon={<Icon component={ searchIcon } />} onClick={props.openSearch}>
                         {/*软件设置*/}
                     </Button>
                 </div>

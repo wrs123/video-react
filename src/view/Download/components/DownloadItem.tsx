@@ -66,12 +66,11 @@ function DownloadItem(props: DownloadItemProps) {
 
         }
     ]
-    const [ menuItems, setMenuItems] = useState<MenuProps['items'][]>([
+    const [ menuItems, setMenuItems] = useState<MenuProps['items']>([
         {
             label: '打开所在目录',
-            key: 'originUrl',
+            key: 'openFolder',
             icon: <FolderOpenOutlined />,
-
         },
         {
             type: 'divider',
@@ -93,7 +92,7 @@ function DownloadItem(props: DownloadItemProps) {
             icon:  <DeleteOutlined />,
             onClick: (key, keyPath, domEvent) => {
                 console.warn(key, keyPath, domEvent)
-               // props.commandCommon && await props.commandCommon('DELETE', item, true)
+                props.commandCommon && props.commandCommon('DELETE', props.item)
             }
         },
     ]);
@@ -171,15 +170,7 @@ function DownloadItem(props: DownloadItemProps) {
         switch (type) {
             case "RELOAD":
                 console.warn(item)
-                props.commandCommon && await props.commandCommon('DELETE', item, true)
-                const res = await API.createTask(item)
-                if(res.status == ResultStatus.OK){
-                    props.onSubmit(res.data)
-                    // messageApi.open({
-                    //     type: 'success',
-                    //     content: '创建成功',
-                    // });
-                }
+                API.reloadTask(item)
                 break;
         }
     }

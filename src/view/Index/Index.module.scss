@@ -18,6 +18,16 @@ $stepBarWidth: 66px;
   }
 }
 
+.searchContainer{
+
+  :global {
+    .ant-modal-content{
+      padding: 0;
+    }
+  }
+}
+
+
 
 
 .projectContainer{

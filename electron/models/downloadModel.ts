@@ -45,7 +45,10 @@ function _formatNetscapeCookie(cookies: Electron.Cookie[]) {
 }
 
 
-
+/**
+ * 初始化cookie
+ * @param domain
+ */
 async function _initCookie(domain: string): Promise<void> {
     const cookies = await session.defaultSession.cookies.get({})
 
@@ -162,6 +165,95 @@ const _analysisWorker = (path: string, id: string, ytDlpArgument: string[]) => {
 }
 
 
+const _taskDownload = async (url: string, _data: DownloadTaskType ) => {
+//构建yt-dlp基本参数
+    const ytDlpArgument: string[] = [
+        url
+    ]
+
+    //获取数据库内的网站cookie
+    const _cookie = await _getCookie(_data.name)
+    if(_cookie){
+        ytDlpArgument.unshift(`${resolve(publicDir(), _cookie)}`)
+        ytDlpArgument.unshift('--cookies')
+    }
+
+    //设置代理
+    if(global.sysConfig.useProxy){
+        const { proxyPortal, proxyHost, proxyPort} = global.sysConfig
+        ytDlpArgument.unshift(`${proxyPortal}://${proxyHost}:${proxyPort}`)
+        ytDlpArgument.unshift('--proxy')
+    }
+    //解析视频基本信息
+    _analysisWorker(param.originUrl, param.id, ytDlpArgument).then(async (analysisObj: any) => {
+
+        if(analysisObj.status === ResultStatus.OK){
+            const data = analysisObj.res;
+
+            _data.name = data.fileName + '-' + moment(new Date()).format('YYYY-MM-DD+HH:mm:ss')
+            _data.analysisUrl = data.analysisUrl
+            _data.suffix = data.suffix
+            _data.fileType = data.fileType
+
+            //下载封面
+            let _cacheThumbnailPath: unknown = ''
+            if(data.cover){
+                _cacheThumbnailPath  = await _cacheThumbnail(data.cover, _data.id)
+            }
+            _data.cover = data.cover ? _cacheThumbnailPath : data.cover
+
+            //下载视频
+            if(data.isUniversal){
+                DownloadFileByOriginalURL(_data, ytDlpArgument)
+            }else{
+                DownloadFileByDirectURL(analysisObj.data, param.path, _data)
+            }
+        }
+        else {
+            if(analysisObj.code === ResultCode.COOKIE_ERROR){
+                _data.status = DownloadStatus.COOKIEERROR
+            }else{
+                _data.status = DownloadStatus.ANALERROR
+            }
+            updateDownloadStatus(_data)
+        }
+    })
+}
+
+
+/**
+ * 重新下载
+ * @param param
+ */
+export const reloadTask = async (param: DownloadTaskType) => {
+    const db = global.db
+    const res: BaseResult = {
+        code: 200,
+        status: ResultStatus.OK,
+        message: '创建成功',
+        data: ''
+    }
+
+    try{
+
+        _taskDownload(param.originUrl, param)
+        // //无需解析直接下载
+        // if(param.cover && param.name){
+        //     _taskDownload(param.originUrl, param)
+        // }else{ //先解析再下载
+        //
+        // }
+
+    }catch(e){
+        console.warn(error.message)
+        res.status= ResultStatus.ERROR
+        res.message = "下载失败："+error.message
+    }
+
+
+    return res
+}
+
 /**
  * 创建任务
  * @param param
@@ -175,6 +267,8 @@ export const createTask = async (param: any) => {
         message: '创建成功',
         data: ''
     }
+
+
     const _data: DownloadTaskType = {
         id: crypto.randomUUID(), //下载任务id
         originUrl: param.originUrl, //原视频地址
@@ -194,7 +288,7 @@ export const createTask = async (param: any) => {
 
     try{
         //查询重复任务
-        const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.urls);
+        const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.originUrl);
 
         if((filterTask.length || []) > 0){
             res.status= ResultStatus.ERROR
@@ -214,58 +308,7 @@ export const createTask = async (param: any) => {
         })
         await db.prepare(`INSERT INTO tasks (${query.join(',')}) VALUES (@${query.join(',@')})`).run(_data)
 
-        //构建yt-dlp基本参数
-        const ytDlpArgument: string[] = [
-            param.urls
-        ]
-
-        //获取数据库内的网站cookie
-        const _cookie = await _getCookie(_data.name)
-        if(_cookie){
-            ytDlpArgument.unshift(`${resolve(publicDir(), _cookie)}`)
-            ytDlpArgument.unshift('--cookies')
-        }
-
-        //设置代理
-        if(global.sysConfig.useProxy){
-            const { proxyPortal, proxyHost, proxyPort} = global.sysConfig
-            ytDlpArgument.unshift(`${proxyPortal}://${proxyHost}:${proxyPort}`)
-            ytDlpArgument.unshift('--proxy')
-        }
-        //解析视频基本信息
-        _analysisWorker(param.originUrl, param.id, ytDlpArgument).then(async (analysisObj: any) => {
-
-            if(analysisObj.status === ResultStatus.OK){
-                const data = analysisObj.res;
-
-                _data.name = data.fileName + '-' + moment(new Date()).format('YYYY-MM-DD+HH:mm:ss')
-                _data.analysisUrl = data.analysisUrl
-                _data.suffix = data.suffix
-                _data.fileType = data.fileType
-
-                //下载封面
-                let _cacheThumbnailPath: unknown = ''
-                if(data.cover){
-                    _cacheThumbnailPath  = await _cacheThumbnail(data.cover, _data.id)
-                }
-                _data.cover = data.cover ? _cacheThumbnailPath : data.cover
-
-                //下载视频
-                if(data.isUniversal){
-                    DownloadFileByOriginalURL(_data, ytDlpArgument)
-                }else{
-                    DownloadFileByDirectURL(analysisObj.data, param.path, _data)
-                }
-            }
-            else {
-                if(analysisObj.code === ResultCode.COOKIE_ERROR){
-                    _data.status = DownloadStatus.COOKIEERROR
-                }else{
-                    _data.status = DownloadStatus.ANALERROR
-                }
-                updateDownloadStatus(_data)
-            }
-        })
+        _taskDownload(param.originUrl, _data)
 
         res.data = _data
 

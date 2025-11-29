@@ -41,7 +41,7 @@ const filterList = [
 function DownloadHome(){
     const [activeFilter, setActiveFilter] = useState('downloading')
     const [modal, confrimContextHolder] = Modal.useModal();
-    const [searchDialogVisible, setSearchDialogVisible] = useState<boolean>(false);
+
     const inputRef = useRef(null)
 
     return (
@@ -62,10 +62,10 @@ function DownloadHome(){
                     }
                 </div>
                 <div key={2} className={styles.leftContainer}>
-                    <Input ref={ inputRef } prefix={ <Icon component={ searchIcon } /> } className={styles.searchBtn} placeholder="搜索下载过的文件" variant="filled" onClick={ () => {
-                        inputRef.current.blur();
-                        setSearchDialogVisible(true)
-                    } } />
+                    {/*<Input ref={ inputRef } prefix={ <Icon component={ searchIcon } /> } className={styles.searchBtn} placeholder="搜索下载过的文件" variant="filled" onClick={ () => {*/}
+                    {/*    inputRef.current.blur();*/}
+                    {/*    setSearchDialogVisible(true)*/}
+                    {/*} } />*/}
                     <If condition={activeFilter === 'downloading'}>
                         <Then>
                             <DownLoad key="1"/>
@@ -78,23 +78,23 @@ function DownloadHome(){
                     </If>
                 </div>
             </QueueAnim>
-            <Modal
-                title=""
-                closable={ false }
-                width={700}
-                open={ searchDialogVisible }
-                onCancel={ () => setSearchDialogVisible(false) }
-                footer={ null }
-                mask={ true }
-                className={styles.searchContainer}
-                styles={{
-                    mask: {
-                        backdropFilter: 'blur(20px)',
-                    },
-                }}
-            >
-                <SearchDialog close={ () => setSearchDialogVisible(false) } />
-            </Modal>
+            {/*<Modal*/}
+            {/*    title=""*/}
+            {/*    closable={ false }*/}
+            {/*    width={700}*/}
+            {/*    open={ searchDialogVisible }*/}
+            {/*    onCancel={ () => setSearchDialogVisible(false) }*/}
+            {/*    footer={ null }*/}
+            {/*    mask={ true }*/}
+            {/*    className={styles.searchContainer}*/}
+            {/*    styles={{*/}
+            {/*        mask: {*/}
+            {/*            backdropFilter: 'blur(20px)',*/}
+            {/*        },*/}
+            {/*    }}*/}
+            {/*>*/}
+            {/*    <SearchDialog close={ () => setSearchDialogVisible(false) } />*/}
+            {/*</Modal>*/}
         </>
 
     )

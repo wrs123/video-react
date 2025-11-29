@@ -133,7 +133,7 @@ export function DownloadFileByDirectURL(downloadObj : DownloadAnalysisType, save
 export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpArgument: string[]){
     try{
         //通用解析
-        const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg.exe');
+        const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg');
         const savePath = resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s')
 
         ytDlpArgument.splice(2, 0, ffmpegPath )
@@ -143,12 +143,12 @@ export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpAr
         ytDlpArgument.splice(2, 0, savePath )
         ytDlpArgument.splice(2, 0, "-o" )
         ytDlpArgument.splice(2, 0, '{"type": "#DOWNLOAD#","percent": "%(progress._percent)s", "downloaded": "%(progress.downloaded_bytes)s", "total": "%(progress.total_bytes)s", "totalEstimate": "%(progress.total_bytes_estimate)s", "speed": "%(progress.speed)s"}' )
-        ytDlpArgument.splice(2, 0, '--progress-template' )
+        ytDlpArgument.splice(2, 0, '--progress-template')
         // ytDlpArgument.splice(2, 0, '--no-cache-dir' )
         // ytDlpArgument.splice(2, 0, '--print-json' )
         ytDlpArgument.splice(2, 0, '--newline' )
 
-        const ytdlp = spawn(resolve(publicDir(), 'yt-dlp/yt-dlp.exe'), ytDlpArgument, {stdio: ['ignore', 'pipe', 'pipe']})
+        const ytdlp = spawn(resolve(publicDir(), 'yt-dlp/yt-dlp'), ytDlpArgument, {stdio: ['ignore', 'pipe', 'pipe']})
 
         ytdlp.stdout.on('data', (data) => {
             const lines = data.toString().split('\n').filter(Boolean);

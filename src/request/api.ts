@@ -1,4 +1,6 @@
 import {delCookie, getCookieList, getSysConfig, setSysTheme} from "../../electron/models/sysModel.ts";
+import {reloadTask} from "../../electron/models/downloadModel.ts";
+import {DownloadTaskType} from "../../types.ts";
 
 const API = {
     request: window.ipcRenderer.invoke,
@@ -43,6 +45,13 @@ const API = {
      */
     createTask : (param: any) => {
         return API.request('download:createTask', param)
+    },
+    /**
+     * 重新下载任务
+     * @param param
+     */
+    reloadTask : (param: any = {}) => {
+        return API.request('download:reloadTask', param)
     },
     /**
      * 下载任务通用操作

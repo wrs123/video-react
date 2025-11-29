@@ -1,5 +1,6 @@
 $windowTitleBarHeight: var(--window-titlebar-height);
 
+
 .windowTitleContainer {
   display: flex;
   align-items: center;
@@ -21,9 +22,13 @@ $windowTitleBarHeight: var(--window-titlebar-height);
     align-items: center;
     padding-right: var(--base-space);
     box-sizing: border-box;
-
     z-index: 5;
     //border-right: 1px solid var(--color-border);
+
+
+    &.winMode{
+      padding-left: 10px;
+    }
 
     .tabList{
       flex: 1;
@@ -321,11 +326,9 @@ $windowTitleBarHeight: var(--window-titlebar-height);
     display: flex;
     align-items: center;
     -webkit-app-region: no-drag;
-    height: 35px;
-    position: fixed;
-    right: 16px;
-    top: 12px;
+    height: 32px;
     gap: 4px;
+    padding-right: 10px;
 
     .windowBotton {
       height: 100%;
