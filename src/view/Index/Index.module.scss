@@ -7,11 +7,10 @@ $stepBarWidth: 66px;
   background-color: var(--cust-slider-bg);
 
 
-
   .contentContainer{
     display: flex;
     height: calc(100% - var(--window-titlebar-height));
-    margin: 0 var(--base-space) var(--base-space) var(--base-space);
+    //margin: 0 var(--base-space) var(--base-space) var(--base-space);
     overflow: hidden;
     border-radius: 8px;
     box-shadow: 0 0 8px rgba(0, 0, 0, .04);

@@ -134,7 +134,7 @@ export function DownloadFileByOriginalURL(downloadTask:DownloadTaskType, ytDlpAr
     try{
         //通用解析
         const ffmpegPath = resolve(publicDir(), 'ffmpeg/ffmpeg');
-        const savePath = resolve(global['sysConfig'].savePath, '%(title)s.%(ext)s')
+        const savePath = resolve(global['sysConfig'].savePath, `%(title)s-${downloadTask.name}.%(ext)s`)
 
         ytDlpArgument.splice(2, 0, ffmpegPath )
         ytDlpArgument.splice(2, 0, "--ffmpeg-location" )

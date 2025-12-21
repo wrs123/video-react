@@ -3,13 +3,12 @@ import Icon, { LineOutlined, CompressOutlined, CloseOutlined, ExpandOutlined, Pl
 import {If, Else, Then} from 'react-if';
 import {useState} from 'react'
 import API from "../request/api.ts";
-import logoIcon from "../assets/images/icon.png";
 import DownloadIcon from '../assets/svgs/download.svg?react'
-import DownloadFillIcon from '../assets/svgs/download-fill.svg?react'
 import BrowserIcon from '../assets/svgs/browser.svg?react'
 import BrowserFillIcon from '../assets/svgs/browser-fill.svg?react'
 import SettingIconRound from '../assets/svgs/setting-icon-round.svg?react'
 import searchIcon from '../assets/svgs/search-icon.svg?react'
+import logoIcon from '../assets/images/icon.png'
 import classnames from 'classnames';
 import { Button } from "antd";
 import moment from 'moment'
@@ -19,7 +18,7 @@ const stepList = [
         label: '下载',
         key: 'download',
         icon: <Icon component={ DownloadIcon } />,
-        activeIcon: <Icon component={ DownloadFillIcon } />
+        activeIcon: <Icon component={ DownloadIcon } />
     },
     // {
     //     label: '嗅探',
@@ -33,15 +32,9 @@ function WindowTitleBar(props: any) {
 
     const [isMaximized, setIsMaximized] = useState<boolean>(false)
     const [activeStep, setActiveStep] = useState<string>('download')
-    const [ tabList, setTabList] = useState<any[]>([
-        {
-            name: '新标签',
-            key: 'newTab',
-            icon: <div className={styles.icon}><FileOutlined /></div>,
-        }
-    ])
+    const [ tabList, setTabList] = useState<any[]>([])
 
-    const [ activeTab, setActiveTab] = useState<string>('newTab')
+    const [ activeTab, setActiveTab] = useState<string>('download')
     function onElectronOperationWindow(type: string){
         if (type == 'max') {
             setIsMaximized(true)
@@ -83,12 +76,19 @@ function WindowTitleBar(props: any) {
 
     return (
         <div className={styles.windowTitleContainer}>
+            <img className={styles.logo} src={ logoIcon } alt=""/>
             <div className={classnames(styles.stepBar, window['sysConfig'].platform != 'darwin' ? styles.winMode : '')}>
                 {/*<div className={styles.logoContainer}>*/}
                 {/*    <img src={ logoIcon } alt="logo"/>*/}
                 {/*</div>*/}
 
-                <div className={styles.tabList}>
+                <div className={ styles.tabList }>
+                    <div className={ classnames(styles.stepBarItem, styles.tabBar, activeTab === 'download' && styles.active) }
+                         onClick={() => tabChange('action', 'download')}
+                    >
+                        <Icon component={ DownloadIcon } />
+                        <span className={styles.itemLabel}>下载</span>
+                    </div>
                     {
                         tabList.map((item, index) => (
                             <div
@@ -117,12 +117,7 @@ function WindowTitleBar(props: any) {
                         </Button>
                     </div>
                 </div>
-                <div className={ classnames(styles.stepBarItem, styles.active, styles.fixBtn) }
-                     onClick={() => tabChange('action', 'download')}
-                >
-                    <Icon component={ DownloadFillIcon } />
-                    <span className={styles.itemLabel}>下载</span>
-                </div>
+
                 <div className={classnames(styles.stepBarItem, styles.active, styles.configBtn, styles.fixBtn)}>
                     <Button color="default" variant="link" size='large' icon={<Icon component={ searchIcon } />} onClick={props.openSearch}>
                         {/*软件设置*/}

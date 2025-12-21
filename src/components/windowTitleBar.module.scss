@@ -13,6 +13,13 @@ $windowTitleBarHeight: var(--window-titlebar-height);
   overflow: hidden;
   //border-bottom: 1px solid #e9e9e9;
 
+  .logo{
+    width: 32px;
+    height: 32px;
+    margin-left: 10px;
+    margin-top: 4px;
+  }
+
   .stepBar{
     height: 100%;
     padding-left: 60px;
@@ -27,7 +34,7 @@ $windowTitleBarHeight: var(--window-titlebar-height);
 
 
     &.winMode{
-      padding-left: 10px;
+      padding-left: 0px;
     }
 
     .tabList{
@@ -37,7 +44,7 @@ $windowTitleBarHeight: var(--window-titlebar-height);
       display: flex;
       height: 100%;
       align-items: center;
-      padding-left: 10px;
+      padding-left: 6px;
     }
 
 

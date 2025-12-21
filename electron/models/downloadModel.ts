@@ -185,12 +185,12 @@ const _taskDownload = async (url: string, _data: DownloadTaskType ) => {
         ytDlpArgument.unshift('--proxy')
     }
     //解析视频基本信息
-    _analysisWorker(param.originUrl, param.id, ytDlpArgument).then(async (analysisObj: any) => {
+    _analysisWorker(_data.originUrl, _data.id, ytDlpArgument).then(async (analysisObj: any) => {
 
         if(analysisObj.status === ResultStatus.OK){
             const data = analysisObj.res;
 
-            _data.name = data.fileName + '-' + moment(new Date()).format('YYYY-MM-DD+HH:mm:ss')
+            _data.name = data.fileName + '-' + moment(new Date()).format('YYYYMMDDHHmmss')
             _data.analysisUrl = data.analysisUrl
             _data.suffix = data.suffix
             _data.fileType = data.fileType
@@ -206,7 +206,7 @@ const _taskDownload = async (url: string, _data: DownloadTaskType ) => {
             if(data.isUniversal){
                 DownloadFileByOriginalURL(_data, ytDlpArgument)
             }else{
-                DownloadFileByDirectURL(analysisObj.data, param.path, _data)
+                DownloadFileByDirectURL(analysisObj.data, _data.savePath, _data)
             }
         }
         else {
@@ -245,9 +245,9 @@ export const reloadTask = async (param: DownloadTaskType) => {
         // }
 
     }catch(e){
-        console.warn(error.message)
+        console.warn(e.message)
         res.status= ResultStatus.ERROR
-        res.message = "下载失败："+error.message
+        res.message = "下载失败："+e.message
     }
 
 

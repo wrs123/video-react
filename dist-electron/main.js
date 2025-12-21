@@ -4143,7 +4143,7 @@ function DownloadFileByDirectURL(downloadObj, savePath, downloadTask) {
 function DownloadFileByOriginalURL(downloadTask, ytDlpArgument) {
   try {
     const ffmpegPath = resolve$5(publicDir$1(), "ffmpeg/ffmpeg");
-    const savePath = resolve$5(global["sysConfig"].savePath, "%(title)s.%(ext)s");
+    const savePath = resolve$5(global["sysConfig"].savePath, `%(title)s-${downloadTask.name}.%(ext)s`);
     ytDlpArgument.splice(2, 0, ffmpegPath);
     ytDlpArgument.splice(2, 0, "--ffmpeg-location");
     ytDlpArgument.splice(2, 0, "bv*+ba/b");
@@ -4296,10 +4296,10 @@ const _taskDownload = async (url, _data) => {
     ytDlpArgument.unshift(`${proxyPortal}://${proxyHost}:${proxyPort}`);
     ytDlpArgument.unshift("--proxy");
   }
-  _analysisWorker(param.originUrl, param.id, ytDlpArgument).then(async (analysisObj) => {
+  _analysisWorker(_data.originUrl, _data.id, ytDlpArgument).then(async (analysisObj) => {
     if (analysisObj.status === ResultStatus.OK) {
       const data = analysisObj.res;
-      _data.name = data.fileName + "-" + hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD+HH:mm:ss");
+      _data.name = data.fileName + "-" + hooks(/* @__PURE__ */ new Date()).format("YYYYMMDDHHmmss");
       _data.analysisUrl = data.analysisUrl;
       _data.suffix = data.suffix;
       _data.fileType = data.fileType;
@@ -4311,7 +4311,7 @@ const _taskDownload = async (url, _data) => {
       if (data.isUniversal) {
         DownloadFileByOriginalURL(_data, ytDlpArgument);
       } else {
-        DownloadFileByDirectURL(analysisObj.data, param.path, _data);
+        DownloadFileByDirectURL(analysisObj.data, _data.savePath, _data);
       }
     } else {
       if (analysisObj.code === ResultCode.COOKIE_ERROR) {
@@ -4323,7 +4323,7 @@ const _taskDownload = async (url, _data) => {
     }
   });
 };
-const createTask = async (param2) => {
+const createTask = async (param) => {
   const db = global.db;
   const res = {
     code: 200,
@@ -4334,7 +4334,7 @@ const createTask = async (param2) => {
   const _data = {
     id: crypto.randomUUID(),
     //下载任务id
-    originUrl: param2.originUrl,
+    originUrl: param.originUrl,
     //原视频地址
     status: DownloadStatus.ANAL,
     //下载状态
@@ -4345,9 +4345,9 @@ const createTask = async (param2) => {
     speed: 0,
     createTime: hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss"),
     finishTime: null,
-    savePath: param2.savePath,
+    savePath: param.savePath,
     //下载的本地地址
-    name: new URL(param2.originUrl).origin,
+    name: new URL(param.originUrl).origin,
     //文件名
     analysisUrl: "",
     //解析后的下载地址
@@ -4357,7 +4357,7 @@ const createTask = async (param2) => {
     cover: ""
   };
   try {
-    const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param2.originUrl);
+    const filterTask = await db.prepare(`SELECT * FROM tasks WHERE originUrl == ? `).all(param.originUrl);
     if ((filterTask.length || []) > 0) {
       res.status = ResultStatus.ERROR;
       res.code = 202;
@@ -4372,7 +4372,7 @@ const createTask = async (param2) => {
       }
     });
     await db.prepare(`INSERT INTO tasks (${query.join(",")}) VALUES (@${query.join(",@")})`).run(_data);
-    _taskDownload(param2.originUrl, _data);
+    _taskDownload(param.originUrl, _data);
     res.data = _data;
   } catch (error2) {
     console.warn(error2.message);
@@ -4381,12 +4381,12 @@ const createTask = async (param2) => {
   }
   return res;
 };
-const updateTask = async (param2) => {
+const updateTask = async (param) => {
   const db = global.db;
   try {
     const query = [];
-    console.warn("update task", param2);
-    Object.keys(param2).forEach((key, val) => {
+    console.warn("update task", param);
+    Object.keys(param).forEach((key, val) => {
       if (key !== "speed" && key != "id") {
         query.push(`${key}=@${key}`);
       }
@@ -4395,14 +4395,14 @@ const updateTask = async (param2) => {
     const updateFunc = db.transaction((signs) => {
       for (const sign2 of signs) update.run(sign2);
     });
-    updateFunc([param2]);
+    updateFunc([param]);
   } catch (error2) {
     console.warn(error2 == null ? void 0 : error2.message);
   }
 };
-const queryTask = async (param2) => {
+const queryTask = async (param) => {
   const db = global.db;
-  const { page, pageSize } = param2;
+  const { page, pageSize } = param;
   const res = {
     code: 200,
     status: ResultStatus.OK,
@@ -4411,20 +4411,20 @@ const queryTask = async (param2) => {
   };
   try {
     let queryParams = "", params = [];
-    if (Object.keys(param2).length !== 0) {
+    if (Object.keys(param).length !== 0) {
       queryParams = "WHERE ";
     }
-    if (Object.hasOwn(param2, "status")) {
-      if (param2.status === 1) {
+    if (Object.hasOwn(param, "status")) {
+      if (param.status === 1) {
         queryParams = queryParams + "status == ?";
       } else {
         queryParams = queryParams + "status != ?";
       }
       params.push("FINISH");
     }
-    if (Object.hasOwn(param2, "name")) {
+    if (Object.hasOwn(param, "name")) {
       queryParams = queryParams + "name LIKE ?";
-      params.push(`%${param2.name}%`);
+      params.push(`%${param.name}%`);
     }
     console.warn(`SELECT * FROM tasks ${queryParams} ORDER BY createTime DESC `);
     const _res = await db.prepare(`SELECT * FROM tasks ${queryParams} ORDER BY createTime DESC `).all(...params);
@@ -4442,7 +4442,7 @@ const queryTask = async (param2) => {
   }
   return res;
 };
-const deleteTask = async (param2) => {
+const deleteTask = async (param) => {
   const db = global.db;
   const res = {
     code: 200,
@@ -4451,13 +4451,13 @@ const deleteTask = async (param2) => {
     data: ""
   };
   try {
-    console.warn("del start", param2);
-    if (global.taskStack[param2.id]) {
-      global.taskStack[param2.id].terminate();
-      delete global.taskStack[param2.id];
+    console.warn("del start", param);
+    if (global.taskStack[param.id]) {
+      global.taskStack[param.id].terminate();
+      delete global.taskStack[param.id];
     }
     await db.prepare("DELETE FROM tasks WHERE id == ?").run(
-      param2.id
+      param.id
     );
   } catch (error2) {
     console.warn(error2.message);
@@ -4468,18 +4468,18 @@ const deleteTask = async (param2) => {
 };
 const DownloadHandler = () => {
   const DOMAIN = "download";
-  ipcMain$1.handle(`${DOMAIN}:createTask`, async (_, param2) => {
-    return await createTask(param2);
+  ipcMain$1.handle(`${DOMAIN}:createTask`, async (_, param) => {
+    return await createTask(param);
   });
-  ipcMain$1.handle(`${DOMAIN}:reloadTask`, async (_, param2) => {
+  ipcMain$1.handle(`${DOMAIN}:reloadTask`, async (_, param) => {
     console.warn(111);
     return "ok";
   });
-  ipcMain$1.handle(`${DOMAIN}:getTaskList`, async (_, param2) => {
-    return await queryTask(param2);
+  ipcMain$1.handle(`${DOMAIN}:getTaskList`, async (_, param) => {
+    return await queryTask(param);
   });
-  ipcMain$1.handle(`${DOMAIN}:deleteTask`, async (_, param2) => {
-    return await deleteTask(param2);
+  ipcMain$1.handle(`${DOMAIN}:deleteTask`, async (_, param) => {
+    return await deleteTask(param);
   });
 };
 const chooseFolderPath = async () => {
@@ -4528,11 +4528,11 @@ const FileHandler = () => {
   ipcMain$1.handle(`${DOMAIN}:chooseFolderPath`, async () => {
     return chooseFolderPath();
   });
-  ipcMain$1.handle(`${DOMAIN}:openFolderPath`, async (_, param2) => {
-    return await openFolderPath(param2.path);
+  ipcMain$1.handle(`${DOMAIN}:openFolderPath`, async (_, param) => {
+    return await openFolderPath(param.path);
   });
-  ipcMain$1.handle(`${DOMAIN}:deleteFile`, async (_, param2) => {
-    return await openFolderPath(param2.path);
+  ipcMain$1.handle(`${DOMAIN}:deleteFile`, async (_, param) => {
+    return await openFolderPath(param.path);
   });
 };
 const isObject = (value) => {
@@ -19864,7 +19864,7 @@ function objToURLParam(json) {
   ).join("&");
 }
 const store = new ElectronStore();
-function _createParseWindow(param2) {
+function _createParseWindow(param) {
   const __dirname2 = path$1.dirname(fileURLToPath(import.meta.url));
   const parseWin = new BrowserWindow({
     width: 1e3,
@@ -19885,11 +19885,11 @@ function _createParseWindow(param2) {
   } else {
     _path = path$1.join(global.RENDERER_DIST, "index.html");
   }
-  _path += `?${param2}`;
+  _path += `?${param}`;
   parseWin.loadURL(_path);
   parseWin.webContents.once("did-finish-load", () => {
     console.warn(111);
-    parseWin.webContents.send("init-data", param2);
+    parseWin.webContents.send("init-data", param);
   });
   parseWin.webContents.openDevTools();
   return parseWin;
@@ -19931,7 +19931,7 @@ const getSysConfig = () => {
   }
   return res;
 };
-const addCookie = async (param2) => {
+const addCookie = async (param) => {
   const db = global.db;
   const res = {
     code: 200,
@@ -19940,15 +19940,15 @@ const addCookie = async (param2) => {
     data: ""
   };
   try {
-    param2.updateTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
-    console.warn(param2);
+    param.updateTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
+    console.warn(param);
     let query = [];
-    Object.keys(param2).forEach((key, val) => {
+    Object.keys(param).forEach((key, val) => {
       if (key !== "id") {
         query.push(key);
       }
     });
-    await db.prepare(`INSERT INTO cookies (${query.join(",")}) VALUES (@${query.join(",@")})`).run(param2);
+    await db.prepare(`INSERT INTO cookies (${query.join(",")}) VALUES (@${query.join(",@")})`).run(param);
   } catch (error2) {
     res.status = ResultStatus.ERROR;
     res.message = "添加失败" + error2.message;
@@ -19956,7 +19956,7 @@ const addCookie = async (param2) => {
   }
   return res;
 };
-const updateCookie = async (param2) => {
+const updateCookie = async (param) => {
   const db = global.db;
   const res = {
     code: 200,
@@ -19965,10 +19965,10 @@ const updateCookie = async (param2) => {
     data: ""
   };
   try {
-    param2.updateTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
-    console.warn(param2);
+    param.updateTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
+    console.warn(param);
     let query = [];
-    Object.keys(param2).forEach((key, val) => {
+    Object.keys(param).forEach((key, val) => {
       if (key !== "id") {
         query.push(`${key}=@${key}`);
       }
@@ -19977,7 +19977,7 @@ const updateCookie = async (param2) => {
     const updateFunc = db.transaction((signs) => {
       for (const sign2 of signs) update.run(sign2);
     });
-    updateFunc([param2]);
+    updateFunc([param]);
   } catch (error2) {
     res.status = ResultStatus.ERROR;
     res.message = "修改失败" + error2.message;
@@ -19985,7 +19985,7 @@ const updateCookie = async (param2) => {
   }
   return res;
 };
-const delCookie = async (param2) => {
+const delCookie = async (param) => {
   const db = global.db;
   const res = {
     code: 200,
@@ -19994,9 +19994,9 @@ const delCookie = async (param2) => {
     data: ""
   };
   try {
-    param2.updateTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
+    param.updateTime = hooks(/* @__PURE__ */ new Date()).format("YYYY-MM-DD HH:mm:ss");
     await db.prepare("DELETE FROM cookies WHERE id == ?").run(
-      param2.id
+      param.id
     );
   } catch (error2) {
     res.status = ResultStatus.ERROR;
@@ -20005,7 +20005,7 @@ const delCookie = async (param2) => {
   }
   return res;
 };
-const getCookieList = async (param2) => {
+const getCookieList = async (param) => {
   const db = global.db;
   const res = {
     code: 200,
@@ -20014,7 +20014,7 @@ const getCookieList = async (param2) => {
     data: ""
   };
   try {
-    console.warn(param2);
+    console.warn(param);
     res.data = await db.prepare("SELECT * FROM cookies").all();
   } catch (error2) {
     res.status = ResultStatus.ERROR;
@@ -20023,7 +20023,7 @@ const getCookieList = async (param2) => {
   }
   return res;
 };
-const getCookie = async (param2) => {
+const getCookie = async (param) => {
   const db = global.db;
   const res = {
     code: 200,
@@ -20032,7 +20032,7 @@ const getCookie = async (param2) => {
     data: ""
   };
   try {
-    const _data = await db.prepare("SELECT * FROM cookies WHERE domain == ?").all(param2.domain || "");
+    const _data = await db.prepare("SELECT * FROM cookies WHERE domain == ?").all(param.domain || "");
     res.data = _data[0];
   } catch (error2) {
     res.status = ResultStatus.ERROR;
@@ -20041,7 +20041,7 @@ const getCookie = async (param2) => {
   }
   return res;
 };
-const setSysConfig = (param2) => {
+const setSysConfig = (param) => {
   const res = {
     code: 200,
     status: ResultStatus.OK,
@@ -20049,9 +20049,9 @@ const setSysConfig = (param2) => {
     data: ""
   };
   try {
-    console.warn("获取", param2);
-    store.set("sysConfig", param2);
-    global.sysConfig = param2;
+    console.warn("获取", param);
+    store.set("sysConfig", param);
+    global.sysConfig = param;
   } catch (error2) {
     res.status = ResultStatus.ERROR;
     res.message = "更新失败" + error2.message;
@@ -20059,7 +20059,7 @@ const setSysConfig = (param2) => {
   }
   return res;
 };
-const openParseWindow = (param2) => {
+const openParseWindow = (param) => {
   return new Promise((rev, rej) => {
     const res = {
       code: 200,
@@ -20067,7 +20067,7 @@ const openParseWindow = (param2) => {
       message: "",
       data: ""
     };
-    const parseWin = _createParseWindow(objToURLParam(param2));
+    const parseWin = _createParseWindow(objToURLParam(param));
     global.parseWindow = parseWin;
     parseWin.on("closed", () => {
       res.data = "CLOSE";
@@ -20075,7 +20075,7 @@ const openParseWindow = (param2) => {
     });
   });
 };
-const closeParseWindow = (param2) => {
+const closeParseWindow = (param) => {
   const res = {
     code: 200,
     status: ResultStatus.OK,
@@ -20093,7 +20093,7 @@ const closeParseWindow = (param2) => {
   }
   return res;
 };
-const setSysTheme = (param2) => {
+const setSysTheme = (param) => {
   const res = {
     code: 200,
     status: ResultStatus.OK,
@@ -20101,8 +20101,8 @@ const setSysTheme = (param2) => {
     data: ""
   };
   try {
-    console.warn(param2);
-    switch (param2.theme) {
+    console.warn(param);
+    switch (param.theme) {
       case SysTheme.LIGHT:
         nativeTheme.themeSource = "light";
         res.data = SysTheme.LIGHT;
@@ -20131,11 +20131,11 @@ const SysHandler = () => {
   ipcMain$1.handle(`${DOMAIN}:getSysConfig`, async () => {
     return getSysConfig();
   });
-  ipcMain$1.handle(`${DOMAIN}:setSysConfig`, async (_, param2) => {
-    return setSysConfig(param2);
+  ipcMain$1.handle(`${DOMAIN}:setSysConfig`, async (_, param) => {
+    return setSysConfig(param);
   });
-  ipcMain$1.handle(`${DOMAIN}:operationWindow`, function(_, param2) {
-    const { type: type2 } = param2;
+  ipcMain$1.handle(`${DOMAIN}:operationWindow`, function(_, param) {
+    const { type: type2 } = param;
     const currOperationWindow = global == null ? void 0 : global.win;
     switch (type2) {
       case "max":
@@ -20152,29 +20152,29 @@ const SysHandler = () => {
         break;
     }
   });
-  ipcMain$1.handle(`${DOMAIN}:getCookieList`, function(_, param2) {
-    return getCookieList(param2);
+  ipcMain$1.handle(`${DOMAIN}:getCookieList`, function(_, param) {
+    return getCookieList(param);
   });
-  ipcMain$1.handle(`${DOMAIN}:getCookie`, function(_, param2) {
-    return getCookie(param2);
+  ipcMain$1.handle(`${DOMAIN}:getCookie`, function(_, param) {
+    return getCookie(param);
   });
-  ipcMain$1.handle(`${DOMAIN}:addCookie`, function(_, param2) {
-    return addCookie(param2);
+  ipcMain$1.handle(`${DOMAIN}:addCookie`, function(_, param) {
+    return addCookie(param);
   });
-  ipcMain$1.handle(`${DOMAIN}:updateCookie`, function(_, param2) {
-    return updateCookie(param2);
+  ipcMain$1.handle(`${DOMAIN}:updateCookie`, function(_, param) {
+    return updateCookie(param);
   });
-  ipcMain$1.handle(`${DOMAIN}:delCookie`, function(_, param2) {
-    return delCookie(param2);
+  ipcMain$1.handle(`${DOMAIN}:delCookie`, function(_, param) {
+    return delCookie(param);
   });
-  ipcMain$1.handle(`${DOMAIN}:openParseWindow`, async (_, param2) => {
-    return await openParseWindow(param2);
+  ipcMain$1.handle(`${DOMAIN}:openParseWindow`, async (_, param) => {
+    return await openParseWindow(param);
   });
-  ipcMain$1.handle(`${DOMAIN}:closeParseWindow`, async (_, param2) => {
+  ipcMain$1.handle(`${DOMAIN}:closeParseWindow`, async (_, param) => {
     return closeParseWindow();
   });
-  ipcMain$1.handle(`${DOMAIN}:setSysTheme`, async (_, param2) => {
-    return setSysTheme(param2);
+  ipcMain$1.handle(`${DOMAIN}:setSysTheme`, async (_, param) => {
+    return setSysTheme(param);
   });
 };
 const InitHandler = () => {
