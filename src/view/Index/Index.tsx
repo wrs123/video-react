@@ -14,21 +14,16 @@ import SearchDialog from "../Download/components/searchDialog.tsx";
 
 
 
-
-
 function Index(){
     const [sysConfigVisible, setSysConfigVisible] = useState(false);
     let { theme } = useTheme();
-    const [pageType, setPageType] = useState<string>('tab')
     const [activeKey, setActiveKey] = useState<string>('')
     const [searchDialogVisible, setSearchDialogVisible] = useState<boolean>(false);
     const openSysConfig = () => {
         setSysConfigVisible(true)
     }
 
-    const tabChange = (type: string, key: string) => {
-        console.warn(key, type)
-        setPageType(type)
+    const tabChange = ( key: string) => {
         setActiveKey(key)
     }
 
@@ -37,21 +32,21 @@ function Index(){
     }
 
 
+
+
     return (
         <div className={styles.indexContainer} >
             <WindowTitleBar openSysConfig={openSysConfig} openSearch={openSearch} tabChange={tabChange} />
             <div className={styles.contentContainer}>
 
                 <div className={styles.projectContainer}>
-                    <If condition={pageType === 'action' && activeKey === 'download'}>
+                    <If condition={ activeKey === 'home'}>
                         <Then>
                                 <DownloadHome />
                         </Then>
-                    </If>
-                    <If condition={pageType === 'tab'}>
-                        <Then>
-                          <Parse />
-                        </Then>
+                        <Else>
+                            <Parse />
+                        </Else>
                     </If>
                 </div>
             </div>

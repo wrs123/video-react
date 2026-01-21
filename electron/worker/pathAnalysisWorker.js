@@ -58,7 +58,6 @@ async function PathAnalysisWorker(path, publicDir, ytDlpArgument){
         res.res.isUniversal = isUniversal
         parentPort.postMessage(res);
     }else{
-        console.warn(123123123123)
         parentPort.postMessage(res);
     }
     return res

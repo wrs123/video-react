@@ -1,7 +1,7 @@
 import styles from './windowTitleBar.module.scss'
 import Icon, { LineOutlined, CompressOutlined, CloseOutlined, ExpandOutlined, PlusOutlined, FileOutlined } from '@ant-design/icons';
 import {If, Else, Then} from 'react-if';
-import {useState} from 'react'
+import { useState, useEffect } from 'react'
 import API from "../request/api.ts";
 import DownloadIcon from '../assets/svgs/download.svg?react'
 import BrowserIcon from '../assets/svgs/browser.svg?react'
@@ -13,28 +13,20 @@ import classnames from 'classnames';
 import { Button } from "antd";
 import moment from 'moment'
 
-const stepList = [
-    {
-        label: '下载',
-        key: 'download',
-        icon: <Icon component={ DownloadIcon } />,
-        activeIcon: <Icon component={ DownloadIcon } />
-    },
-    // {
-    //     label: '嗅探',
-    //     key: 'finish',
-    //     icon: <Icon component={ BrowserIcon } />,
-    //     activeIcon: <Icon component={ BrowserFillIcon } />
-    // },
-]
 
 function WindowTitleBar(props: any) {
 
     const [isMaximized, setIsMaximized] = useState<boolean>(false)
-    const [activeStep, setActiveStep] = useState<string>('download')
-    const [ tabList, setTabList] = useState<any[]>([])
+    const [ tabList, setTabList] = useState<any[]>([
+        {
+            name: '首页',
+            key: 'home',
+            icon: <Icon component={ DownloadIcon } />,
+            activeIcon: <Icon component={ DownloadIcon } />
+        }
+    ])
 
-    const [ activeTab, setActiveTab] = useState<string>('download')
+    const [ activeTab, setActiveTab] = useState<string>('home')
     function onElectronOperationWindow(type: string){
         if (type == 'max') {
             setIsMaximized(true)
@@ -66,29 +58,35 @@ function WindowTitleBar(props: any) {
         setTabList(prevList =>
             prevList.filter((item, index) => item.key !== activeTab.key)
         );
-        tabChange('tab', tabList[tabList.length - 2].key)
+        tabChange(tabList[tabList.length - 2].key)
     }
 
     function tabChange (type, key: string){
         setActiveTab(key)
-        props.tabChange(type, key)
+        props.tabChange(key)
     }
+
+    useEffect(() => {
+        props.tabChange(activeTab)
+    }, [])
 
     return (
         <div className={styles.windowTitleContainer}>
-            <img className={styles.logo} src={ logoIcon } alt=""/>
+            <If condition={window['sysConfig'].platform != 'darwin'}>
+                <Then><img className={styles.logo} src={ logoIcon } alt=""/></Then>
+            </If>
             <div className={classnames(styles.stepBar, window['sysConfig'].platform != 'darwin' ? styles.winMode : '')}>
                 {/*<div className={styles.logoContainer}>*/}
                 {/*    <img src={ logoIcon } alt="logo"/>*/}
                 {/*</div>*/}
 
                 <div className={ styles.tabList }>
-                    <div className={ classnames(styles.stepBarItem, styles.tabBar, activeTab === 'download' && styles.active) }
-                         onClick={() => tabChange('action', 'download')}
-                    >
-                        <Icon component={ DownloadIcon } />
-                        <span className={styles.itemLabel}>下载</span>
-                    </div>
+                    {/*<div className={ classnames(styles.stepBarItem, styles.tabBar, activeTab === 'download' && styles.active) }*/}
+                    {/*     onClick={() => tabChange('action', 'download')}*/}
+                    {/*>*/}
+                    {/*    <Icon component={ DownloadIcon } />*/}
+                    {/*    <span className={styles.itemLabel}>下载</span>*/}
+                    {/*</div>*/}
                     {
                         tabList.map((item, index) => (
                             <div
@@ -98,9 +96,13 @@ function WindowTitleBar(props: any) {
                             >
                                 { item.icon }
                                 <div className={ styles.itemLabel }>{item.name}</div>
-                                <div className={styles.closeButton} onClick={(e) => closeTab(e, item)}>
-                                    <CloseOutlined />
-                                </div>
+                                <If condition={item.key !== 'home'}>
+                                    <Then>
+                                        <div className={styles.closeButton} onClick={(e) => closeTab(e, item)}>
+                                            <CloseOutlined />
+                                        </div>
+                                    </Then>
+                                </If>
                                 <div className={styles.tabDivider}></div>
                             </div>
                         ))
@@ -123,9 +125,10 @@ function WindowTitleBar(props: any) {
                         {/*软件设置*/}
                     </Button>
                 </div>
-                <div className={classnames(styles.stepBarItem, styles.active, styles.configBtn, styles.fixBtn)}>
-                    <Button color="default" variant="link" size='large' icon={<Icon component={ SettingIconRound } />} onClick={props.openSysConfig}>
+                <div className={classnames(styles.stepBarItem, styles.configBtn, styles.fixBtn)}>
+                    <Button color="default" shape="circle" variant="text" size='default' onClick={props.openSysConfig}>
                         {/*软件设置*/}
+                        <Icon component={ SettingIconRound } />
                     </Button>
                 </div>
             </div>

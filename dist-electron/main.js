@@ -20252,9 +20252,9 @@ function createWindow() {
     // transparent: true,       // 需要透明以让 backdrop-filter / vibrancy 生效
     titleBarStyle: "hiddenInset",
     trafficLightPosition: {
-      x: 8,
+      x: 10,
       // 水平位置（通常保持较小值）
-      y: 14
+      y: 16
       // 👈 关键：增大这个值，让红绿灯下移
     },
     backgroundColor: "#00000000",
