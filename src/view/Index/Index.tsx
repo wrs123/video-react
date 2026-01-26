@@ -73,7 +73,8 @@ function Index(){
             className={styles.searchContainer}
             styles={{
                 mask: {
-                    backdropFilter: 'blur(20px)',
+                    backdropFilter: 'blur(6px)',
+                    backgroundColor: 'rgba(0,0,0,.08)',
                 },
             }}
         >

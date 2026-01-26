@@ -2,10 +2,10 @@ import API from "../../../request/api.ts";
 import {ResultStatus} from "../../../shared/enums.ts";
 import styles from "../Download.module.scss";
 import { Button, Empty, Input } from "antd";
-import { CloseOutlined, AimOutlined } from '@ant-design/icons';
+import Icon, { CloseOutlined, AimOutlined, EnterOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
 import { useEffect, useRef, useState } from 'react'
-import {If, Then} from 'react-if'
-
+import { If, Then, Else } from 'react-if'
+import searchIcon from '../../../assets/svgs/search-icon.svg?react'
 
 const SearchDialog = (props: any) => {
     const inputRef = useRef(null);
@@ -37,35 +37,41 @@ const SearchDialog = (props: any) => {
     return (
         <div className={ styles.searchDialog }>
             <div className={ styles.searchHeader } >
-                <Input ref={ inputRef } placeholder="请输入搜索内容" size={ 'large' } variant="borderless" onInput={ searchTask } />
+                <Input ref={ inputRef } prefix={ <Icon style={{marginRight: '10px'}} component={ searchIcon } /> } placeholder="搜索下载内容或任务" size={ 'large' } variant="borderless" onInput={ searchTask } />
                 <div className={styles.divider}></div>
                 <Button color="default" className={styles.closeBtn} variant="text" onClick={ props.close }>
                     <CloseOutlined />
                 </Button>
             </div>
-            <If condition={ query != '' }>
-                <Then>
-                    <div className={ styles.taskContainer } >
-                        <If condition={ taskList.length === 0 }>
-                            <Empty />
-                        </If>
-                        {
-                            taskList.map(item => {
-                                return (
-                                    <div className={ styles.taskItem } key={ item.id }>
-                                        <div className={ styles.name }>{ item.name }</div>
-                                        <Button color="default" variant="text" >
-                                            <AimOutlined />
-                                        </Button>
+            <div className={ styles.taskContainer } >
+                <If condition={ taskList.length === 0 }>
+                    <Empty />
+                </If>
+                {
+                    taskList.map(item => {
+                        return (
+                            <div className={ styles.taskItem } key={ item.id }>
+                                <div className={ styles.name }>{ item.name }</div>
+                                <Button color="default" variant="text" >
+                                    <AimOutlined />
+                                </Button>
 
-                                    </div>
-                                )
-                            })
-                        }
-                    </div>
-                </Then>
-            </If>
-
+                            </div>
+                        )
+                    })
+                }
+            </div>
+            <div className={ styles.searchBottom }>
+                <div className={ styles.shortCutItem }>
+                    <EnterOutlined />
+                    <div className={ styles.btnText }>选择</div>
+                </div>
+                <div className={ styles.shortCutItem }>
+                    <ArrowUpOutlined />
+                    <ArrowDownOutlined />
+                    <div className={ styles.btnText }>导航</div>
+                </div>
+            </div>
         </div>
     )
 }

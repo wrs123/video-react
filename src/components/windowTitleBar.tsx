@@ -120,10 +120,15 @@ function WindowTitleBar(props: any) {
                     </div>
                 </div>
 
-                <div className={classnames(styles.stepBarItem, styles.active, styles.configBtn, styles.fixBtn)}>
-                    <Button color="default" variant="link" size='large' icon={<Icon component={ searchIcon } />} onClick={props.openSearch}>
-                        {/*软件设置*/}
-                    </Button>
+                <div className={classnames(styles.stepBarItem, styles.active, styles.searchBtn, styles.fixBtn)} onClick={props.openSearch}>
+                    {/*软件设置*/}
+                    <div className={ styles.searchText}>
+                        <Icon component={ searchIcon } />
+                        搜索
+                    </div>
+                    <div className={ styles.searchWay }>
+                        ⌘ K
+                    </div>
                 </div>
                 <div className={classnames(styles.stepBarItem, styles.configBtn, styles.fixBtn)}>
                     <Button color="default" shape="circle" variant="text" size='default' onClick={props.openSysConfig}>

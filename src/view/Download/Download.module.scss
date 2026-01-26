@@ -1,7 +1,7 @@
 .searchDialog{
   width: 100%;
-  background-color: var(--color-config-slider);
-  border-radius: 6px;
+  background-color: var(--color-config-content);
+  border-radius: 8px;
 
   .searchHeader{
     display: flex;
@@ -22,7 +22,7 @@
   }
 
   .taskContainer{
-    height: 60vh;
+    height: 55vh;
     overflow-y: auto;
     border-top: 1px solid var(--color-border);
     padding: 8px 12px 0 12px;
@@ -45,6 +45,26 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .searchBottom{
+    border-top: 1px solid var(--color-border);
+    padding: 8px 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+
+    .shortCutItem{
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      color: var(--color-text-second);
+
+      .btnText{
+        margin-left: 4px;
+        line-height: 1;
       }
     }
   }
@@ -123,7 +143,7 @@
   .leftContainer{
     flex: 1;
     height: 100%;
-    padding-top: 16px;
+    padding-top: 10px;
     overflow: hidden;
     box-sizing: border-box;
     display: flex;
