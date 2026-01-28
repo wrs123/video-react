@@ -19,6 +19,7 @@
     --color-window-button-hover: #e8e8e8;
     --color-download-item-anal: #fff;
     --color-download-item-err: #ffccc7;
+    --color-download-cover-default-bg: var(--color-text-second);
 }
 
 :root[data-theme='dark'] {
@@ -43,4 +44,5 @@
     --color-download-item-anal: #4b4a4a;
     --color-download-item-err: #451d1f;
     --ant-color-bg-mask: rgba(255,255,255,0.85);
+    --color-download-cover-default-bg: var(--cust-content-bg);
 }

@@ -213,7 +213,7 @@ function DownloadItem(props: DownloadItemProps) {
                     <Then>
                         <div className={styles.downloadCover}>
                             <div className={styles.mask} style={{width: `${100 - percentParse(taskItem?.receivedBytes, taskItem?.TotalBytes)}%`}}></div>
-                            <img  src={taskItem?.cover} alt=""/>
+                            <img  src={taskItem?.cover} alt="" loading="lazy" decoding="async" />
                         </div>
                     </Then>
                 </If>

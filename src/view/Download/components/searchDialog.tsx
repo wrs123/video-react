@@ -2,7 +2,7 @@ import API from "../../../request/api.ts";
 import {ResultStatus} from "../../../shared/enums.ts";
 import styles from "../Download.module.scss";
 import { Button, Empty, Input } from "antd";
-import Icon, { CloseOutlined, AimOutlined, EnterOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import Icon, { CloseOutlined, AimOutlined, EnterOutlined, ArrowUpOutlined, ArrowDownOutlined, FileOutlined } from '@ant-design/icons';
 import { useEffect, useRef, useState } from 'react'
 import { If, Then, Else } from 'react-if'
 import searchIcon from '../../../assets/svgs/search-icon.svg?react'
@@ -51,9 +51,12 @@ const SearchDialog = (props: any) => {
                     taskList.map(item => {
                         return (
                             <div className={ styles.taskItem } key={ item.id }>
+                                <div className={ styles.searchItemIcon } >
+                                    <FileOutlined />
+                                </div>
                                 <div className={ styles.name }>{ item.name }</div>
-                                <Button color="default" variant="text" >
-                                    <AimOutlined />
+                                <Button color="default" variant="text" icon={ <AimOutlined /> }>
+
                                 </Button>
 
                             </div>
