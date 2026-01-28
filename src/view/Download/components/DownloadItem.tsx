@@ -2,7 +2,7 @@ import styles from './DownloadItem.module.scss'
 import { DownloadTaskType} from "../../../../types.ts";
 import { DownloadStatus, ResultStatus} from "../../../shared/enums.ts";
 import { message, Modal, Tooltip, Dropdown, Space, Checkbox, Button } from "antd";
-import { CaretRightOutlined, CloseOutlined, FileTextFilled, HddFilled, ReloadOutlined, LinkOutlined, DeleteOutlined, FolderOpenOutlined, PauseOutlined} from '@ant-design/icons';
+import { CaretRightOutlined, CloseOutlined, FileSearchOutlined, FileTextOutlined, ReloadOutlined, LinkOutlined, DeleteOutlined, FolderOpenOutlined, PauseOutlined} from '@ant-design/icons';
 import { Else, If, Then} from 'react-if';
 import { fileSizeFormat, percentParse} from '../../../utils/tools.ts'
 import API from "../../../request/api.ts";
@@ -57,12 +57,12 @@ function DownloadItem(props: DownloadItemProps) {
         {
             label: '复制原地址',
             key: 'originUrl',
-            icon: <HddFilled />,
+            icon: <FileTextOutlined />,
         },
         {
             label: '复制解析地址',
             key: 'analysisUrl',
-            icon: <FileTextFilled />
+            icon: <FileSearchOutlined />
 
         }
     ]
@@ -70,7 +70,7 @@ function DownloadItem(props: DownloadItemProps) {
         {
             label: '打开所在目录',
             key: 'openFolder',
-            icon: <FolderOpenOutlined />,
+            icon: <FolderOpenOutlined style={{fontSize: '15px', marginRight: '10px'}} />,
         },
         {
             type: 'divider',
@@ -78,18 +78,21 @@ function DownloadItem(props: DownloadItemProps) {
         {
             label: '复制原地址',
             key: 'originUrl',
-            icon: <HddFilled />,
+            icon: <FileTextOutlined style={{fontSize: '15px', marginRight: '10px'}} />,
         },
         {
             label: '复制解析地址',
             key: 'analysisUrl',
-            icon: <FileTextFilled />,
+            icon: <FileSearchOutlined style={{fontSize: '15px', marginRight: '10px'}} />,
         },
-
+        {
+            type: 'divider',
+        },
         {
             label: '删除',
+            danger: true,
             key: 'delete',
-            icon:  <DeleteOutlined />,
+            icon:  <DeleteOutlined style={{fontSize: '15px', marginRight: '10px'}} />,
             onClick: (key, keyPath, domEvent) => {
                 console.warn(key, keyPath, domEvent)
                 props.commandCommon && props.commandCommon('DELETE', props.item)

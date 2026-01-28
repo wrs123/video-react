@@ -55,10 +55,7 @@ const SearchDialog = (props: any) => {
                                     <FileOutlined />
                                 </div>
                                 <div className={ styles.name }>{ item.name }</div>
-                                <Button color="default" variant="text" icon={ <AimOutlined /> }>
-
-                                </Button>
-
+                                <Button color="default" variant="text" icon={ <AimOutlined /> }></Button>
                             </div>
                         )
                     })

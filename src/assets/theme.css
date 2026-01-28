@@ -19,7 +19,7 @@
     --color-window-button-hover: #e8e8e8;
     --color-download-item-anal: #fff;
     --color-download-item-err: #ffccc7;
-    --color-download-cover-default-bg: var(--color-text-second);
+    --color-download-cover-default-bg: #777;
 }
 
 :root[data-theme='dark'] {
